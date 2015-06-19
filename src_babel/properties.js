@@ -1,0 +1,46 @@
+'use strict';
+define(function() {
+    let Prop = {
+        properties: function() {
+            /*
+            prop: {
+                type: 'String',
+                value: 'haha',
+                merge: true,
+                observe: '_xxx'
+            },
+            prop2: Object       // Object, Number, String, Boolean, Date, Array
+            */
+        },
+
+        /*
+        * Used when transfering attribute to prop
+        */
+        _propTypes: [Object, Number, String, Boolean, Date, Array],
+
+        created: function() {
+            transferProperties.call(this);
+        },
+
+        set: function(name, value) {
+        }
+    }
+
+    function transferProperties() {
+        for(let prop in this.properties) {
+            if(this.properties.hasOwnProperty(prop)) {
+                let value = properties[prop];
+                // 检测是否简单写法，如果是，转换成完整写法
+                if(this._propTypes.indexOf(value) >= 0) {
+                    this.properties[prop] = {
+                        type: this.properties[prop]
+                    }
+                }
+                // 将properties值定义到this上
+                this[prop] = this.properties[prop].value;
+            }
+        }
+    }
+
+    return Prop;
+});

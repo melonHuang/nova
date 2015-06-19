@@ -1,0 +1,1 @@
+{"version":3,"sources":["src_babel/nova.js"],"names":[],"mappings":";;QAAO,SAAS;;QACT,mBAAmB","file":"src_babel/nova.js","sourcesContent":["import 'base.js';\nimport 'nova_bootstrap.js';\n"]}
