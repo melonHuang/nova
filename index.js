@@ -8,21 +8,37 @@ require(['nova_bootstrap'], function(Nova) {
     MyEle = Nova({
         is: 'my-button',
         properties: {
-            prop: {
-                type: 'String',
-                value: 'haha',
+            name: {
+                type: String,
+                value: 'defaultValue',
                 merge: true,
-                observe: '_xxx'
-            }
+                observer: '_nameChanged'
+            },
+            info: {
+                type: Object,
+                value: function() {
+                    return {a:1};
+                }
+            },
+            date: {
+                type: Date
+            },
+            canSwim: {
+                         type: Boolean
+                     }
         },
         created: function() {
             //alert('created');
         },
         attached: function() {
             //alert('attached');
+        },
+        _nameChanged: function(ev, oldVal, newVal) {
+            console.log('name change from ' + oldVal + ' to ' + newVal);
         }
     });
 
     window.btn = document.querySelector('my-button');
+    window.btn2 = document.createElement('my-button');
 
 });

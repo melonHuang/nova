@@ -8,5 +8,8 @@ define(['base'], function(Base) {
         return registerd;
     };
 
+    window.Nova = Nova;
+    Nova.Base = Base;
+
     return Nova;
 });
