@@ -1,5 +1,6 @@
 'use strict';
-define(['lib/case_map'], function(CaseMap) {
+//define(['lib/case_map'], function(CaseMap) {
+(function() {
     let PropBehavior = {
         properties: function() {
             /*
@@ -23,7 +24,7 @@ define(['lib/case_map'], function(CaseMap) {
         },
 
         attributeChanged: function(attrName, oldVal, newVal) {
-            let propName = CaseMap.dashToCamelCase(attrName);
+            let propName = Nova.CaseMap.dashToCamelCase(attrName);
             let prop = this.properties[propName]
             if(prop) {
                 setPropFromAttr.call(this, attrName, newVal);
@@ -49,7 +50,7 @@ define(['lib/case_map'], function(CaseMap) {
     }
 
     function setPropFromAttr(attrName) {
-        let propName = CaseMap.dashToCamelCase(attrName);
+        let propName = Nova.CaseMap.dashToCamelCase(attrName);
         let prop = this.properties[propName]
         let val = this.getAttribute(attrName);
         this[propName] = fromAttrToProp.call(this, attrName, val, prop);
@@ -96,7 +97,7 @@ define(['lib/case_map'], function(CaseMap) {
         }
 
         // set value
-        let attrName = CaseMap.camelToDashCase(name);
+        let attrName = Nova.CaseMap.camelToDashCase(name);
         if(this.hasAttribute(attrName)) {
             setPropFromAttr.call(this, attrName);
         }
@@ -138,5 +139,5 @@ define(['lib/case_map'], function(CaseMap) {
         return '_' + propName + 'Changed';
     }
 
-    return PropBehavior;
-});
+    Nova.PropBehavior = PropBehavior;
+})();

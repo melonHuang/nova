@@ -1,5 +1,6 @@
 'use strict';
-define(function() {
+//define(function() {
+(function() {
 
     let EVENT_SPLITTER = ' ';
 
@@ -18,7 +19,7 @@ define(function() {
     }
 
 
-    let Event = {
+    let EventBehavior = {
         on: function(events, callback, context) {
                 let cache, event;
 
@@ -102,5 +103,5 @@ define(function() {
                  },
     }
 
-    return Event
-});
+    Nova.EventBehavior = EventBehavior;
+})();

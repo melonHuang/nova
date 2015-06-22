@@ -1,5 +1,5 @@
 'use strict';
-define(function() {
+(function() {
 
     let CaseMap = {
 
@@ -35,5 +35,5 @@ define(function() {
 
     }
 
-    return CaseMap;
-});
+    Nova.CaseMap = CaseMap;
+})();

@@ -1,11 +1,17 @@
 
+/*
 require.config({
     baseUrl: 'src_babel'
 });
 
 require(['nova_bootstrap'], function(Nova) {
+*/
 
-    MyEle = Nova({
+    NovaExports.exports = {
+        template: '<template>hehe</template>',
+        stylesheet: '<style>my-button {background: blue;}</style>'
+    };
+    window.MyEle = NovaExports({
         is: 'my-button',
         properties: {
             name: {
@@ -38,7 +44,3 @@ require(['nova_bootstrap'], function(Nova) {
         }
     });
 
-    window.btn = document.querySelector('my-button');
-    window.btn2 = document.createElement('my-button');
-
-});

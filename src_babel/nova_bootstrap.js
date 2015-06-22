@@ -1,15 +1,24 @@
 'use strict';
-define(['base'], function(Base) {
-
+(function() {
     let Nova = function(prototype) {
-        Base.chainObject(prototype, Base);
+        Nova.Base.chainObject(prototype, Nova.Base);
         window.a = prototype;
         let registerd = document.registerElement(prototype.is, {prototype});
+
+        // 初始化stylesheet
+        Nova.Style.init(prototype);
+
         return registerd;
     };
 
-    window.Nova = Nova;
-    Nova.Base = Base;
+    let NovaExports = function(prototype) {
+        Nova.Base.mix(prototype, NovaExports.exports);
+        var ret = Nova(prototype);
+        NovaExports.exports = {};
+        return ret;
+    }
+    NovaExports.exports = {};
 
-    return Nova;
-});
+    window.Nova = Nova;
+    window.NovaExports = NovaExports;
+})();

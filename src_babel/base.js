@@ -1,11 +1,13 @@
 'use strict';
-define(["properties_behavior", "event_behavior"], function(PropBehavior, EventBehavior) {
+//define(["properties_behavior", "event_behavior", "template_behavior"], function(PropBehavior, EventBehavior, TemplateBehavior) {
+(function() {
 
     let Base = {
 
         _behaviors: [
-            EventBehavior,
-            PropBehavior
+            Nova.EventBehavior,
+            Nova.PropBehavior,
+            Nova.TemplateBehavior
         ],
 
         behaviors: [],
@@ -108,6 +110,6 @@ define(["properties_behavior", "event_behavior"], function(PropBehavior, EventBe
 
     Base = Base.chainObject(Base, HTMLElement.prototype);
 
-    return Base;
+    Nova.Base = Base;
 
-});
+})();
