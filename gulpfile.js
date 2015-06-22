@@ -2,7 +2,7 @@ var gulp = require('gulp'),
     gulpLoadPlugins = require('gulp-load-plugins'),
     babel = require('gulp-babel'),
     rename = require('gulp-rename'),
-    novaCompile = require('nova-compiler'),
+    novaCompile = require('gulp-nova'),
     plugins = gulpLoadPlugins();
 
 gulp.task('nova-compile', function() {
