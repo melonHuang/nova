@@ -6,8 +6,8 @@
 
         _behaviors: [
             Nova.EventBehavior,
-            Nova.PropBehavior,
-            Nova.TemplateBehavior
+            Nova.TemplateBehavior,
+            Nova.PropBehavior
         ],
 
         behaviors: [],

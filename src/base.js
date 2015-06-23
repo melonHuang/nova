@@ -4,7 +4,7 @@
 
     var Base = {
 
-        _behaviors: [Nova.EventBehavior, Nova.PropBehavior, Nova.TemplateBehavior],
+        _behaviors: [Nova.EventBehavior, Nova.TemplateBehavior, Nova.PropBehavior],
 
         behaviors: [],
 
