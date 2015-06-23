@@ -2,7 +2,7 @@
 //define(['lib/case_map'], function(CaseMap) {
 (function () {
     var PropBehavior = {
-        properties: function properties() {},
+        props: function props() {},
 
         /*
         * Used when transfering attribute to prop
@@ -15,7 +15,7 @@
 
         attributeChanged: function attributeChanged(attrName, oldVal, newVal) {
             var propName = Nova.CaseMap.dashToCamelCase(attrName);
-            var prop = this.properties[propName];
+            var prop = this.props[propName];
             if (prop) {
                 setPropFromAttr.call(this, attrName, newVal);
             }
@@ -24,33 +24,33 @@
     };
 
     /*
-     * 初始化properties
-     * 1. 将properties转换为标准格式{type:String, ...}
-     * 2. 解析properties的config，解析并应用到this
-     * 3. 将attribute上的属性应用到properties
+     * 初始化props
+     * 1. 将props转换为标准格式{type:String, ...}
+     * 2. 解析props的config，解析并应用到this
+     * 3. 将attribute上的属性应用到props
      * */
     function initProperties() {
-        for (var prop in this.properties) {
-            if (this.properties.hasOwnProperty(prop)) {
+        for (var prop in this.props) {
+            if (this.props.hasOwnProperty(prop)) {
                 transferProperty.call(this, prop);
-                defineProperty.call(this, prop, this.properties[prop]);
+                defineProperty.call(this, prop, this.props[prop]);
             }
         }
     }
 
     function setPropFromAttr(attrName) {
         var propName = Nova.CaseMap.dashToCamelCase(attrName);
-        var prop = this.properties[propName];
+        var prop = this.props[propName];
         var val = this.getAttribute(attrName);
         this[propName] = fromAttrToProp.call(this, attrName, val, prop);
     }
 
     function transferProperty(prop) {
-        var value = this.properties[prop];
+        var value = this.props[prop];
         // 检测是否简单写法，如果是，转换成完整写法
         if (this._propTypes.indexOf(value) >= 0) {
-            this.properties[prop] = {
-                type: this.properties[prop]
+            this.props[prop] = {
+                type: this.props[prop]
             };
         }
     }
@@ -65,6 +65,7 @@
                 return self[realPropPrefix + name];
             },
             set: function set(val) {
+                //alert('set:' + name + ' to ' + val);
                 var oldVal = self[realPropPrefix + name];
 
                 if (val == oldVal) {

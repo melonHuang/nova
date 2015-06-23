@@ -1,29 +1,47 @@
 var gulp = require('gulp'),
     gulpLoadPlugins = require('gulp-load-plugins'),
-    babel = require('gulp-babel'),
-    rename = require('gulp-rename'),
-    novaCompile = require('gulp-nova'),
     plugins = gulpLoadPlugins();
 
-gulp.task('nova-compile', function() {
+gulp.task('build-component', function() {
   // place code for your default task here
     gulp.src('components/**/*.html')
-        .pipe(novaCompile())
-        .pipe(rename(function(path) {
-            console.log(path);
+        .pipe(plugins.watch('components/**/*.html'))
+        .pipe(plugins.nova())
+        .pipe(plugins.rename(function(path) {
+            console.log('building component', path);
             path.extname = '.js';
         }))
-        .pipe(babel())
-        .pipe(gulp.dest('./components'));
+        .pipe(plugins.babel())
+        .pipe(gulp.dest('components'));
 });
 
-gulp.task('babel-compile', function() {
+gulp.task('build-nova', function() {
     gulp.src('src_babel/**/*.js')
-        .pipe(babel())
-        .pipe(gulp.dest('src'));
+        .pipe(plugins.watch('src_babel/**/*.js'))
+        .pipe(plugins.babel())
+        .pipe(plugins.rename(function(path) {
+            console.log('building nova', path);
+        }))
+        .pipe(gulp.dest('src'))
+        .pipe(plugins.rename(function(path) {
+            gulp.start('concat-nova');
+        }))
+
 });
 
-gulp.task('watch', function() {
-    var watcher1 = gulp.watch('components/**/*.html', ['nova-compile']);
-    var watcher2 = gulp.watch('src_babel/**/*.js', ['babel-compile']);
+gulp.task('concat-nova', function() {
+    gulp.src([
+             'src/nova_bootstrap.js',
+             'src/lib/css_parse.js',
+             'src/lib/case_map.js',
+             'src/style.js',
+             'src/event_behavior.js',
+             'src/properties_behavior.js',
+             'src/template_behavior.js',
+             'src/base.js'
+        ])
+        .pipe(plugins.concat('nova.js'))
+        .pipe(gulp.dest('./build'));
 });
+
+gulp.task('default', ['build-nova', 'build-component']);

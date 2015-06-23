@@ -1,5 +1,5 @@
 'use strict';
-//define(["properties_behavior", "event_behavior", "template_behavior"], function(PropBehavior, EventBehavior, TemplateBehavior) {
+//define(["props_behavior", "event_behavior", "template_behavior"], function(PropBehavior, EventBehavior, TemplateBehavior) {
 (function() {
 
     let Base = {
@@ -12,7 +12,7 @@
 
         behaviors: [],
 
-        properties: {
+        props: {
         },
 
         /***************************** 生命周期 ******************************/
@@ -21,7 +21,6 @@
 
             this.trigger('created');
             this.created && this.created();
-            console.log('created: ', arguments);
         },
 
         attachedCallback: function() {
@@ -46,11 +45,17 @@
 
             /* 将behaviors的行为和属性合并到元素上 */
             behaviors.forEach(function(behavior) {
+                var toMix = self.mix({}, behavior);
+                'created attached detached attributeChanged'.split(' ').forEach(function(prop) {
+                    delete toMix[prop];
+                });
+
                 // 合并方法
-                self.mix(self, behavior);
+                self.mix(self, toMix);
 
                 // 合并属性
-                self.mix(self.properties, behavior.properties);
+                self.mix(self.props, toMix.props);
+
             });
 
             /* 在生命周期的各个阶段初始化behaviors */

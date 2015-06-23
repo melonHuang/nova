@@ -1,7 +1,7 @@
 <dom-module>
     <style type="text/css">
-        my-button {
-            background: red;
+        :host {
+            display: block;
         }
 
         .hint .text {
@@ -27,6 +27,7 @@
     <template>
         <div class="hint">
             <div class="text">{{name}}</div>
+            <content select="page"></content>
         </div>
     </template>
 

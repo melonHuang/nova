@@ -22,10 +22,15 @@
                                     var selectors = rule.selector.split(' ');
                                     var selector = '';
                                     selectors.forEach(function (s) {
-                                        if (s != ':host') {
-                                            selector += s + '.' + tagName + ' ';
-                                        } else {
+                                        if (s == ':host') {
                                             selector += tagName + ' ';
+                                        } else if (s == '::content') {} else {
+                                            var pseudoStart = s.indexOf(':');
+                                            if (pseudoStart < 0) {
+                                                selector += s + '.' + tagName + ' ';
+                                            } else {
+                                                selector += s.slice(0, pseudoStart) + '.' + tagName + s.slice(pseudoStart) + ' ';
+                                            }
                                         }
                                     });
                                     // 生成CSS属性
