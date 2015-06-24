@@ -3,7 +3,7 @@
 NovaExports.exports = { "stylesheet": "<style type=\"text/css\">\n        :host {\n            display: block;\n        }\n\n        .hint .text {\n            color: red;\n        }\n\n        @keyframes bounceIn {\n            0% {\n                color: red;\n            }\n            100% {\n                color: blue;\n            }\n        }\n\n        @media screen and (max-width: 600px) {\n            .hint {\n                background: black;\n            }\n        }\n    </style>", "template": "<template>\n        <div class=\"hint\">\n            <div class=\"text\">{{name}}</div>\n            <content select=\"page\"></content>\n        </div>\n    </template>" };
 window.MyEle = NovaExports({
     is: "my-button",
-    properties: {
+    props: {
         name: {
             type: String,
             value: "defaultValue",
@@ -29,7 +29,5 @@ window.MyEle = NovaExports({
         console.log("name change from " + oldVal + " to " + newVal);
     }
 });
-
-//alert('created');
 
 //alert('attached');

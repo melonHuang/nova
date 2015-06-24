@@ -44,7 +44,6 @@
             if(this.props.hasOwnProperty(prop)) {
                 transferProperty.call(this, prop);
                 defineProperty.call(this, prop, this.props[prop]);
-
             }
         }
     }
@@ -76,7 +75,6 @@
                 return self[realPropPrefix + name];
             },
             set: function(val) {
-                //alert('set:' + name + ' to ' + val);
                 let oldVal = self[realPropPrefix + name];
 
                 if(val == oldVal) {return;}
@@ -92,6 +90,7 @@
 
             }
         });
+
 
         // init observers
         if(config.observer) {

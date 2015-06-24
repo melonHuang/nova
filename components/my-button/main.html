@@ -34,7 +34,7 @@
     <script>
         window.MyEle = Nova({
             is: 'my-button',
-            properties: {
+            props: {
                 name: {
                     type: String,
                     value: 'defaultValue',
@@ -55,7 +55,6 @@
                  }
             },
             created: function() {
-                //alert('created');
             },
             attached: function() {
                 //alert('attached');

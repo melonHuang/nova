@@ -65,7 +65,6 @@
                 return self[realPropPrefix + name];
             },
             set: function set(val) {
-                //alert('set:' + name + ' to ' + val);
                 var oldVal = self[realPropPrefix + name];
 
                 if (val == oldVal) {
