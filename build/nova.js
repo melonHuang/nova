@@ -2,8 +2,11 @@
 (function () {
     var Nova = function Nova(prototype) {
         Nova.Base.chainObject(prototype, Nova.Base);
-        window.a = prototype;
-        var registerd = document.registerElement(prototype.is, { prototype: prototype });
+        var opts = { prototype: prototype };
+        if (prototype['extends']) {
+            opts['extends'] = prototype['extends'];
+        }
+        var registerd = document.registerElement(prototype.is, opts);
 
         // 初始化stylesheet
         Nova.Style.init(prototype);
@@ -406,7 +409,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         */
         _propTypes: [Object, Number, String, Boolean, Date, Array],
 
-        created: function created() {
+        createdHandler: function createdHandler() {
             initProperties.call(this);
         },
 
@@ -427,6 +430,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * 3. 将attribute上的属性应用到props
      * */
     function initProperties() {
+        var proto = {};
+        var oldProto = this.__proto__;
+        this.__proto__ = proto;
+        proto.__proto__ = oldProto;
         for (var prop in this.props) {
             if (this.props.hasOwnProperty(prop)) {
                 transferProperty.call(this, prop);
@@ -456,12 +463,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var self = this;
         var realPropPrefix = '_prop_';
 
-        Object.defineProperty(this, name, {
+        Object.defineProperty(this.__proto__, name, {
 
             get: function get() {
                 return self[realPropPrefix + name];
             },
             set: function set(val) {
+                //alert('set:' + name + ' to ' + val);
                 var oldVal = self[realPropPrefix + name];
 
                 if (val == oldVal) {
@@ -545,7 +553,7 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             INNERHTML: 1,
             ATTRIBUTE: 2
         },
-        created: function created() {
+        createdHandler: function createdHandler() {
             var _this = this;
 
             var self = this;
@@ -613,8 +621,16 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
                     self._contents.each(function (index, content) {
                         content = $(content);
                         var select = content.attr('select');
-                        var replacement = $(self).find(select);
-                        replacement.insertBefore(content);
+                        var replacement = undefined;
+                        if (select) {
+                            replacement = $(self).find(select);
+                            replacement.insertBefore(content);
+                        } else {
+                            replacement = Array.prototype.slice.call(self.childNodes);
+                            for (var i = 0; i < replacement.length; i++) {
+                                content[0].parentNode.insertBefore(replacement[i], content[0]);
+                            }
+                        }
                         content.remove();
                     });
 
@@ -648,22 +664,22 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             this._initBehaviors();
 
             this.trigger('created');
-            this.created && this.created();
+            this.createdHandler && this.createdHandler();
         },
 
         attachedCallback: function attachedCallback() {
             this.trigger('attached');
-            this.attached && this.attached();
+            this.attachedHandler && this.attachedHandler();
         },
 
         detachedCallback: function detachedCallback() {
             this.trigger('detached');
-            this.detached && this.detached();
+            this.detachedHandler && this.detachedHandler();
         },
 
         attributeChangedCallback: function attributeChangedCallback(attrName, oldVal, newVal) {
             this.trigger('attributeChanged', [attrName, oldVal, newVal]);
-            this.attributeChanged && this.attributeChanged(attrName, oldVal, newVal);
+            this.attributeChangedHandler && this.attributeChangedHandler(attrName, oldVal, newVal);
         },
 
         /***************************** 初始化behaviors ******************************/
@@ -674,7 +690,7 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             /* 将behaviors的行为和属性合并到元素上 */
             behaviors.forEach(function (behavior) {
                 var toMix = self.mix({}, behavior);
-                'created attached detached attributeChanged'.split(' ').forEach(function (prop) {
+                'createdHandler attachedHandler detachedHandler attributeChangedHandler'.split(' ').forEach(function (prop) {
                     delete toMix[prop];
                 });
 
@@ -688,8 +704,9 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             /* 在生命周期的各个阶段初始化behaviors */
             this.on('created attached detached attributeChanged', function (e) {
                 behaviors.forEach(function (behavior) {
-                    if (behavior[e.type]) {
-                        behavior[e.type].call(self, Array.prototype.slice.call(arguments, 1));
+                    var handler = behavior[e.type + 'Handler'];
+                    if (handler) {
+                        handler.call(self, Array.prototype.slice.call(arguments, 1));
                     }
                 });
             });

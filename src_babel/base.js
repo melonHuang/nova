@@ -20,22 +20,22 @@
             this._initBehaviors();
 
             this.trigger('created');
-            this.created && this.created();
+            this.createdHandler && this.createdHandler();
         },
 
         attachedCallback: function() {
             this.trigger('attached');
-            this.attached && this.attached();
+            this.attachedHandler && this.attachedHandler();
         },
 
         detachedCallback: function() {
             this.trigger('detached');
-            this.detached && this.detached();
+            this.detachedHandler && this.detachedHandler();
         },
 
         attributeChangedCallback: function(attrName, oldVal, newVal) {
             this.trigger('attributeChanged', [attrName, oldVal, newVal]);
-            this.attributeChanged && this.attributeChanged(attrName, oldVal, newVal);
+            this.attributeChangedHandler && this.attributeChangedHandler(attrName, oldVal, newVal);
         },
 
         /***************************** 初始化behaviors ******************************/
@@ -46,7 +46,7 @@
             /* 将behaviors的行为和属性合并到元素上 */
             behaviors.forEach(function(behavior) {
                 var toMix = self.mix({}, behavior);
-                'created attached detached attributeChanged'.split(' ').forEach(function(prop) {
+                'createdHandler attachedHandler detachedHandler attributeChangedHandler'.split(' ').forEach(function(prop) {
                     delete toMix[prop];
                 });
 
@@ -61,8 +61,9 @@
             /* 在生命周期的各个阶段初始化behaviors */
             this.on('created attached detached attributeChanged', function(e) {
                 behaviors.forEach(function(behavior) {
-                    if(behavior[e.type]) {
-                        behavior[e.type].call(self, Array.prototype.slice.call(arguments, 1));
+                    var handler = behavior[e.type + 'Handler'];
+                    if(handler) {
+                        handler.call(self, Array.prototype.slice.call(arguments, 1));
                     }
                 });
             });

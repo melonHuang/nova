@@ -5,7 +5,7 @@
             INNERHTML: 1,
             ATTRIBUTE: 2
         },
-        created: function created() {
+        createdHandler: function createdHandler() {
             var _this = this;
 
             var self = this;
@@ -73,8 +73,16 @@
                     self._contents.each(function (index, content) {
                         content = $(content);
                         var select = content.attr('select');
-                        var replacement = $(self).find(select);
-                        replacement.insertBefore(content);
+                        var replacement = undefined;
+                        if (select) {
+                            replacement = $(self).find(select);
+                            replacement.insertBefore(content);
+                        } else {
+                            replacement = Array.prototype.slice.call(self.childNodes);
+                            for (var i = 0; i < replacement.length; i++) {
+                                content[0].parentNode.insertBefore(replacement[i], content[0]);
+                            }
+                        }
                         content.remove();
                     });
 

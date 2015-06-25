@@ -5,7 +5,7 @@
             INNERHTML: 1,
             ATTRIBUTE: 2
         },
-        created: function() {
+        createdHandler: function() {
             let self = this;
             if(this.template) {
                 let className = this.is;
@@ -20,8 +20,16 @@
                 self._contents.each(function(index, content) {
                     content = $(content);
                     let select = content.attr('select');
-                    let replacement = $(self).find(select);
-                    replacement.insertBefore(content);
+                    let replacement;
+                    if(select) {
+                        replacement = $(self).find(select);
+                        replacement.insertBefore(content);
+                    } else {
+                        replacement = Array.prototype.slice.call(self.childNodes);
+                        for(let i = 0; i < replacement.length; i++) {
+                            content[0].parentNode.insertBefore( replacement[i], content[0]);
+                        }
+                    }
                     content.remove();
                 });
 

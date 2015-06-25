@@ -9,7 +9,7 @@
         */
         _propTypes: [Object, Number, String, Boolean, Date, Array],
 
-        created: function created() {
+        createdHandler: function createdHandler() {
             initProperties.call(this);
         },
 
@@ -30,6 +30,10 @@
      * 3. 将attribute上的属性应用到props
      * */
     function initProperties() {
+        var proto = {};
+        var oldProto = this.__proto__;
+        this.__proto__ = proto;
+        proto.__proto__ = oldProto;
         for (var prop in this.props) {
             if (this.props.hasOwnProperty(prop)) {
                 transferProperty.call(this, prop);
@@ -59,12 +63,13 @@
         var self = this;
         var realPropPrefix = '_prop_';
 
-        Object.defineProperty(this, name, {
+        Object.defineProperty(this.__proto__, name, {
 
             get: function get() {
                 return self[realPropPrefix + name];
             },
             set: function set(val) {
+                //alert('set:' + name + ' to ' + val);
                 var oldVal = self[realPropPrefix + name];
 
                 if (val == oldVal) {

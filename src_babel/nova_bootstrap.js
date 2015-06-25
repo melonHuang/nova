@@ -2,8 +2,11 @@
 (function() {
     let Nova = function(prototype) {
         Nova.Base.chainObject(prototype, Nova.Base);
-        window.a = prototype;
-        let registerd = document.registerElement(prototype.is, {prototype});
+        let opts = { prototype };
+        if(prototype.extends) {
+            opts.extends = prototype.extends
+        }
+        let registerd = document.registerElement(prototype.is, opts);
 
         // 初始化stylesheet
         Nova.Style.init(prototype);

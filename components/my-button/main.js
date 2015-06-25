@@ -1,6 +1,6 @@
 "use strict";
 
-NovaExports.exports = { "stylesheet": "<style type=\"text/css\">\n        :host {\n            display: block;\n        }\n\n        .hint .text {\n            color: red;\n        }\n\n        @keyframes bounceIn {\n            0% {\n                color: red;\n            }\n            100% {\n                color: blue;\n            }\n        }\n\n        @media screen and (max-width: 600px) {\n            .hint {\n                background: black;\n            }\n        }\n    </style>", "template": "<template>\n        <div class=\"hint\">\n            <div class=\"text\">{{name}}</div>\n            <content select=\"page\"></content>\n        </div>\n    </template>" };
+NovaExports.exports = { "stylesheet": "<style type=\"text/css\">\n        :host {\n            display: block;\n        }\n\n        .hint .text {\n            color: red;\n        }\n\n        @keyframes bounceIn {\n            0% {\n                color: red;\n            }\n            100% {\n                color: blue;\n            }\n        }\n\n        @media screen and (max-width: 600px) {\n            .hint {\n                background: black;\n            }\n        }\n    </style>", "template": "<template>\n        <div class=\"hint\">\n            <div class=\"text\">{{name}}</div>\n            <content select=\".page\"></content>\n            <content select=\"div\"></content>\n            <content></content>\n        </div>\n    </template>" };
 window.MyEle = NovaExports({
     is: "my-button",
     props: {
