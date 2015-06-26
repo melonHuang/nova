@@ -25,6 +25,8 @@ gulp.task('build-nova', function() {
         .pipe(gulp.dest('src'))
         .pipe(plugins.rename(function(path) {
             gulp.start('concat-nova');
+            gulp.src('src/nova_dev.js')
+                .pipe(gulp.dest('./build'));
         }))
 
 });
