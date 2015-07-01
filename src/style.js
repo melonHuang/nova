@@ -18,24 +18,47 @@
                             rules.forEach(function (rule) {
                                 // style
                                 if (rule.type == Nova.CssParse.types.STYLE_RULE) {
-                                    // 生成selector
-                                    var selectors = rule.selector.split(' ');
-                                    var selector = '';
-                                    selectors.forEach(function (s) {
-                                        if (s == ':host') {
-                                            selector += tagName + ' ';
-                                        } else if (s == '::content') {} else {
-                                            var pseudoStart = s.indexOf(':');
-                                            if (pseudoStart < 0) {
-                                                selector += s + '.' + tagName + ' ';
+                                    (function () {
+                                        // 生成selector
+                                        var selectors = rule.selector.split(' ');
+                                        var selector = '';
+                                        selectors.every(function (s, i) {
+                                            if (s.indexOf(':host') >= 0) {
+                                                selector += s.replace(':host', tagName) + ' ';
+                                            } else if (s == '::content') {
+                                                if (i > 0) {
+                                                    for (var j = i + 1; j < selectors.length; j++) {
+                                                        selector += selectors[j] + ' ';
+                                                    }
+                                                    return false;
+                                                } else {
+                                                    selector += '::content ';
+                                                }
+                                            } else if ('>'.split(' ').indexOf(s) >= 0) {
+                                                selector += s + ' ';
                                             } else {
-                                                selector += s.slice(0, pseudoStart) + '.' + tagName + s.slice(pseudoStart) + ' ';
+                                                var pseudoStart = s.indexOf(':');
+                                                if (pseudoStart < 0) {
+                                                    selector += s + '.' + tagName + ' ';
+                                                } else {
+                                                    selector += s.slice(0, pseudoStart) + '.' + tagName + s.slice(pseudoStart) + ' ';
+                                                }
                                             }
+                                            return true;
+                                        });
+
+                                        /*R
+                                        if(selector.indexOf(':host') >= 0) {
+                                            selector = selector.replace(':host', tagName);
+                                        } else {
+                                            selector = tagName + ' ' + selector;
                                         }
-                                    });
-                                    // 生成CSS属性
-                                    var cssText = rule.cssText;
-                                    generatedCss += selector + '\n{\n' + cssText + '\n}\n';
+                                        */
+
+                                        // 生成CSS属性
+                                        var cssText = rule.cssText;
+                                        generatedCss += selector + '\n{\n' + cssText + '\n}\n';
+                                    })();
                                 }
 
                                 // keyframes

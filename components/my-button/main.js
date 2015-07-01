@@ -23,8 +23,12 @@ window.MyEle = NovaExports({
             type: Boolean
         }
     },
-    created: function created() {},
-    attached: function attached() {},
+    createdHandler: function createdHandler() {
+        this.on("click", function () {
+            alert("clicked");
+        });
+    },
+    attachedHandler: function attachedHandler() {},
     _nameChanged: function _nameChanged(ev, oldVal, newVal) {
         console.log("name change from " + oldVal + " to " + newVal);
     }

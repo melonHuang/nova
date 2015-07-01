@@ -26,10 +26,21 @@
                                 // 生成selector
                                 let selectors = rule.selector.split(' ');
                                 let selector = '';
-                                selectors.forEach(function(s) {
-                                    if(s == ':host') {
-                                        selector += tagName + ' ';
+                                selectors.every(function(s, i) {
+                                    if (s.indexOf(':host') >= 0) {
+                                        selector += s.replace(':host', tagName) + ' ';
                                     } else if(s == '::content'){
+                                        if(i > 0) {
+                                            for(let j = i + 1; j < selectors.length; j++) {
+                                                selector += selectors[j] + ' ';
+                                            }
+                                            return false;
+                                        } else {
+                                            selector += '::content ';
+                                        }
+                                    }
+                                    else if('>'.split(' ').indexOf(s) >= 0) {
+                                        selector += s + ' ';
                                     }
                                     else {
                                         let pseudoStart = s.indexOf(':');
@@ -39,7 +50,17 @@
                                             selector += s.slice(0, pseudoStart) + '.' + tagName + s.slice(pseudoStart) + ' ';
                                         }
                                     }
+                                    return true;
                                 });
+
+                                /*R
+                                if(selector.indexOf(':host') >= 0) {
+                                    selector = selector.replace(':host', tagName);
+                                } else {
+                                    selector = tagName + ' ' + selector;
+                                }
+                                */
+
                                 // 生成CSS属性
                                 let cssText = rule.cssText;
                                 generatedCss += selector + '\n{\n' + cssText + '\n}\n';

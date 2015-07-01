@@ -33,7 +33,7 @@
         </div>
     </template>
 
-    <script>
+    <script type="text/nova-javascript">
         window.MyEle = Nova({
             is: 'my-button',
             props: {
@@ -56,9 +56,12 @@
                      type: Boolean
                  }
             },
-            created: function() {
+            createdHandler: function() {
+                this.on('click', function() {
+                        alert('clicked');
+                });
             },
-            attached: function() {
+            attachedHandler: function() {
                 //alert('attached');
             },
             _nameChanged: function(ev, oldVal, newVal) {

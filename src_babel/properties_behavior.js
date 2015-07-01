@@ -23,7 +23,7 @@
             initProperties.call(this);
         },
 
-        attributeChanged: function(attrName, oldVal, newVal) {
+        attributeChangedHandler: function(attrName, oldVal, newVal) {
             let propName = Nova.CaseMap.dashToCamelCase(attrName);
             let prop = this.props[propName]
             if(prop) {

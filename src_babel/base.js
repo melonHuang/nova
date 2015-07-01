@@ -60,10 +60,11 @@
 
             /* 在生命周期的各个阶段初始化behaviors */
             this.on('created attached detached attributeChanged', function(e) {
+                let args = arguments;
                 behaviors.forEach(function(behavior) {
                     var handler = behavior[e.type + 'Handler'];
                     if(handler) {
-                        handler.call(self, Array.prototype.slice.call(arguments, 1));
+                        handler.apply(self, Array.prototype.slice.call(args, 1));
                     }
                 });
             });

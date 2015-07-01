@@ -11,7 +11,14 @@
             var self = this;
             if (this.template) {
                 (function () {
-                    var addClassToChildren = function addClassToChildren(parent, className) {
+
+                    /*
+                    * 遍历节点并初始化
+                    * 1. 为所有节点添加class，实现css scope
+                    * 2. 对节点进行单向绑定
+                    */
+
+                    var initNode = function initNode(parent, className) {
                         var children = parent.children();
                         children.each(function (index, ele) {
                             /***************************** 添加class实现css scope ******************************/
@@ -56,7 +63,7 @@
                             }
 
                             if (ele.children().length > 0) {
-                                addClassToChildren(ele, className);
+                                initNode(ele, className);
                             }
                         });
                     };
@@ -67,6 +74,8 @@
 
                     //wrap.append(template);
                     wrap[0].innerHTML = template;
+
+                    initNode(wrap, className);
 
                     /***************************** content insertion ******************************/
                     self._contents = wrap.find('content');
@@ -86,12 +95,13 @@
                         content.remove();
                     });
 
-                    // 为所有节点加上class，实现CSS scrope
-                    addClassToChildren(wrap, className);
-
                     /***************************** 生成DOM ******************************/
                     _this.innerHTML = '';
-                    wrap.children().appendTo(_this);
+                    //wrap.children().appendTo(this);
+                    var childNodes = Array.prototype.slice.call(wrap[0].childNodes);
+                    for (var i = 0; i < childNodes.length; i++) {
+                        _this.appendChild(childNodes[i]);
+                    }
                 })();
             }
         }
