@@ -30,7 +30,7 @@
         var name, method;
         while (name = names.shift()) {
             method = this[name];
-            if (!method || !$.isFunction(method)) {
+            if (!method || typeof method != 'function') {
                 break;
             }
             if (!method._isAspected) {
