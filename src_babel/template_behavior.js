@@ -1,111 +1,127 @@
 'use strict';
 (function() {
+    /*
+    * Template功能：
+    * 1. content insertion
+    * 2. 为template中，除content insertion的dom节点，添加tagName class
+    * 3. 解析模板中的annotaion，进行单向数据绑定
+    * */
     let TemplateBehavior = {
         BIND_TYPES: {
             INNERHTML: 1,
             ATTRIBUTE: 2
         },
         createdHandler: function() {
+            if(!this.template) { return; }
+
             let self = this;
-            if(this.template) {
-                let className = this.is;
-                let template = $(this.template).html();
-                let wrap = $('<div>');
+            let wrap = document.createElement('div');
+            wrap.innerHTML = this.template;
 
-                //wrap.append(template);
-                wrap[0].innerHTML = template;
+            // 初始化每一个节点
+            initNode.call(this, wrap);
 
-                initNode(wrap, className);
+            // 插入content
+            insertContent.call(this, wrap);
 
-                /***************************** content insertion ******************************/
-                self._contents = wrap.find('content');
-                self._contents.each(function(index, content) {
-                    content = $(content);
-                    let select = content.attr('select');
-                    let replacement;
-                    if(select) {
-                        replacement = $(self).find(select);
-                        replacement.insertBefore(content);
-                    } else {
-                        replacement = Array.prototype.slice.call(self.childNodes);
-                        for(let i = 0; i < replacement.length; i++) {
-                            content[0].parentNode.insertBefore( replacement[i], content[0]);
-                        }
-                    }
-                    content.remove();
-                });
+            // 插入到DOM中
+            attach.call(this, wrap);
+        },
+    };
 
-                /***************************** 生成DOM ******************************/
-                this.innerHTML = '';
-                //wrap.children().appendTo(this);
-                let childNodes = Array.prototype.slice.call(wrap[0].childNodes);
-                for(let i = 0; i < childNodes.length; i++) {
-                    this.appendChild(childNodes[i]);
-                }
+    /*
+    * content insertion
+    * */
+    function insertContent(nodesWrap) {
+        let self = this;
+        let contents = Array.prototype.slice.call(nodesWrap.querySelectorAll('content'));
+        contents.forEach(function(content) {
+            let select = content.getAttribute('select');
+            let replacement;
 
-                /*
-                * 遍历节点并初始化
-                * 1. 为所有节点添加class，实现css scope
-                * 2. 对节点进行单向绑定
-                */
-                function initNode(parent, className) {
-                    let children = parent.children();
-                    children.each(function(index, ele) {
-                        /***************************** 添加class实现css scope ******************************/
-                        ele = $(ele);
-                        ele.addClass(className);
+            replacement = Array.prototype.slice.call((select ? self.querySelectorAll(select) : self.childNodes) || []);
+            replacement.forEach(function(selectedEle) {
+                content.parentElement.insertBefore(selectedEle, content);
+            });
+            content.remove();
+        });
+    }
 
-                        /***************************** 替换模板中的占位符并监听 ******************************/
+    /*
+    * 将解析好的模板插入到DOM中
+    * */
+    function attach(nodesWrap) {
+        let childNodes = Array.prototype.slice.call(nodesWrap.childNodes);
+        for(let i = 0; i < childNodes.length; i++) {
+            this.appendChild(childNodes[i]);
+        }
+    }
 
-                        // 替换属性注解<div attr="{{annotation}}">
-                        for(let i in ele[0].attributes) {
-                            if(ele[0].attributes.hasOwnProperty(i) && ele[0].attributes[i].constructor == Attr) {
-                                let attr = ele[0].attributes[i];
-                                let match = attr.value.match(/^{{(.+)}}$/);
-                                if(match) {
-                                    bind(ele, match[1], self.BIND_TYPES.ATTRIBUTE, {name: attr.name});
-                                }
-                            }
-                        }
+    /*
+    * 初始化template中的每个节点
+    * 1. 添加tagName Class
+    * 2. 添加annotation单向数据绑定
+    * */
+    function initNode(node) {
+        let self = this;
 
-                        // 替换标签注解，<tagName>{{annotaion}}</tagName>
-                        let html = ele.html().trim();
-                        let match = html.match(/^{{(.+)}}$/);
-                        if(match) {
-                            bind(ele, match[1], self.BIND_TYPES.INNERHTML);
-                        }
+        // 添加tagName class
+        let className = this.is;
+        node.className += ' ' + className;
 
-                        function bind(ele, prop, type, config) {
-                            let propPath = prop.split('.');
-                            if(self.props.hasOwnProperty(prop)) {
-                                self.on('_' + propPath[0] + 'Changed', function(ev, oldVal, newVal) {
-                                    for(let i = 1; i < propPath.length; i++) {
-                                        newVal = newVal[propPath[i]];
-                                    }
-
-                                    if(type == self.BIND_TYPES.INNERHTML) {
-                                        ele.html(newVal);
-                                    } else if(type == self.BIND_TYPES.ATTRIBUTE) {
-                                        let type = (self.props[propPath]).type;
-                                        if(type == Boolean) {
-                                            newVal ? ele.attr(config.name, '') : (ele.removeAttr(config.name));
-                                        } else {
-                                            ele.attr(config.name, newVal);
-                                        }
-                                    }
-
-                                });
-                            }
-                        }
-
-                        if(ele.children().length > 0) {
-                            initNode(ele, className);
-                        }
-                    });
+        // 解析annotation
+        // 替换属性注解<div attr="{{annotation}}">
+        for(let i in node.attributes) {
+            if(node.attributes.hasOwnProperty(i) && node.attributes[i].constructor == Attr) {
+                let attr = node.attributes[i];
+                let match = attr.value.match(/^{{(.+)}}$/);
+                if(match) {
+                    bind.call(this, node, match[1], this.BIND_TYPES.ATTRIBUTE, {name: attr.name});
                 }
             }
         }
-    };
+
+        // 替换标签注解，<tagName>{{annotaion}}</tagName>
+        let html = node.innerHTML.trim();
+        let match = html.match(/^{{(.+)}}$/);
+        if(match) {
+            bind.call(this, node, match[1], this.BIND_TYPES.INNERHTML);
+        }
+
+        Array.prototype.slice.call(node.children).forEach(function(child) {
+            initNode.call(self, child);
+        });
+    }
+
+
+    /*
+    * 对节点进行单向绑定
+    * 1. html绑定
+    * 2. attribute绑定
+    * */
+    function bind(node, prop, type, config) {
+        let self = this;
+        let propPath = prop.split('.');
+        if(self.props.hasOwnProperty(prop)) {
+            self.on('_' + propPath[0] + 'Changed', function(ev, oldVal, newVal) {
+                for(let i = 1; i < propPath.length; i++) {
+                    newVal = newVal[propPath[i]];
+                }
+
+                if(type == self.BIND_TYPES.INNERHTML) {
+                    node.innerHTML = newVal;
+                } else if(type == self.BIND_TYPES.ATTRIBUTE) {
+                    let type = (self.props[propPath]).type;
+                    if(type == Boolean) {
+                        newVal ? node.setAttribute(config.name, '') : node.removeAttribute(config.name);
+                    } else {
+                        node.setAttribute(config.name, newVal);
+                    }
+                }
+
+            });
+        }
+    }
 
     Nova.TemplateBehavior = TemplateBehavior;
 })();

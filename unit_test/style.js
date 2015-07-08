@@ -1,7 +1,7 @@
 (function() {
     var TestEleEvent = Nova({
         is: 'test-ele-style',
-        stylesheet: '<style>\
+        stylesheet: '\
             :host {background:blue;display:none;}\
             * {background:black;}\
             h1 { color: red; }\
@@ -13,8 +13,8 @@
             :host .ancestor {color:red;}\
             :host ::content .page {color:red;}\
             :host:first-child {color:red;}\
-        </style>',
-        template: '<template>\
+        ',
+        template: '\
             <div class="first-child">Test pseudo selector</div>\
             <h1>Test element selector</h1>\
             <div class="text">Test Class Selector</div>\
@@ -24,7 +24,7 @@
             <div class="parent">Test parent selector</div>\
             <div class="ancestor">Test ancestor selector</div>\
             <content selector=".page"></content>\
-        </template>',
+        ',
         props: {
         }
     });

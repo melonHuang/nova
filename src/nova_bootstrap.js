@@ -1,7 +1,7 @@
 'use strict';
 (function () {
     var Nova = function Nova(prototype) {
-        Nova.Base.chainObject(prototype, Nova.Base);
+        Nova.Utils.chainObject(prototype, Nova.Base);
         var opts = { prototype: prototype };
         if (prototype['extends']) {
             opts['extends'] = prototype['extends'];
@@ -15,7 +15,7 @@
     };
 
     var NovaExports = function NovaExports(prototype) {
-        Nova.Base.mix(prototype, NovaExports.exports);
+        Nova.Utils.mix(prototype, NovaExports.exports);
         var ret = Nova(prototype);
         NovaExports.exports = {};
         return ret;

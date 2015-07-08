@@ -1,11 +1,14 @@
 'use strict';
-//define(["props_behavior", "event_behavior", "template_behavior"], function(PropBehavior, EventBehavior, TemplateBehavior) {
 (function() {
-
+    /*
+    * Nova Custom Element的基础原型链
+    * */
+    let Utils = Nova.Utils;
     let Base = {
 
         _behaviors: [
             Nova.EventBehavior,
+            Nova.AspectBehavior,
             Nova.TemplateBehavior,
             Nova.PropBehavior
         ],
@@ -45,16 +48,16 @@
 
             /* 将behaviors的行为和属性合并到元素上 */
             behaviors.forEach(function(behavior) {
-                var toMix = self.mix({}, behavior);
+                var toMix = Utils.mix({}, behavior);
                 'createdHandler attachedHandler detachedHandler attributeChangedHandler'.split(' ').forEach(function(prop) {
                     delete toMix[prop];
                 });
 
                 // 合并方法
-                self.mix(self, toMix);
+                Utils.mix(self, toMix);
 
                 // 合并属性
-                self.mix(self.props, toMix.props);
+                Utils.mix(self.props, toMix.props);
 
             });
 
@@ -69,53 +72,10 @@
                 });
             });
 
-        },
-
-        /***************************** helpers ******************************/
-        mix: function(des, src, override) {
-             if (src && src.constructor == Array) {
-                 for (var i = 0, len = src.length; i < len; i++) {
-                     this.mix(des, src[i], override);
-                 }
-                 return des;
-             }
-             if (typeof override == 'function') {
-                 for (i in src) {
-                     des[i] = override(des[i], src[i], i);
-                 }
-             }
-             else {
-                 for (i in src) {
-                     if (override || !(des[i] || (i in des))) { 
-                         des[i] = src[i];
-                     }
-                 }
-             }
-             return des;
-         },
-        /*
-        * 使object的原型链尾端指向inherited, 拥有inherited的属性和方法
-        */
-        chainObject: function(object, inherited) {
-            if (object && inherited && object !== inherited) {
-                if (!Object.__proto__) {
-                    object = this.mix(Object.create(inherited), object, true);
-                } else {
-                    // 首先找到object原型链末端
-                    let lastPrototype = object;
-                    while(lastPrototype.__proto__ && lastPrototype.__proto__.__proto__) {
-                        lastPrototype = lastPrototype.__proto__;
-                    }
-                    lastPrototype.__proto__ = inherited;
-                }
-            }
-            return object;
         }
-
     };
 
-    Base = Base.chainObject(Base, HTMLElement.prototype);
-
+    Base = Utils.chainObject(Base, HTMLElement.prototype);
     Nova.Base = Base;
 
 })();

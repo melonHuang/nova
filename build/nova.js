@@ -1,7 +1,7 @@
 'use strict';
 (function () {
     var Nova = function Nova(prototype) {
-        Nova.Base.chainObject(prototype, Nova.Base);
+        Nova.Utils.chainObject(prototype, Nova.Base);
         var opts = { prototype: prototype };
         if (prototype['extends']) {
             opts['extends'] = prototype['extends'];
@@ -15,7 +15,7 @@
     };
 
     var NovaExports = function NovaExports(prototype) {
-        Nova.Base.mix(prototype, NovaExports.exports);
+        Nova.Utils.mix(prototype, NovaExports.exports);
         var ret = Nova(prototype);
         NovaExports.exports = {};
         return ret;
@@ -210,96 +210,154 @@ Nova.CssParse = (function () {
 })();
 'use strict';
 (function () {
-    var lastInsertedStylesheet = undefined;
 
-    var Style = {
-        init: function init(prototype) {
-            if (prototype.stylesheet) {
-                var stylesheet = $(prototype.stylesheet);
-                if (lastInsertedStylesheet) {
-                    stylesheet.insertAfter(lastInsertedStylesheet);
-                    lastInsertedStylesheet = stylesheet;
-                } else {
-                    (function () {
-                        //let tagName = Nova.CaseMap.camelToDashCase(prototype.is);
-
-                        var generateCss = function generateCss(rules) {
-                            var generatedCss = '';
-                            rules.forEach(function (rule) {
-                                // style
-                                if (rule.type == Nova.CssParse.types.STYLE_RULE) {
-                                    (function () {
-                                        // 生成selector
-                                        var selectors = rule.selector;
-                                        selectors = selectors.replace(/([+>])/g, function (match) {
-                                            return ' ' + match + ' ';
-                                        });
-                                        selectors = selectors.split(/\s+/);
-                                        var selector = '';
-                                        selectors.every(function (s, i) {
-                                            if (s.indexOf(':host') >= 0) {
-                                                selector += s.replace(':host', tagName) + ' ';
-                                            } else if (s == '::content') {
-                                                if (i > 0) {
-                                                    for (var j = i + 1; j < selectors.length; j++) {
-                                                        selector += selectors[j] + ' ';
-                                                    }
-                                                    return false;
-                                                } else {
-                                                    selector += '::content ';
-                                                }
-                                            } else if ('> +'.split(' ').indexOf(s) >= 0) {
-                                                selector += s + ' ';
-                                            } else {
-                                                var pseudoStart = s.indexOf(':');
-                                                if (pseudoStart < 0) {
-                                                    selector += s + '.' + tagName + ' ';
-                                                } else {
-                                                    selector += s.slice(0, pseudoStart) + '.' + tagName + s.slice(pseudoStart) + ' ';
-                                                }
-                                            }
-                                            return true;
-                                        });
-
-                                        /*R
-                                        if(selector.indexOf(':host') >= 0) {
-                                            selector = selector.replace(':host', tagName);
-                                        } else {
-                                            selector = tagName + ' ' + selector;
-                                        }
-                                        */
-
-                                        // 生成CSS属性
-                                        var cssText = rule.cssText;
-                                        generatedCss += selector + '\n{\n' + cssText + '\n}\n';
-                                    })();
-                                }
-
-                                // keyframes
-                                if (rule.type == Nova.CssParse.types.KEYFRAMES_RULE) {
-                                    var selector = rule.selector;
-                                    var cssText = rule.cssText;
-                                    generatedCss += selector + '\n{\n' + cssText + '\n}\n';
-                                }
-
-                                // media rule
-                                if (rule.type == Nova.CssParse.types.MEDIA_RULE) {
-                                    var selector = rule.selector;
-                                    var cssText = generateCss(rule.rules || []);
-                                    generatedCss += selector + '\n{\n' + cssText + '\n}\n';
-                                }
-                            });
-                            return generatedCss;
-                        };
-
-                        var style = Nova.CssParse.parse(stylesheet.html());
-                        var tagName = prototype.is;
-                        var styleText = generateCss(style.rules || []);
-                        stylesheet.html(styleText);
-                        stylesheet.prependTo($('head'));
-                    })();
+    var Utils = {
+        mix: function mix(des, src, override) {
+            if (src && src.constructor == Array) {
+                for (var i = 0, len = src.length; i < len; i++) {
+                    this.mix(des, src[i], override);
+                }
+                return des;
+            }
+            if (typeof override == 'function') {
+                for (i in src) {
+                    des[i] = override(des[i], src[i], i);
+                }
+            } else {
+                for (i in src) {
+                    if (override || !(des[i] || i in des)) {
+                        des[i] = src[i];
+                    }
                 }
             }
+            return des;
+        },
+        /*
+        * 使object的原型链尾端指向inherited, 拥有inherited的属性和方法
+        */
+        chainObject: function chainObject(object, inherited) {
+            if (object && inherited && object !== inherited) {
+                if (!Object.__proto__) {
+                    object = this.mix(Object.create(inherited), object, true);
+                } else {
+                    // 首先找到object原型链末端
+                    var lastPrototype = object;
+                    while (lastPrototype.__proto__ && lastPrototype.__proto__.__proto__) {
+                        lastPrototype = lastPrototype.__proto__;
+                    }
+                    lastPrototype.__proto__ = inherited;
+                }
+            }
+            return object;
+        }
+
+    };
+
+    Nova.Utils = Utils;
+})();
+'use strict';
+(function () {
+    var lastInsertedStylesheet = undefined;
+
+    /*
+    * 解析stylesheet属性，并添加css scope插入到DOM中
+    * */
+    var Style = {
+        init: function init(prototype) {
+            if (!prototype.stylesheet) {
+                return;
+            }
+
+            var stylesheet = prototype.stylesheet;
+
+            // 编译Stylesheet，为其添加scope
+            stylesheet = this.compile(stylesheet, prototype.is);
+
+            // 将stylesheet插入到head中
+            this.attach(stylesheet);
+        },
+
+        compile: function compile(stylesheet, tagName) {
+            var parsedStyle = Nova.CssParse.parse(stylesheet);
+            var rules = parsedStyle.rules;
+            return this.compileRules(rules, tagName);
+        },
+
+        compileRules: function compileRules(rules, tagName) {
+            var self = this;
+            var generatedCss = '';
+            rules.forEach(function (rule) {
+                // style
+                if (rule.type == Nova.CssParse.types.STYLE_RULE) {
+                    (function () {
+                        // 生成selector
+                        var selectors = rule.selector;
+                        selectors = selectors.replace(/([+>])/g, function (match) {
+                            return ' ' + match + ' ';
+                        });
+                        selectors = selectors.split(/\s+/);
+                        var selector = '';
+                        selectors.every(function (s, i) {
+                            if (s.indexOf(':host') >= 0) {
+                                selector += s.replace(':host', tagName) + ' ';
+                            } else if (s == '::content') {
+                                if (i > 0) {
+                                    for (var j = i + 1; j < selectors.length; j++) {
+                                        selector += selectors[j] + ' ';
+                                    }
+                                    return false;
+                                } else {
+                                    selector += '::content ';
+                                }
+                            } else if ('> +'.split(' ').indexOf(s) >= 0) {
+                                selector += s + ' ';
+                            } else {
+                                var pseudoStart = s.indexOf(':');
+                                if (pseudoStart < 0) {
+                                    selector += s + '.' + tagName + ' ';
+                                } else {
+                                    selector += s.slice(0, pseudoStart) + '.' + tagName + s.slice(pseudoStart) + ' ';
+                                }
+                            }
+                            return true;
+                        });
+
+                        // 生成CSS属性
+                        var cssText = rule.cssText;
+                        generatedCss += selector + '\n{\n' + cssText + '\n}\n';
+                    })();
+                }
+
+                // keyframes
+                if (rule.type == Nova.CssParse.types.KEYFRAMES_RULE) {
+                    var selector = rule.selector;
+                    var cssText = rule.cssText;
+                    generatedCss += selector + '\n{\n' + cssText + '\n}\n';
+                }
+
+                // media rule
+                if (rule.type == Nova.CssParse.types.MEDIA_RULE) {
+                    var selector = rule.selector;
+                    var cssText = self.compileRules(rule.rules || [], tagName);
+                    generatedCss += selector + '\n{\n' + cssText + '\n}\n';
+                }
+            });
+            return generatedCss;
+        },
+
+        attach: function attach(stylesheet) {
+            var head = document.head;
+            var styleEle = document.createElement('style');
+            styleEle.innerHTML = stylesheet;
+
+            // 第一次通过Nova插入Stylesheet，直接插入到head顶部
+            if (!lastInsertedStylesheet) {
+                head.insertBefore(styleEle, head.firstChild);
+                // 若已有通过Nova插入的Stylesheet，则插入到其后面
+            } else {
+                head.insertBefore(styleEle, lastInsertedStylesheet.nextSibling);
+            }
+            lastInsertedStylesheet = styleEle;
         }
     };
 
@@ -324,6 +382,12 @@ Nova.CssParse = (function () {
     /***************************** event behavior ******************************/
     var EVENT_SPLITTER = ' ';
     var EventBehavior = {
+        /*
+        * 绑定事件
+        * @param {String} types 事件名，绑定多个事件可以空格间隔
+        * @param {Function} listener 监听函数
+        * @param {Boolean} optional useCapture 是否在捕捉阶段执行回调
+        * */
         on: function on(types, listener, useCapture) {
             types = types.split(EVENT_SPLITTER);
             var type = undefined;
@@ -333,6 +397,12 @@ Nova.CssParse = (function () {
             }
         },
 
+        /*
+        * 注销事件
+        * @param {String} types 事件名，绑定多个事件可以空格间隔
+        * @param {Function} listener 监听函数
+        * @param {Boolean} optional useCapture 是否在捕捉阶段执行回调
+        * */
         off: function off(types, listener, useCapture) {
             types = types.split(EVENT_SPLITTER);
             var type = undefined;
@@ -342,6 +412,11 @@ Nova.CssParse = (function () {
             }
         },
 
+        /*
+        * 触发事件
+        * @param {String} types 事件名，绑定多个事件可以空格间隔
+        * @param {Array} details 额外参数
+        * */
         trigger: function trigger(types, details) {
             types = types.split(EVENT_SPLITTER);
             var type = undefined;
@@ -384,8 +459,73 @@ Nova.CssParse = (function () {
     Nova.EventBehavior = EventBehavior;
 })();
 'use strict';
-//define(['lib/case_map'], function(CaseMap) {
+
 (function () {
+    var ASPECT_SPLITTER = ' ';
+    var AspectBehavior = {
+        /*
+        * 在某个方法之前插入方法
+        * @param {String} methodName 被插队的方法名
+        * @param {Function} callback 插入的方法
+        * */
+        before: function before(methodName, callback) {
+            weaver.call(this, 'before', methodName, callback);
+            return this;
+        },
+
+        /*
+        * 在某个方法之后插入方法
+        * @param {String} methodName 被插队的方法名
+        * @param {Function} callback 插入的方法
+        * */
+        after: function after(methodName, callback) {
+            weaver.call(this, 'after', methodName, callback);
+            return this;
+        }
+    };
+
+    // 将callback绑定到methodName执行的前/后时触发
+    function weaver(when, methodName, callback) {
+        var names = methodName.split(ASPECT_SPLITTER);
+        var name, method;
+        while (name = names.shift()) {
+            method = this[name];
+            if (!method || !$.isFunction(method)) {
+                break;
+            }
+            if (!method._isAspected) {
+                wrap.call(this, name);
+            }
+            this.on(when + ':' + name, callback);
+        }
+    }
+
+    function wrap(methodName) {
+        var method = this[methodName];
+        var ret, beforeFunRet;
+        var me = this;
+        this[methodName] = function () {
+            beforeFunRet = this.trigger('before:' + methodName, Array.prototype.slice.call(arguments));
+            if (beforeFunRet === false) {
+                return;
+            }
+            ret = method.apply(this, arguments);
+            this.trigger('after:' + methodName, Array.prototype.slice.call(arguments));
+            return ret;
+        };
+        this[methodName]._isAspected = true;
+    }
+
+    Nova.AspectBehavior = AspectBehavior;
+})();
+'use strict';
+(function () {
+    /*
+    * Properties功能：
+    * 1. 定义props中声明的properties，监听变化
+    * 2. 通过attributes初始化properties
+    * 3. 监听attributes，变化时，同步更新到props声明的properties
+    * */
     var PropBehavior = {
         props: function props() {},
 
@@ -482,8 +622,12 @@ Nova.CssParse = (function () {
         });
 
         // init observers
-        if (config.observer && this[config.observer]) {
-            this.on(getPropChangeEventName(name), this[config.observer]);
+        if (config.observer) {
+            this.on(getPropChangeEventName(name), function () {
+                if (self[config.observer]) {
+                    self[config.observer].apply(self, arguments);
+                }
+            });
         }
 
         // set value
@@ -542,127 +686,140 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
 */
 'use strict';
 (function () {
+    /*
+    * Template功能：
+    * 1. content insertion
+    * 2. 为template中，除content insertion的dom节点，添加tagName class
+    * 3. 解析模板中的annotaion，进行单向数据绑定
+    * */
     var TemplateBehavior = {
         BIND_TYPES: {
             INNERHTML: 1,
             ATTRIBUTE: 2
         },
         createdHandler: function createdHandler() {
-            var _this = this;
+            if (!this.template) {
+                return;
+            }
 
             var self = this;
-            if (this.template) {
-                (function () {
+            var wrap = document.createElement('div');
+            wrap.innerHTML = this.template;
 
-                    /*
-                    * 遍历节点并初始化
-                    * 1. 为所有节点添加class，实现css scope
-                    * 2. 对节点进行单向绑定
-                    */
+            // 初始化每一个节点
+            initNode.call(this, wrap);
 
-                    var initNode = function initNode(parent, className) {
-                        var children = parent.children();
-                        children.each(function (index, ele) {
-                            /***************************** 添加class实现css scope ******************************/
-                            ele = $(ele);
-                            ele.addClass(className);
+            // 插入content
+            insertContent.call(this, wrap);
 
-                            /***************************** 替换模板中的占位符并监听 ******************************/
-
-                            // 替换属性注解<div attr="{{annotation}}">
-                            for (var i in ele[0].attributes) {
-                                if (ele[0].attributes.hasOwnProperty(i) && ele[0].attributes[i].constructor == Attr) {
-                                    var attr = ele[0].attributes[i];
-                                    var _match = attr.value.match(/^{{(.+)}}$/);
-                                    if (_match) {
-                                        bind(ele, _match[1], self.BIND_TYPES.ATTRIBUTE, { name: attr.name });
-                                    }
-                                }
-                            }
-
-                            // 替换标签注解，<tagName>{{annotaion}}</tagName>
-                            var html = ele.html().trim();
-                            var match = html.match(/^{{(.+)}}$/);
-                            if (match) {
-                                bind(ele, match[1], self.BIND_TYPES.INNERHTML);
-                            }
-
-                            function bind(ele, prop, type, config) {
-                                var propPath = prop.split('.');
-                                if (self.props.hasOwnProperty(prop)) {
-                                    self.on('_' + propPath[0] + 'Changed', function (ev, oldVal, newVal) {
-                                        for (var i = 1; i < propPath.length; i++) {
-                                            newVal = newVal[propPath[i]];
-                                        }
-
-                                        if (type == self.BIND_TYPES.INNERHTML) {
-                                            ele.html(newVal);
-                                        } else if (type == self.BIND_TYPES.ATTRIBUTE) {
-                                            var _type = self.props[propPath].type;
-                                            if (_type == Boolean) {
-                                                newVal ? ele.attr(config.name, '') : ele.removeAttr(config.name);
-                                            } else {
-                                                ele.attr(config.name, newVal);
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-
-                            if (ele.children().length > 0) {
-                                initNode(ele, className);
-                            }
-                        });
-                    };
-
-                    var className = _this.is;
-                    var template = $(_this.template).html();
-                    var wrap = $('<div>');
-
-                    //wrap.append(template);
-                    wrap[0].innerHTML = template;
-
-                    initNode(wrap, className);
-
-                    /***************************** content insertion ******************************/
-                    self._contents = wrap.find('content');
-                    self._contents.each(function (index, content) {
-                        content = $(content);
-                        var select = content.attr('select');
-                        var replacement = undefined;
-                        if (select) {
-                            replacement = $(self).find(select);
-                            replacement.insertBefore(content);
-                        } else {
-                            replacement = Array.prototype.slice.call(self.childNodes);
-                            for (var i = 0; i < replacement.length; i++) {
-                                content[0].parentNode.insertBefore(replacement[i], content[0]);
-                            }
-                        }
-                        content.remove();
-                    });
-
-                    /***************************** 生成DOM ******************************/
-                    _this.innerHTML = '';
-                    //wrap.children().appendTo(this);
-                    var childNodes = Array.prototype.slice.call(wrap[0].childNodes);
-                    for (var i = 0; i < childNodes.length; i++) {
-                        _this.appendChild(childNodes[i]);
-                    }
-                })();
-            }
+            // 插入到DOM中
+            attach.call(this, wrap);
         }
     };
+
+    /*
+    * content insertion
+    * */
+    function insertContent(nodesWrap) {
+        var self = this;
+        var contents = Array.prototype.slice.call(nodesWrap.querySelectorAll('content'));
+        contents.forEach(function (content) {
+            var select = content.getAttribute('select');
+            var replacement = undefined;
+
+            replacement = Array.prototype.slice.call((select ? self.querySelectorAll(select) : self.childNodes) || []);
+            replacement.forEach(function (selectedEle) {
+                content.parentElement.insertBefore(selectedEle, content);
+            });
+            content.remove();
+        });
+    }
+
+    /*
+    * 将解析好的模板插入到DOM中
+    * */
+    function attach(nodesWrap) {
+        var childNodes = Array.prototype.slice.call(nodesWrap.childNodes);
+        for (var i = 0; i < childNodes.length; i++) {
+            this.appendChild(childNodes[i]);
+        }
+    }
+
+    /*
+    * 初始化template中的每个节点
+    * 1. 添加tagName Class
+    * 2. 添加annotation单向数据绑定
+    * */
+    function initNode(node) {
+        var self = this;
+
+        // 添加tagName class
+        var className = this.is;
+        node.className += ' ' + className;
+
+        // 解析annotation
+        // 替换属性注解<div attr="{{annotation}}">
+        for (var i in node.attributes) {
+            if (node.attributes.hasOwnProperty(i) && node.attributes[i].constructor == Attr) {
+                var attr = node.attributes[i];
+                var _match = attr.value.match(/^{{(.+)}}$/);
+                if (_match) {
+                    bind.call(this, node, _match[1], this.BIND_TYPES.ATTRIBUTE, { name: attr.name });
+                }
+            }
+        }
+
+        // 替换标签注解，<tagName>{{annotaion}}</tagName>
+        var html = node.innerHTML.trim();
+        var match = html.match(/^{{(.+)}}$/);
+        if (match) {
+            bind.call(this, node, match[1], this.BIND_TYPES.INNERHTML);
+        }
+
+        Array.prototype.slice.call(node.children).forEach(function (child) {
+            initNode.call(self, child);
+        });
+    }
+
+    /*
+    * 对节点进行单向绑定
+    * 1. html绑定
+    * 2. attribute绑定
+    * */
+    function bind(node, prop, type, config) {
+        var self = this;
+        var propPath = prop.split('.');
+        if (self.props.hasOwnProperty(prop)) {
+            self.on('_' + propPath[0] + 'Changed', function (ev, oldVal, newVal) {
+                for (var i = 1; i < propPath.length; i++) {
+                    newVal = newVal[propPath[i]];
+                }
+
+                if (type == self.BIND_TYPES.INNERHTML) {
+                    node.innerHTML = newVal;
+                } else if (type == self.BIND_TYPES.ATTRIBUTE) {
+                    var _type = self.props[propPath].type;
+                    if (_type == Boolean) {
+                        newVal ? node.setAttribute(config.name, '') : node.removeAttribute(config.name);
+                    } else {
+                        node.setAttribute(config.name, newVal);
+                    }
+                }
+            });
+        }
+    }
 
     Nova.TemplateBehavior = TemplateBehavior;
 })();
 'use strict';
-//define(["props_behavior", "event_behavior", "template_behavior"], function(PropBehavior, EventBehavior, TemplateBehavior) {
 (function () {
-
+    /*
+    * Nova Custom Element的基础原型链
+    * */
+    var Utils = Nova.Utils;
     var Base = {
 
-        _behaviors: [Nova.EventBehavior, Nova.TemplateBehavior, Nova.PropBehavior],
+        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.TemplateBehavior, Nova.PropBehavior],
 
         behaviors: [],
 
@@ -698,16 +855,16 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
 
             /* 将behaviors的行为和属性合并到元素上 */
             behaviors.forEach(function (behavior) {
-                var toMix = self.mix({}, behavior);
+                var toMix = Utils.mix({}, behavior);
                 'createdHandler attachedHandler detachedHandler attributeChangedHandler'.split(' ').forEach(function (prop) {
                     delete toMix[prop];
                 });
 
                 // 合并方法
-                self.mix(self, toMix);
+                Utils.mix(self, toMix);
 
                 // 合并属性
-                self.mix(self.props, toMix.props);
+                Utils.mix(self.props, toMix.props);
             });
 
             /* 在生命周期的各个阶段初始化behaviors */
@@ -720,51 +877,9 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
                     }
                 });
             });
-        },
-
-        /***************************** helpers ******************************/
-        mix: function mix(des, src, override) {
-            if (src && src.constructor == Array) {
-                for (var i = 0, len = src.length; i < len; i++) {
-                    this.mix(des, src[i], override);
-                }
-                return des;
-            }
-            if (typeof override == 'function') {
-                for (i in src) {
-                    des[i] = override(des[i], src[i], i);
-                }
-            } else {
-                for (i in src) {
-                    if (override || !(des[i] || i in des)) {
-                        des[i] = src[i];
-                    }
-                }
-            }
-            return des;
-        },
-        /*
-        * 使object的原型链尾端指向inherited, 拥有inherited的属性和方法
-        */
-        chainObject: function chainObject(object, inherited) {
-            if (object && inherited && object !== inherited) {
-                if (!Object.__proto__) {
-                    object = this.mix(Object.create(inherited), object, true);
-                } else {
-                    // 首先找到object原型链末端
-                    var lastPrototype = object;
-                    while (lastPrototype.__proto__ && lastPrototype.__proto__.__proto__) {
-                        lastPrototype = lastPrototype.__proto__;
-                    }
-                    lastPrototype.__proto__ = inherited;
-                }
-            }
-            return object;
         }
-
     };
 
-    Base = Base.chainObject(Base, HTMLElement.prototype);
-
+    Base = Utils.chainObject(Base, HTMLElement.prototype);
     Nova.Base = Base;
 })();

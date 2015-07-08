@@ -1,7 +1,7 @@
 'use strict';
 (function() {
     let Nova = function(prototype) {
-        Nova.Base.chainObject(prototype, Nova.Base);
+        Nova.Utils.chainObject(prototype, Nova.Base);
         let opts = { prototype };
         if(prototype.extends) {
             opts.extends = prototype.extends
@@ -15,7 +15,7 @@
     };
 
     let NovaExports = function(prototype) {
-        Nova.Base.mix(prototype, NovaExports.exports);
+        Nova.Utils.mix(prototype, NovaExports.exports);
         var ret = Nova(prototype);
         NovaExports.exports = {};
         return ret;

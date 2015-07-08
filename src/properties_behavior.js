@@ -1,6 +1,11 @@
 'use strict';
-//define(['lib/case_map'], function(CaseMap) {
 (function () {
+    /*
+    * Properties功能：
+    * 1. 定义props中声明的properties，监听变化
+    * 2. 通过attributes初始化properties
+    * 3. 监听attributes，变化时，同步更新到props声明的properties
+    * */
     var PropBehavior = {
         props: function props() {},
 
@@ -97,8 +102,12 @@
         });
 
         // init observers
-        if (config.observer && this[config.observer]) {
-            this.on(getPropChangeEventName(name), this[config.observer]);
+        if (config.observer) {
+            this.on(getPropChangeEventName(name), function () {
+                if (self[config.observer]) {
+                    self[config.observer].apply(self, arguments);
+                }
+            });
         }
 
         // set value

@@ -36,8 +36,10 @@ gulp.task('concat-nova', function() {
              'src/nova_bootstrap.js',
              'src/lib/css_parse.js',
              'src/lib/case_map.js',
+             'src/lib/utils.js',
              'src/style.js',
              'src/event_behavior.js',
+             'src/aspect_behavior.js',
              'src/properties_behavior.js',
              'src/template_behavior.js',
              'src/base.js'

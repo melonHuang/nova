@@ -2,6 +2,7 @@
     <style type="text/css">
         :host {
             display: block;
+            color: black;
         }
 
         .hint>.text {
@@ -30,7 +31,7 @@
 
     <template>
         <div class="hint">
-            <div class="text">{{name}}</div>
+            <div class="text" data-name="{{name}}">{{name}}</div>
             <div class="text">{{name}}</div>
             <content select=".page"></content>
             <content select="div"></content>
@@ -68,6 +69,9 @@
             },
             _nameChanged: function(ev, oldVal, newVal) {
                 console.log('name change from ' + oldVal + ' to ' + newVal);
+            },
+            say: function() {
+                alert('hi');
             }
     });
     </script>

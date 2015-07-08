@@ -1,14 +1,14 @@
 (function() {
     var TestEleTemplate = Nova({
         is: 'test-ele-template',
-        template: '<template><span class="name-wrap" data-isgay="{{isGay}}" data-name="{{name}}">{{name}}</span>\
+        template: '<span class="name-wrap" data-isgay="{{isGay}}" data-name="{{name}}">{{name}}</span>\
                 <div class="page-wrap">\
                     <content select=".page"></content>\
                 </div>\
                 <div class="other-wrap">\
                     <content></content>\
                 </div>\
-            </template>',
+            ',
         props: {
             name: String,
             isGay: Boolean

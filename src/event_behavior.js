@@ -17,6 +17,12 @@
     /***************************** event behavior ******************************/
     var EVENT_SPLITTER = ' ';
     var EventBehavior = {
+        /*
+        * 绑定事件
+        * @param {String} types 事件名，绑定多个事件可以空格间隔
+        * @param {Function} listener 监听函数
+        * @param {Boolean} optional useCapture 是否在捕捉阶段执行回调
+        * */
         on: function on(types, listener, useCapture) {
             types = types.split(EVENT_SPLITTER);
             var type = undefined;
@@ -26,6 +32,12 @@
             }
         },
 
+        /*
+        * 注销事件
+        * @param {String} types 事件名，绑定多个事件可以空格间隔
+        * @param {Function} listener 监听函数
+        * @param {Boolean} optional useCapture 是否在捕捉阶段执行回调
+        * */
         off: function off(types, listener, useCapture) {
             types = types.split(EVENT_SPLITTER);
             var type = undefined;
@@ -35,6 +47,11 @@
             }
         },
 
+        /*
+        * 触发事件
+        * @param {String} types 事件名，绑定多个事件可以空格间隔
+        * @param {Array} details 额外参数
+        * */
         trigger: function trigger(types, details) {
             types = types.split(EVENT_SPLITTER);
             var type = undefined;

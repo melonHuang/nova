@@ -2,93 +2,104 @@
 (function() {
     let lastInsertedStylesheet;
 
+    /*
+    * 解析stylesheet属性，并添加css scope插入到DOM中
+    * */
     let Style = {
         init: function(prototype) {
-            if(prototype.stylesheet) {
-                let stylesheet = $(prototype.stylesheet);
-                if(lastInsertedStylesheet) {
-                    stylesheet.insertAfter(lastInsertedStylesheet);
-                    lastInsertedStylesheet = stylesheet;
-                } else {
-                    let style = Nova.CssParse.parse(stylesheet.html());
-                    let tagName = prototype.is;
-                    let styleText = generateCss(style.rules || []);
-                    stylesheet.html(styleText);
-                    stylesheet.prependTo($('head'));
-                    //let tagName = Nova.CaseMap.camelToDashCase(prototype.is);
+            if(!prototype.stylesheet) { return; }
 
+            let stylesheet = prototype.stylesheet;
 
-                    function generateCss(rules) {
-                        let generatedCss = '';
-                        rules.forEach(function(rule) {
-                            // style
-                            if(rule.type == Nova.CssParse.types.STYLE_RULE) {
-                                // 生成selector
-                                let selectors = rule.selector;
-                                selectors = selectors.replace(/([+>])/g, function(match) {
-                                    return ' ' + match + ' ';
-                                });
-                                selectors = selectors.split(/\s+/);
-                                let selector = '';
-                                selectors.every(function(s, i) {
-                                    if (s.indexOf(':host') >= 0) {
-                                        selector += s.replace(':host', tagName) + ' ';
-                                    } else if(s == '::content'){
-                                        if(i > 0) {
-                                            for(let j = i + 1; j < selectors.length; j++) {
-                                                selector += selectors[j] + ' ';
-                                            }
-                                            return false;
-                                        } else {
-                                            selector += '::content ';
-                                        }
-                                    }
-                                    else if('> +'.split(' ').indexOf(s) >= 0) {
-                                        selector += s + ' ';
-                                    }
-                                    else {
-                                        let pseudoStart = s.indexOf(':');
-                                        if(pseudoStart < 0) {
-                                            selector += s + '.' + tagName + ' ';
-                                        } else {
-                                            selector += s.slice(0, pseudoStart) + '.' + tagName + s.slice(pseudoStart) + ' ';
-                                        }
-                                    }
-                                    return true;
-                                });
+            // 编译Stylesheet，为其添加scope
+            stylesheet = this.compile(stylesheet, prototype.is);
 
-                                /*R
-                                if(selector.indexOf(':host') >= 0) {
-                                    selector = selector.replace(':host', tagName);
-                                } else {
-                                    selector = tagName + ' ' + selector;
+            // 将stylesheet插入到head中
+            this.attach(stylesheet);
+        },
+
+        compile: function(stylesheet, tagName) {
+            let parsedStyle = Nova.CssParse.parse(stylesheet);
+            let rules = parsedStyle.rules;
+            return this.compileRules(rules, tagName);
+
+        },
+
+        compileRules: function(rules, tagName) {
+            let self = this;
+            let generatedCss = '';
+            rules.forEach(function(rule) {
+                // style
+                if(rule.type == Nova.CssParse.types.STYLE_RULE) {
+                    // 生成selector
+                    let selectors = rule.selector;
+                    selectors = selectors.replace(/([+>])/g, function(match) {
+                        return ' ' + match + ' ';
+                    });
+                    selectors = selectors.split(/\s+/);
+                    let selector = '';
+                    selectors.every(function(s, i) {
+                        if (s.indexOf(':host') >= 0) {
+                            selector += s.replace(':host', tagName) + ' ';
+                        } else if(s == '::content'){
+                            if(i > 0) {
+                                for(let j = i + 1; j < selectors.length; j++) {
+                                    selector += selectors[j] + ' ';
                                 }
-                                */
-
-                                // 生成CSS属性
-                                let cssText = rule.cssText;
-                                generatedCss += selector + '\n{\n' + cssText + '\n}\n';
+                                return false;
+                            } else {
+                                selector += '::content ';
                             }
-
-                            // keyframes
-                            if(rule.type == Nova.CssParse.types.KEYFRAMES_RULE) {
-                                let selector = rule.selector;
-                                let cssText = rule.cssText;
-                                generatedCss += selector + '\n{\n' + cssText + '\n}\n';
+                        }
+                        else if('> +'.split(' ').indexOf(s) >= 0) {
+                            selector += s + ' ';
+                        }
+                        else {
+                            let pseudoStart = s.indexOf(':');
+                            if(pseudoStart < 0) {
+                                selector += s + '.' + tagName + ' ';
+                            } else {
+                                selector += s.slice(0, pseudoStart) + '.' + tagName + s.slice(pseudoStart) + ' ';
                             }
+                        }
+                        return true;
+                    });
 
-                            // media rule
-                            if(rule.type == Nova.CssParse.types.MEDIA_RULE) {
-                                let selector = rule.selector;
-                                let cssText = generateCss(rule.rules || []);
-                                generatedCss += selector + '\n{\n' + cssText + '\n}\n';
-                            }
-                        });
-                        return generatedCss;
-                    }
-
+                    // 生成CSS属性
+                    let cssText = rule.cssText;
+                    generatedCss += selector + '\n{\n' + cssText + '\n}\n';
                 }
+
+                // keyframes
+                if(rule.type == Nova.CssParse.types.KEYFRAMES_RULE) {
+                    let selector = rule.selector;
+                    let cssText = rule.cssText;
+                    generatedCss += selector + '\n{\n' + cssText + '\n}\n';
+                }
+
+                // media rule
+                if(rule.type == Nova.CssParse.types.MEDIA_RULE) {
+                    let selector = rule.selector;
+                    let cssText = self.compileRules(rule.rules || [], tagName);
+                    generatedCss += selector + '\n{\n' + cssText + '\n}\n';
+                }
+            });
+            return generatedCss;
+        },
+
+        attach: function(stylesheet) {
+            let head = document.head;
+            let styleEle = document.createElement('style');
+            styleEle.innerHTML = stylesheet;
+
+            // 第一次通过Nova插入Stylesheet，直接插入到head顶部
+            if(!lastInsertedStylesheet) {
+                head.insertBefore(styleEle, head.firstChild);
+            // 若已有通过Nova插入的Stylesheet，则插入到其后面
+            } else {
+                head.insertBefore(styleEle, lastInsertedStylesheet.nextSibling);
             }
+            lastInsertedStylesheet = styleEle;
         }
     };
 
