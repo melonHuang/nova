@@ -1,0 +1,14 @@
+// should allow comments in this type of config
+{
+    "excludeFiles": [
+        "node_modules/**",
+        "build/*",
+        "coverage/*",
+        "pkg/*"
+    ],
+    "preset": "crockford",
+
+    // Sinon specific overrides
+    "validateQuoteMarks" : "\"",
+    "requireMultipleVarDecl" : null
+}

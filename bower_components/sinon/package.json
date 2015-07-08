@@ -1,0 +1,46 @@
+{
+  "name": "sinon",
+  "description": "JavaScript test spies, stubs and mocks.",
+  "version": "1.15.4",
+  "homepage": "http://sinonjs.org/",
+  "author": "Christian Johansen",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/cjohansen/Sinon.JS.git"
+  },
+  "bugs": {
+    "mail": "christian@cjohansen.no",
+    "url": "http://github.com/cjohansen/Sinon.JS/issues"
+  },
+  "license": "BSD-3-Clause",
+  "scripts": {
+    "ci-test": "./scripts/ci-test.sh",
+    "test": "npm run lint && ./scripts/ci-test.sh",
+    "lint": "jscs .",
+    "prepublish": "./build"
+  },
+  "dependencies": {
+    "formatio": "1.1.1",
+    "util": ">=0.10.3 <1",
+    "lolex": "1.1.0",
+    "samsam": "1.1.2"
+  },
+  "devDependencies": {
+    "buster": "0.7.18",
+    "jscs": "1.11.3",
+    "buster-istanbul": "0.1.13"
+  },
+  "files": [
+    "lib",
+    "pkg",
+    "AUTHORS",
+    "CONTRIBUTING.md",
+    "Changelog.txt",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "./lib/sinon.js",
+  "engines": {
+    "node": ">=0.1.103"
+  }
+}

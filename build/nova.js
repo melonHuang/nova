@@ -230,7 +230,11 @@ Nova.CssParse = (function () {
                                 if (rule.type == Nova.CssParse.types.STYLE_RULE) {
                                     (function () {
                                         // 生成selector
-                                        var selectors = rule.selector.split(' ');
+                                        var selectors = rule.selector;
+                                        selectors = selectors.replace(/([+>])/g, function (match) {
+                                            return ' ' + match + ' ';
+                                        });
+                                        selectors = selectors.split(/\s+/);
                                         var selector = '';
                                         selectors.every(function (s, i) {
                                             if (s.indexOf(':host') >= 0) {
@@ -244,7 +248,7 @@ Nova.CssParse = (function () {
                                                 } else {
                                                     selector += '::content ';
                                                 }
-                                            } else if ('>'.split(' ').indexOf(s) >= 0) {
+                                            } else if ('> +'.split(' ').indexOf(s) >= 0) {
                                                 selector += s + ' ';
                                             } else {
                                                 var pseudoStart = s.indexOf(':');
@@ -308,8 +312,9 @@ Nova.CssParse = (function () {
     if (!window.CustomEvent) {
         var _CustomEvent = function _CustomEvent(event, params) {
             params = params || { bubbles: false, cancelable: false, detail: undefined };
-            var evt = document.createEvent('CustomEvent');
-            evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+            var evt = document.createEvent('Events');
+            evt.initEvent(event, params.bubbles, params.cancelable);
+            evt.detail = params.detail;
             return evt;
         };
         _CustomEvent.prototype = window.Event.prototype;
@@ -319,22 +324,12 @@ Nova.CssParse = (function () {
     /***************************** event behavior ******************************/
     var EVENT_SPLITTER = ' ';
     var EventBehavior = {
-        on: function on(types, listener, userCapture) {
-            var _this = this;
-
+        on: function on(types, listener, useCapture) {
             types = types.split(EVENT_SPLITTER);
             var type = undefined;
-
-            var _loop = function () {
-                var self = _this;
-                _this.addEventListener(type, function (e) {
-                    var args = [e].concat(e.detail);
-                    listener.apply(self, args);
-                }, userCapture);
-            };
-
             while (type = types.shift()) {
-                _loop();
+                var cb = addListener.call(this, type, listener);
+                this.addEventListener(type, cb, useCapture);
             }
         },
 
@@ -342,7 +337,8 @@ Nova.CssParse = (function () {
             types = types.split(EVENT_SPLITTER);
             var type = undefined;
             while (type = types.shift()) {
-                this.removeEventListener(type, listener, userCapture);
+                var cb = removeListener.call(this, type, listener);
+                cb && this.removeEventListener(type, cb, useCapture);
             }
         },
 
@@ -355,6 +351,35 @@ Nova.CssParse = (function () {
             }
         }
     };
+
+    function addListener(type, listener) {
+        !this._eventListeners && (this._eventListeners = {});
+        !this._eventListeners[type] && (this._eventListeners[type] = new Map());
+
+        var self = this;
+        var listenersMap = this._eventListeners[type];
+        var listenerWrap = listenersMap.get(listener);
+
+        if (!listenerWrap) {
+            listenerWrap = function (e) {
+                var args = [e].concat(e.detail);
+                listener.apply(self, args);
+            };
+            listenersMap.set(listener, listenerWrap);
+        }
+
+        return listenerWrap;
+    }
+
+    function removeListener(type, listener) {
+        if (!this._eventListeners || !this._eventListeners[type]) {
+            return;
+        }
+        var listenersMap = this._eventListeners[type];
+        var listenerWrap = listenersMap.get(listener);
+        listenersMap['delete'](listener);
+        return listenerWrap;
+    }
 
     Nova.EventBehavior = EventBehavior;
 })();
@@ -402,6 +427,9 @@ Nova.CssParse = (function () {
         }
     }
 
+    /*
+    * 通过Attribute，设置property
+    * */
     function setPropFromAttr(attrName) {
         var propName = Nova.CaseMap.dashToCamelCase(attrName);
         var prop = this.props[propName];
@@ -409,6 +437,9 @@ Nova.CssParse = (function () {
         this[propName] = fromAttrToProp.call(this, attrName, val, prop);
     }
 
+    /*
+    * 将props转换为完整定义
+    * */
     function transferProperty(prop) {
         var value = this.props[prop];
         // 检测是否简单写法，如果是，转换成完整写法
@@ -419,6 +450,9 @@ Nova.CssParse = (function () {
         }
     }
 
+    /*
+    * 定义单个property
+    * */
     function defineProperty(name, config) {
         var self = this;
         var realPropPrefix = '_prop_';
@@ -448,7 +482,7 @@ Nova.CssParse = (function () {
         });
 
         // init observers
-        if (config.observer) {
+        if (config.observer && this[config.observer]) {
             this.on(getPropChangeEventName(name), this[config.observer]);
         }
 
@@ -564,7 +598,12 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
                                         if (type == self.BIND_TYPES.INNERHTML) {
                                             ele.html(newVal);
                                         } else if (type == self.BIND_TYPES.ATTRIBUTE) {
-                                            ele.attr(config.name, newVal);
+                                            var _type = self.props[propPath].type;
+                                            if (_type == Boolean) {
+                                                newVal ? ele.attr(config.name, '') : ele.removeAttr(config.name);
+                                            } else {
+                                                ele.attr(config.name, newVal);
+                                            }
                                         }
                                     });
                                 }
@@ -697,7 +736,6 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
                 }
             } else {
                 for (i in src) {
-                    //杩欓噷瑕佸姞涓€涓猟es[i]锛屾槸鍥犱负瑕佺収椤句竴浜涗笉鍙灇涓剧殑灞炴€�
                     if (override || !(des[i] || i in des)) {
                         des[i] = src[i];
                     }

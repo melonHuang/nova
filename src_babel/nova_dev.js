@@ -4,10 +4,6 @@
         is: 'dom-module',
         //template: '<template></template>',
         createdHandler: function() {
-            /*
-            let ele = document.createElement('div');
-            $(this).children().appendTo(ele);
-            */
             let ele = this;
             compileAndRun();
 

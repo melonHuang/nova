@@ -78,7 +78,6 @@
                 }
             } else {
                 for (i in src) {
-                    //杩欓噷瑕佸姞涓€涓猟es[i]锛屾槸鍥犱负瑕佺収椤句竴浜涗笉鍙灇涓剧殑灞炴€�
                     if (override || !(des[i] || i in des)) {
                         des[i] = src[i];
                     }

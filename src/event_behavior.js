@@ -5,8 +5,9 @@
     if (!window.CustomEvent) {
         var _CustomEvent = function _CustomEvent(event, params) {
             params = params || { bubbles: false, cancelable: false, detail: undefined };
-            var evt = document.createEvent('CustomEvent');
-            evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+            var evt = document.createEvent('Events');
+            evt.initEvent(event, params.bubbles, params.cancelable);
+            evt.detail = params.detail;
             return evt;
         };
         _CustomEvent.prototype = window.Event.prototype;
@@ -16,22 +17,12 @@
     /***************************** event behavior ******************************/
     var EVENT_SPLITTER = ' ';
     var EventBehavior = {
-        on: function on(types, listener, userCapture) {
-            var _this = this;
-
+        on: function on(types, listener, useCapture) {
             types = types.split(EVENT_SPLITTER);
             var type = undefined;
-
-            var _loop = function () {
-                var self = _this;
-                _this.addEventListener(type, function (e) {
-                    var args = [e].concat(e.detail);
-                    listener.apply(self, args);
-                }, userCapture);
-            };
-
             while (type = types.shift()) {
-                _loop();
+                var cb = addListener.call(this, type, listener);
+                this.addEventListener(type, cb, useCapture);
             }
         },
 
@@ -39,7 +30,8 @@
             types = types.split(EVENT_SPLITTER);
             var type = undefined;
             while (type = types.shift()) {
-                this.removeEventListener(type, listener, userCapture);
+                var cb = removeListener.call(this, type, listener);
+                cb && this.removeEventListener(type, cb, useCapture);
             }
         },
 
@@ -52,6 +44,35 @@
             }
         }
     };
+
+    function addListener(type, listener) {
+        !this._eventListeners && (this._eventListeners = {});
+        !this._eventListeners[type] && (this._eventListeners[type] = new Map());
+
+        var self = this;
+        var listenersMap = this._eventListeners[type];
+        var listenerWrap = listenersMap.get(listener);
+
+        if (!listenerWrap) {
+            listenerWrap = function (e) {
+                var args = [e].concat(e.detail);
+                listener.apply(self, args);
+            };
+            listenersMap.set(listener, listenerWrap);
+        }
+
+        return listenerWrap;
+    }
+
+    function removeListener(type, listener) {
+        if (!this._eventListeners || !this._eventListeners[type]) {
+            return;
+        }
+        var listenersMap = this._eventListeners[type];
+        var listenerWrap = listenersMap.get(listener);
+        listenersMap['delete'](listener);
+        return listenerWrap;
+    }
 
     Nova.EventBehavior = EventBehavior;
 })();

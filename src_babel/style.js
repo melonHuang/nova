@@ -24,7 +24,11 @@
                             // style
                             if(rule.type == Nova.CssParse.types.STYLE_RULE) {
                                 // 生成selector
-                                let selectors = rule.selector.split(' ');
+                                let selectors = rule.selector;
+                                selectors = selectors.replace(/([+>])/g, function(match) {
+                                    return ' ' + match + ' ';
+                                });
+                                selectors = selectors.split(/\s+/);
                                 let selector = '';
                                 selectors.every(function(s, i) {
                                     if (s.indexOf(':host') >= 0) {
@@ -39,7 +43,7 @@
                                             selector += '::content ';
                                         }
                                     }
-                                    else if('>'.split(' ').indexOf(s) >= 0) {
+                                    else if('> +'.split(' ').indexOf(s) >= 0) {
                                         selector += s + ' ';
                                     }
                                     else {

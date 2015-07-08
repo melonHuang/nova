@@ -6,7 +6,7 @@
     <title></title>
 </head>
 <body>
-    <my-button name="guagua" info='{"b":1}' date="Sat Jun 20 2015 21:15:57 GMT+0800 (CST)" style="color:white;">
+    <my-button name="guaguaguagau" info='{"b":1}' date="Sat Jun 20 2015 21:15:57 GMT+0800 (CST)" style="color:white;">
     </my-button>
 
     <div class="hint">
@@ -47,6 +47,11 @@
 
 
     <script>
+        btn = document.querySelector('my-button');
+        btn.on('click', clickedHandler);
+        function clickedHandler() {
+            alert('clicked');
+        }
     </script>
 
 </body>

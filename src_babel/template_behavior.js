@@ -86,7 +86,12 @@
                                     if(type == self.BIND_TYPES.INNERHTML) {
                                         ele.html(newVal);
                                     } else if(type == self.BIND_TYPES.ATTRIBUTE) {
-                                        ele.attr(config.name, newVal);
+                                        let type = (self.props[propPath]).type;
+                                        if(type == Boolean) {
+                                            newVal ? ele.attr(config.name, '') : (ele.removeAttr(config.name));
+                                        } else {
+                                            ele.attr(config.name, newVal);
+                                        }
                                     }
 
                                 });

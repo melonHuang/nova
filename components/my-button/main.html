@@ -4,8 +4,12 @@
             display: block;
         }
 
-        .hint .text {
+        .hint>.text {
             color: red;
+        }
+
+        .text+.text {
+            color:blue;
         }
 
         @keyframes bounceIn {
@@ -26,6 +30,7 @@
 
     <template>
         <div class="hint">
+            <div class="text">{{name}}</div>
             <div class="text">{{name}}</div>
             <content select=".page"></content>
             <content select="div"></content>
@@ -57,9 +62,6 @@
                  }
             },
             createdHandler: function() {
-                this.on('click', function() {
-                        alert('clicked');
-                });
             },
             attachedHandler: function() {
                 //alert('attached');

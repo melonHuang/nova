@@ -52,6 +52,9 @@
         }
     }
 
+    /*
+    * 通过Attribute，设置property
+    * */
     function setPropFromAttr(attrName) {
         let propName = Nova.CaseMap.dashToCamelCase(attrName);
         let prop = this.props[propName]
@@ -59,6 +62,9 @@
         this[propName] = fromAttrToProp.call(this, attrName, val, prop);
     }
 
+    /*
+    * 将props转换为完整定义
+    * */
     function transferProperty(prop) {
         let value = this.props[prop];
         // 检测是否简单写法，如果是，转换成完整写法
@@ -69,6 +75,9 @@
         }
     }
 
+    /*
+    * 定义单个property
+    * */
     function defineProperty(name, config) {
         var self = this;
         var realPropPrefix = '_prop_';
@@ -98,7 +107,7 @@
 
 
         // init observers
-        if(config.observer) {
+        if(config.observer && this[config.observer]) {
             this.on(getPropChangeEventName(name), this[config.observer]);
         }
 
