@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="description" content="Nova.js单元测试，BBD驱动，覆盖率等"/>
     <title>Nova.js单元测试</title>
     <link rel="stylesheet" href="../bower_components/mocha/mocha.css" />
 
@@ -10,7 +11,23 @@
     <script src="../bower_components/sinon/sinon.js"></script>
 
     <script src="../lib/document-register-element.js"></script>
-    <script src="../build/nova.js"></script>
+    <script src="../src/nova_bootstrap.js"></script>
+    <script src="../src/lib/css_parse.js"></script>
+    <script src="../src/lib/case_map.js"></script>
+    <script src="../src/lib/utils.js" data-cover></script>
+    <script src="../src/style.js" data-cover></script>
+    <script src="../src/event_behavior.js" data-cover></script>
+    <script src="../src/aspect_behavior.js" data-cover></script>
+    <script src="../src/properties_behavior.js" data-cover></script>
+    <script src="../src/template_behavior.js" data-cover></script>
+    <script src="../src/base.js" data-cover></script>
+    <!--
+    <script src="../build/nova.js" data-cover></script>
+    -->
+
+    <script src="../bower_components/blanket/blanket.min.js"></script>
+    <script src="../bower_components/blanket/mocha-blanket.js"></script>
+
 </head>
 <body>
 
@@ -29,6 +46,7 @@
     <script src="style.js"></script>
     <script src="template.js"></script>
 
+    <script src="index.js"></script>
     <script>
         mocha.run();
     </script>

@@ -1,9 +1,10 @@
 (function() {
-    var TestEleAspect = Nova({
-        is: 'test-ele-aspect'
-    });
-
     describe('Aspect', function() {
+        it('init', function() {
+            var TestEleAspect = Nova({
+                is: 'test-ele-aspect'
+            });
+        });
         it('before', function() {
             var ele = document.createElement('test-ele-aspect');
             var callback = sinon.spy();

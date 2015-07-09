@@ -1,40 +1,42 @@
 (function() {
-    var TestEleEvent = Nova({
-        is: 'test-ele-properties',
-        props: {
-            'name': {
-                type: String,
-                observer: '_nameChangedHandler'
-            },
-            'age': {
-                type: Number,
-                value: 3
-            },
-            'birthday': {
-                type: Date
-            },
-            'families': {
-                type: Object
-            },
-            'hobbies': {
-                type: Array
-            },
-            'isGay': {
-                type: Boolean
-            },
-            'isLace': {
-                type: Boolean
-            }
-        },
-        _nameChangedHandler: function() {
-            if(!this._count) {
-                this._count= 0;
-            }
-            this._count++;
-        }
-    });
 
     describe('Properties', function() {
+        it('init', function() {
+            window.TestEleEvent = Nova({
+                is: 'test-ele-properties',
+                props: {
+                    'name': {
+                        type: String,
+                        observer: '_nameChangedHandler'
+                    },
+                    'age': {
+                        type: Number,
+                        value: 3
+                    },
+                    'birthday': {
+                        type: Date
+                    },
+                    'families': {
+                        type: Object
+                    },
+                    'hobbies': {
+                        type: Array
+                    },
+                    'isGay': {
+                        type: Boolean
+                    },
+                    'isLace': {
+                        type: Boolean
+                    }
+                },
+                _nameChangedHandler: function() {
+                    if(!this._count) {
+                        this._count= 0;
+                    }
+                    this._count++;
+                }
+            });
+        });
         it('attributes transfer', function() {
             var wrap = document.createElement('div');
             wrap.innerHTML = '<test-ele-properties name="gua" age="10" birthday="Tue Jul 07 2015 17:11:55 GMT+0800 (CST)" hobbies=\'["basketball"]\' families=\'{"father":"Mike"}\' is-gay></test-ele-properties>';

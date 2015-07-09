@@ -1,23 +1,26 @@
 (function() {
-    var TestEleTemplate = Nova({
-        is: 'test-ele-template',
-        template: '<span class="name-wrap" data-isgay="{{isGay}}" data-name="{{name}}">{{name}}</span>\
-                <div class="page-wrap">\
-                    <content select=".page"></content>\
-                </div>\
-                <div class="other-wrap">\
-                    <content></content>\
-                </div>\
-            ',
-        props: {
-            name: String,
-            isGay: Boolean
-        }
-    });
 
-    var ins = document.createElement('test-ele-template');
-    ins.name = 'guagua';
+    var ins;
     describe('Template', function() {
+        it('init', function() {
+            window.TestEleTemplate = Nova({
+                is: 'test-ele-template',
+                template: '<span class="name-wrap" data-isgay="{{isGay}}" data-name="{{name}}">{{name}}</span>\
+                        <div class="page-wrap">\
+                            <content select=".page"></content>\
+                        </div>\
+                        <div class="other-wrap">\
+                            <content></content>\
+                        </div>\
+                    ',
+                props: {
+                    name: String,
+                    isGay: Boolean
+                }
+            });
+            ins = document.createElement('test-ele-template');
+            ins.name = 'guagua';
+        });
         it('content insertion', function() {
             var wrap = document.createElement('div');
             wrap.innerHTML = '<test-ele-template><div class="other">other</div><div class="page">page</div></test-ele-template>';

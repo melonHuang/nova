@@ -1,10 +1,10 @@
 (function() {
-    var TestEleEvent = Nova({
-        is: 'test-ele-event'
-    });
-
     describe('Event', function() {
-
+        it('init', function() {
+            window.TestEleEvent = Nova({
+                is: 'test-ele-event'
+            });
+        });
         it('callback should be executed when the custom event is triggered', function() {
             var ele = document.createElement('test-ele-event');
             var callback = sinon.spy();

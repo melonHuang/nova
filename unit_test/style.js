@@ -1,40 +1,43 @@
 (function() {
-    var TestEleEvent = Nova({
-        is: 'test-ele-style',
-        stylesheet: '\
-            :host {background:blue;display:none;}\
-            * {background:black;}\
-            h1 { color: red; }\
-            .text {color:red;}\
-            #text {color:red;}\
-            div[text=red] {color:red;}\
-            div+.follower {color:red;}\
-            :host>.parent {color:red;}\
-            :host .ancestor {color:red;}\
-            :host ::content .page {color:red;}\
-            :host:first-child {color:red;}\
-        ',
-        template: '\
-            <div class="first-child">Test pseudo selector</div>\
-            <h1>Test element selector</h1>\
-            <div class="text">Test Class Selector</div>\
-            <div id="text">Test Id Selector</div>\
-            <div text="red">Test Attribute Selector</div>\
-            <div class="follower">Test sibling selector</div>\
-            <div class="parent">Test parent selector</div>\
-            <div class="ancestor">Test ancestor selector</div>\
-            <content selector=".page"></content>\
-        ',
-        props: {
-        }
-    });
 
-    var wrap = document.createElement('div');
-    wrap.innerHTML = '<test-ele-style><div class="page">Page</div></test-ele-style>';
-    var ins = wrap.querySelector('test-ele-style');
-    document.body.appendChild(wrap);
-
+    var ins;
     describe('Styles', function() {
+        it('init', function() {
+            window.TestEleEvent = Nova({
+                is: 'test-ele-style',
+                stylesheet: '\
+                    :host {background:blue;display:none;}\
+                    * {background:black;}\
+                    h1 { color: red; }\
+                    .text {color:red;}\
+                    #text {color:red;}\
+                    div[text=red] {color:red;}\
+                    div+.follower {color:red;}\
+                    :host>.parent {color:red;}\
+                    :host .ancestor {color:red;}\
+                    :host ::content .page {color:red;}\
+                    :host:first-child {color:red;}\
+                ',
+                template: '\
+                    <div class="first-child">Test pseudo selector</div>\
+                    <h1>Test element selector</h1>\
+                    <div class="text">Test Class Selector</div>\
+                    <div id="text">Test Id Selector</div>\
+                    <div text="red">Test Attribute Selector</div>\
+                    <div class="follower">Test sibling selector</div>\
+                    <div class="parent">Test parent selector</div>\
+                    <div class="ancestor">Test ancestor selector</div>\
+                    <content selector=".page"></content>\
+                ',
+                props: {
+                }
+            });
+
+            var wrap = document.createElement('div');
+            wrap.innerHTML = '<test-ele-style><div class="page">Page</div></test-ele-style>';
+            ins = wrap.querySelector('test-ele-style');
+            document.body.appendChild(wrap);
+        });
         it(':host selector', function() {
             expect(window.getComputedStyle(ins).backgroundColor).to.equal('rgb(0, 0, 255)');;
         });
