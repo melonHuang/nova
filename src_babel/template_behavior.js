@@ -41,7 +41,9 @@
 
             replacement = Array.prototype.slice.call((select ? self.querySelectorAll(select) : self.childNodes) || []);
             replacement.forEach(function(selectedEle) {
-                content.parentElement.insertBefore(selectedEle, content);
+                if(Array.prototype.slice.call(self.children).indexOf(selectedEle) >= 0) {
+                    content.parentElement.insertBefore(selectedEle, content);
+                }
             });
             content.remove();
         });

@@ -10,6 +10,8 @@
     hehe
     </my-button>
 
+    <plugin-share title="share title" desc="xxx" info='{"father":"Mike"}'></plugin-share>
+
 
     <div class="log"></div>
 
@@ -39,6 +41,32 @@
     <script src="src/template_behavior.js"></script>
     <script src="src/base.js"></script>
     -->
+
+<dom-module>
+    <style type="text/css">
+        .hint .text {
+            color: red;
+        }
+    </style>
+    <template>
+        <div class="hint">
+            <div class="text" data-title="{{title}}">{{title}}</div>
+        </div>
+    </template>
+    <script type="text/nova-javascript">
+        var PluginShare = Nova({
+            is: 'plugin-share',
+            props: {
+                title: String,
+                desc: String,
+                info: Object
+            },
+            createdHandler: function() {
+            }
+        });
+    </script>
+</dom-module>
+
 
     <link rel="import" href="components/my-button/main.html" />
     <script src="build/nova_dev.js"></script>

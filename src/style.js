@@ -7,7 +7,7 @@
     * */
     var Style = {
         init: function init(prototype) {
-            if (!prototype.stylesheet) {
+            if (!prototype.stylesheet || !prototype.stylesheet.trim()) {
                 return;
             }
 
