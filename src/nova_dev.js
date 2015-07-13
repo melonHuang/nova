@@ -20,13 +20,13 @@
             var style = ele.querySelector('style');
             var template = ele.querySelector('template');
             var exports = {
-                stylesheet: style.innerHTML,
-                template: template.innerHTML
+                stylesheet: style ? style.innerHTML : '',
+                template: template ? template.innerHTML : ''
             };
             var script = ele.querySelector('script');
 
             // 时机问题，有时候createdHandler执行的时候，可能dom不完整，缺少以下任意元素
-            if (!script || script.innerHTML.indexOf('Nova') < 0 || !style || !template) {
+            if (!script || script.innerHTML.indexOf('Nova') < 0) {
                 console.log('resource not completedly loaded, try again in 100ms');
                 setTimeout(compileAndRun, 100);
                 return;
