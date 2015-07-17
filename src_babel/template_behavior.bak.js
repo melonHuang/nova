@@ -6,6 +6,9 @@
     * 2. 为template中，除content insertion的dom节点，添加tagName class
     * 3. 解析模板中的annotaion，进行单向数据绑定
     * */
+    let BIND_ATTR_NAME = '_nova-bind';
+    let bindingData = [];
+
     let TemplateBehavior = {
         BIND_TYPES: {
             INNERHTML: 1,
@@ -17,8 +20,13 @@
 
             let self = this;
 
+            // 编译template
             let wrap = document.createElement('div');
-            wrap.innerHTML = this.template;
+            wrap.innerHTML = compileTemplate.call(this, this.template);
+
+            console.log(this.tagName, wrap.innerHTML);
+
+
 
             // 初始化每一个节点
             initNode.call(this, wrap);
@@ -30,6 +38,77 @@
             attach.call(this, wrap);
         },
     };
+
+    function compileTemplate(template) {
+
+        let wrap = document.createElement('div');
+        wrap.innerHTML = template;
+
+        compileNode.call(this, wrap);
+
+        return wrap.innerHTML;
+    }
+
+    function compileNode(node) {
+        let self = this;
+        let binds = [];
+
+        // 解析annotation
+        // 替换属性注解<div attr="{{annotation}}">
+        Array.prototype.slice.call(node.attributes || []).forEach(function(attr) {
+            if(attr.constructor == Attr) {
+                let match = attr.value.match(/^{{(.+)}}$/);
+                if(match) {
+                    let type = attr.name[attr.name.length - 1] == '$' ? self.BIND_TYPES.ATTRIBUTE : self.BIND_TYPES.PROPERTY;
+                    let config = {};
+                    // 绑定attribute
+                    if(type == self.BIND_TYPES.ATTRIBUTE) {
+                        config.attrName = attr.name.slice(0, attr.name.length - 1);
+                        config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
+                        node.removeAttribute(attr.name);
+                        node.setAttribute(config.attrName, self.get(match[1]));
+                    }
+                    // 绑定property
+                    else {
+                        config.attrName = attr.name;
+                        config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
+                        node.removeAttribute(attr.name);
+                        node.setAttribute(config.attrName, self.get(match[1]));
+                        // TODO: set init prop
+                    }
+                    binds.push({
+                        propName: match[1],
+                        type: type,
+                        config: config
+                    });
+                }
+            }
+        });
+
+        // 替换标签注解，<tagName>{{annotaion}}</tagName>
+        let html = node.innerHTML.trim();
+        let match = html.match(/^{{(.+)}}$/);
+        if(match) {
+            node.innerHTML = self.get(match[1]);
+            binds.push({
+                propName: match[1],
+                type: this.BIND_TYPES.INNERHTML
+            });
+        }
+
+        if(binds.length > 0) {
+            let bindArr = [];
+            for(let i = 0, len = binds.length; i < len; i++) {
+                bindArr.push(bindingData.length + i);
+            }
+            node.setAttribute(BIND_ATTR_NAME, bindArr.join(','));
+            bindingData = bindingData.concat(binds);
+        }
+
+        Array.prototype.slice.call(node.children).forEach(function(child) {
+            compileNode.call(self, child);
+        });
+    }
 
     /*
     * content insertion
@@ -55,7 +134,8 @@
                     content.parentElement.insertBefore(selectedEle, content);
                 }
             });
-            content.remove();
+            //content.remove();
+            content.parentElement.removeChild(content);
         });
     }
 
@@ -81,38 +161,14 @@
         let className = this.is;
         node.className += ' ' + className;
 
-        // 解析annotation
-        // 替换属性注解<div attr="{{annotation}}">
-        Array.prototype.slice.call(node.attributes || []).forEach(function(attr) {
-        //for(let i in node.attributes) {
-            if(attr.constructor == Attr) {
-                let match = attr.value.match(/^{{(.+)}}$/);
-                if(match) {
-                    let type = attr.name[attr.name.length - 1] == '$' ? self.BIND_TYPES.ATTRIBUTE : self.BIND_TYPES.PROPERTY;
-                    let config = {};
-                    // 绑定attribute
-                    if(type == self.BIND_TYPES.ATTRIBUTE) {
-                        config.attrName = attr.name.slice(0, attr.name.length - 1);
-                        config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
-                        node.removeAttribute(attr.name);
-                    }
-                    // 绑定property
-                    else {
-                        config.attrName = attr.name;
-                        config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
-                        node.removeAttribute(attr.name);
-                    }
-                    bind.call(self, node, match[1], type, config);
-                }
+        let binds = node.getAttribute(BIND_ATTR_NAME);
+        if(binds) {
+            binds = binds.split(',');
+            for(let i = 0, len = binds.length; i < len; i++) {
+                let bindInfo = bindingData[binds[i]];
+                bind.call(this, node, bindInfo.propName, bindInfo.type, bindInfo.config);
             }
-        //}
-        });
-
-        // 替换标签注解，<tagName>{{annotaion}}</tagName>
-        let html = node.innerHTML.trim();
-        let match = html.match(/^{{(.+)}}$/);
-        if(match) {
-            bind.call(this, node, match[1], this.BIND_TYPES.INNERHTML);
+            node.removeAttribute(BIND_ATTR_NAME);
         }
 
         Array.prototype.slice.call(node.children).forEach(function(child) {

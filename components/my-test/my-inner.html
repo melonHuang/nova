@@ -1,0 +1,22 @@
+<dom-module>
+    <style type="text/css">
+    </style>
+    <template>
+        <span>{{value}}</span>
+    </template>
+    <script type="text/nova-javascript">
+        var MyWrap = Nova({
+            is: 'my-inner',
+            props: {
+                value: {
+                    type: String,
+                    value: 'sdfsd'
+                }
+            },
+            createdHandler: function() {
+            },
+            attributeChangedHandler: function() {
+            }
+        });
+    </script>
+</dom-module>

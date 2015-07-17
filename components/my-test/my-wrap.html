@@ -1,0 +1,25 @@
+<dom-module>
+    <style type="text/css">
+    </style>
+    <template>
+        <my-inner value="{{value}}" title="{{title}}"></my-inner>
+        <content></content>
+    </template>
+    <script type="text/nova-javascript">
+        var MyWrap = Nova({
+            is: 'my-wrap',
+            props: {
+                value: {
+                    type: String,
+                    value: 'wrap value'
+                },
+                title: {
+                    type: String,
+                    value: 'title here'
+                }
+            },
+            createdHandler: function() {
+            }
+        });
+    </script>
+</dom-module>

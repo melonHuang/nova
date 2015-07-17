@@ -5,10 +5,11 @@
     * */
     var Utils = Nova.Utils;
     var enable = true;
+    var eleStack = [];
 
     var Base = {
 
-        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.PropBehavior, Nova.TemplateBehavior],
+        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.TemplateBehavior, Nova.PropBehavior],
 
         behaviors: [],
 
@@ -16,58 +17,64 @@
 
         /***************************** 生命周期 ******************************/
         createdCallback: function createdCallback() {
-            if (!this._canInit()) {
-                return;
-            }
-
             //alert(this.tagName + 'created');
             var self = this;
-            this._nova = {};
-            this._initBehaviors();
+            self._nova = {}; // 内部变量命名空间
+            self._initBehaviors();
 
-            this.trigger('created');
-            self.createdHandler && self.createdHandler();
+            // 当parent完成created初始化后，才能开始create
+            this._waitForInit(create);
+
+            function create() {
+                eleStack.push(self);
+                self.trigger('created');
+                self.trigger('finishCreated');
+                self._nova.isCreated = true;
+                eleStack.pop();
+
+                ready();
+            }
+
+            function ready() {
+                self.createdHandler && self.createdHandler();
+                self._nova.ready = true;
+            }
         },
 
         attachedCallback: function attachedCallback() {
-            if (!this._canInit()) {
-                return;
-            }
-            this.trigger('attached');
-            this.attachedHandler && this.attachedHandler();
+            var self = this;
+            this._waitForInit(function () {
+                self.trigger('attached');
+                self.attachedHandler && self.attachedHandler();
+            });
         },
 
         detachedCallback: function detachedCallback() {
-            if (!this._canInit()) {
-                return;
-            }
-            this.trigger('detached');
-            this.detachedHandler && this.detachedHandler();
+            var self = this;
+            this._waitForInit(function () {
+                self.trigger('detached');
+                self.detachedHandler && self.detachedHandler();
+            });
         },
 
         attributeChangedCallback: function attributeChangedCallback(attrName, oldVal, newVal) {
-            if (!this._canInit()) {
-                return;
+            var self = this;
+            if (this._nova.isCreated) {
+                self.trigger('attributeChanged', [attrName, oldVal, newVal]);
+                self.attributeChangedHandler && self.attributeChangedHandler(attrName, oldVal, newVal);
             }
-            this.trigger('attributeChanged', [attrName, oldVal, newVal]);
-            this.attributeChangedHandler && this.attributeChangedHandler(attrName, oldVal, newVal);
         },
 
-        /***************************** 控制是否初始化 ******************************/
-        /*
-         * 存在一些场景，不希望调用createdCallback
-         * 例如：在templateBehaviors中，通过div.innerHTML = template模拟一个template元素的功能时，只是希望使用dom的接口，方便进行数据绑定。而不希望真正的去初始化内部元素。
-         * */
-        _enableInit: function _enableInit() {
-            enable = true;
-        },
-
-        _disableInit: function _disableInit() {
-            enable = false;
-        },
-
-        _canInit: function _canInit() {
-            return enable;
+        _waitForInit: function _waitForInit(callback) {
+            // 当parent完成created初始化后，才能开始create
+            var parent = eleStack[eleStack.length - 1];
+            if (!parent || parent._nova.isCreated) {
+                callback();
+            } else {
+                parent.on('finishCreated', function () {
+                    callback();
+                });
+            }
         },
 
         /***************************** 初始化behaviors ******************************/

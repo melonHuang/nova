@@ -634,7 +634,6 @@ Nova.CssParse = (function () {
         var self = this;
         var realPropPrefix = '_prop_';
 
-        delete this[name];
         Object.defineProperty(this.__proto__, name, {
 
             get: function get() {
@@ -677,7 +676,12 @@ Nova.CssParse = (function () {
             if (typeof config.value == 'function') {
                 this[name] = config.value.apply(this);
             } else {
-                this[name] = config.value;
+                var val = config.value;
+                if (this[name]) {
+                    val = this[name];
+                    delete this[name];
+                }
+                this[name] = val;
             }
         }
     }
@@ -731,9 +735,6 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
     * 2. 为template中，除content insertion的dom节点，添加tagName class
     * 3. 解析模板中的annotaion，进行单向数据绑定
     * */
-    var BIND_ATTR_NAME = '_nova-bind';
-    var bindingData = [];
-
     var TemplateBehavior = {
         BIND_TYPES: {
             INNERHTML: 1,
@@ -747,11 +748,8 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
 
             var self = this;
 
-            // 编译template
             var wrap = document.createElement('div');
-            wrap.innerHTML = compileTemplate.call(this, this.template);
-
-            console.log(this.tagName, wrap.innerHTML);
+            wrap.innerHTML = this.template;
 
             // 初始化每一个节点
             initNode.call(this, wrap);
@@ -763,80 +761,6 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             attach.call(this, wrap);
         }
     };
-
-    function compileTemplate(template) {
-        this._disableInit();
-
-        var wrap = document.createElement('div');
-        wrap.innerHTML = template;
-
-        compileNode.call(this, wrap);
-
-        this._enableInit();
-
-        return wrap.innerHTML;
-    }
-
-    function compileNode(node) {
-        var self = this;
-        var binds = [];
-
-        // 解析annotation
-        // 替换属性注解<div attr="{{annotation}}">
-        Array.prototype.slice.call(node.attributes || []).forEach(function (attr) {
-            if (attr.constructor == Attr) {
-                var _match = attr.value.match(/^{{(.+)}}$/);
-                if (_match) {
-                    var type = attr.name[attr.name.length - 1] == '$' ? self.BIND_TYPES.ATTRIBUTE : self.BIND_TYPES.PROPERTY;
-                    var config = {};
-                    // 绑定attribute
-                    if (type == self.BIND_TYPES.ATTRIBUTE) {
-                        config.attrName = attr.name.slice(0, attr.name.length - 1);
-                        config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
-                        node.removeAttribute(attr.name);
-                        node.setAttribute(config.attrName, self.get(_match[1]));
-                    }
-                    // 绑定property
-                    else {
-                        config.attrName = attr.name;
-                        config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
-                        node.removeAttribute(attr.name);
-                        node.setAttribute(config.attrName, self.get(_match[1]));
-                        // TODO: set init prop
-                    }
-                    binds.push({
-                        propName: _match[1],
-                        type: type,
-                        config: config
-                    });
-                }
-            }
-        });
-
-        // 替换标签注解，<tagName>{{annotaion}}</tagName>
-        var html = node.innerHTML.trim();
-        var match = html.match(/^{{(.+)}}$/);
-        if (match) {
-            node.innerHTML = self.get(match[1]);
-            binds.push({
-                propName: match[1],
-                type: this.BIND_TYPES.INNERHTML
-            });
-        }
-
-        if (binds.length > 0) {
-            var bindArr = [];
-            for (var i = 0, len = binds.length; i < len; i++) {
-                bindArr.push(bindingData.length + i);
-            }
-            node.setAttribute(BIND_ATTR_NAME, bindArr.join(','));
-            bindingData = bindingData.concat(binds);
-        }
-
-        Array.prototype.slice.call(node.children).forEach(function (child) {
-            compileNode.call(self, child);
-        });
-    }
 
     /*
     * content insertion
@@ -862,7 +786,6 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
                     content.parentElement.insertBefore(selectedEle, content);
                 }
             });
-            //content.remove();
             content.parentElement.removeChild(content);
         });
     }
@@ -889,14 +812,38 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
         var className = this.is;
         node.className += ' ' + className;
 
-        var binds = node.getAttribute(BIND_ATTR_NAME);
-        if (binds) {
-            binds = binds.split(',');
-            for (var i = 0, len = binds.length; i < len; i++) {
-                var bindInfo = bindingData[binds[i]];
-                bind.call(this, node, bindInfo.propName, bindInfo.type, bindInfo.config);
+        // 解析annotation
+        // 替换属性注解<div attr="{{annotation}}">
+        Array.prototype.slice.call(node.attributes || []).forEach(function (attr) {
+            //for(let i in node.attributes) {
+            if (attr.constructor == Attr) {
+                var _match = attr.value.match(/^{{(.+)}}$/);
+                if (_match) {
+                    var type = attr.name[attr.name.length - 1] == '$' ? self.BIND_TYPES.ATTRIBUTE : self.BIND_TYPES.PROPERTY;
+                    var config = {};
+                    // 绑定attribute
+                    if (type == self.BIND_TYPES.ATTRIBUTE) {
+                        config.attrName = attr.name.slice(0, attr.name.length - 1);
+                        config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
+                        node.removeAttribute(attr.name);
+                    }
+                    // 绑定property
+                    else {
+                        config.attrName = attr.name;
+                        config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
+                        node.removeAttribute(attr.name);
+                    }
+                    bind.call(self, node, _match[1], type, config);
+                }
             }
-            node.removeAttribute(BIND_ATTR_NAME);
+            //}
+        });
+
+        // 替换标签注解，<tagName>{{annotaion}}</tagName>
+        var html = node.innerHTML.trim();
+        var match = html.match(/^{{(.+)}}$/);
+        if (match) {
+            bind.call(this, node, match[1], this.BIND_TYPES.INNERHTML);
         }
 
         Array.prototype.slice.call(node.children).forEach(function (child) {
@@ -917,7 +864,7 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
         if (self.props.hasOwnProperty(propPath[0])) {
             // 绑定：从prop到node
             self.on('_' + propPath[0] + 'Changed', function (ev, oldVal, newVal) {
-                //console.log(propPath[0], 'change from', oldVal, 'to', newVal);
+                //console.log(this.tagName, propPath[0], 'change from', oldVal, 'to', newVal);
                 for (var i = 1; i < propPath.length; i++) {
                     newVal = newVal[propPath[i]];
                 }
@@ -964,10 +911,11 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
     * */
     var Utils = Nova.Utils;
     var enable = true;
+    var eleStack = [];
 
     var Base = {
 
-        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.PropBehavior, Nova.TemplateBehavior],
+        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.TemplateBehavior, Nova.PropBehavior],
 
         behaviors: [],
 
@@ -975,58 +923,64 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
 
         /***************************** 生命周期 ******************************/
         createdCallback: function createdCallback() {
-            if (!this._canInit()) {
-                return;
-            }
-
             //alert(this.tagName + 'created');
             var self = this;
-            this._nova = {};
-            this._initBehaviors();
+            self._nova = {}; // 内部变量命名空间
+            self._initBehaviors();
 
-            this.trigger('created');
-            self.createdHandler && self.createdHandler();
+            // 当parent完成created初始化后，才能开始create
+            this._waitForInit(create);
+
+            function create() {
+                eleStack.push(self);
+                self.trigger('created');
+                self.trigger('finishCreated');
+                self._nova.isCreated = true;
+                eleStack.pop();
+
+                ready();
+            }
+
+            function ready() {
+                self.createdHandler && self.createdHandler();
+                self._nova.ready = true;
+            }
         },
 
         attachedCallback: function attachedCallback() {
-            if (!this._canInit()) {
-                return;
-            }
-            this.trigger('attached');
-            this.attachedHandler && this.attachedHandler();
+            var self = this;
+            this._waitForInit(function () {
+                self.trigger('attached');
+                self.attachedHandler && self.attachedHandler();
+            });
         },
 
         detachedCallback: function detachedCallback() {
-            if (!this._canInit()) {
-                return;
-            }
-            this.trigger('detached');
-            this.detachedHandler && this.detachedHandler();
+            var self = this;
+            this._waitForInit(function () {
+                self.trigger('detached');
+                self.detachedHandler && self.detachedHandler();
+            });
         },
 
         attributeChangedCallback: function attributeChangedCallback(attrName, oldVal, newVal) {
-            if (!this._canInit()) {
-                return;
+            var self = this;
+            if (this._nova.isCreated) {
+                self.trigger('attributeChanged', [attrName, oldVal, newVal]);
+                self.attributeChangedHandler && self.attributeChangedHandler(attrName, oldVal, newVal);
             }
-            this.trigger('attributeChanged', [attrName, oldVal, newVal]);
-            this.attributeChangedHandler && this.attributeChangedHandler(attrName, oldVal, newVal);
         },
 
-        /***************************** 控制是否初始化 ******************************/
-        /*
-         * 存在一些场景，不希望调用createdCallback
-         * 例如：在templateBehaviors中，通过div.innerHTML = template模拟一个template元素的功能时，只是希望使用dom的接口，方便进行数据绑定。而不希望真正的去初始化内部元素。
-         * */
-        _enableInit: function _enableInit() {
-            enable = true;
-        },
-
-        _disableInit: function _disableInit() {
-            enable = false;
-        },
-
-        _canInit: function _canInit() {
-            return enable;
+        _waitForInit: function _waitForInit(callback) {
+            // 当parent完成created初始化后，才能开始create
+            var parent = eleStack[eleStack.length - 1];
+            if (!parent || parent._nova.isCreated) {
+                callback();
+            } else {
+                parent.on('finishCreated', function () {
+                    callback();
+                });
+            }
         },
 
         /***************************** 初始化behaviors ******************************/

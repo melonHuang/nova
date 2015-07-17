@@ -114,7 +114,6 @@
         var self = this;
         var realPropPrefix = '_prop_';
 
-        delete this[name];
         Object.defineProperty(this.__proto__, name, {
 
             get: function get() {
@@ -157,7 +156,12 @@
             if (typeof config.value == 'function') {
                 this[name] = config.value.apply(this);
             } else {
-                this[name] = config.value;
+                var val = config.value;
+                if (this[name]) {
+                    val = this[name];
+                    delete this[name];
+                }
+                this[name] = val;
             }
         }
     }
