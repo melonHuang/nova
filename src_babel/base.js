@@ -4,13 +4,15 @@
     * Nova Custom Element的基础原型链
     * */
     let Utils = Nova.Utils;
+    let enable = true;
+
     let Base = {
 
         _behaviors: [
             Nova.EventBehavior,
             Nova.AspectBehavior,
-            Nova.TemplateBehavior,
-            Nova.PropBehavior
+            Nova.PropBehavior,
+            Nova.TemplateBehavior
         ],
 
         behaviors: [],
@@ -20,10 +22,14 @@
 
         /***************************** 生命周期 ******************************/
         createdCallback: function() {
+
+            //alert(this.tagName + 'created');
+            let self = this;
+            this._nova = {};
             this._initBehaviors();
 
             this.trigger('created');
-            this.createdHandler && this.createdHandler();
+            self.createdHandler && self.createdHandler();
         },
 
         attachedCallback: function() {
@@ -39,6 +45,23 @@
         attributeChangedCallback: function(attrName, oldVal, newVal) {
             this.trigger('attributeChanged', [attrName, oldVal, newVal]);
             this.attributeChangedHandler && this.attributeChangedHandler(attrName, oldVal, newVal);
+        },
+
+        /***************************** 控制是否初始化 ******************************/
+        /*
+         * 存在一些场景，不希望调用createdCallback
+         * 例如：在templateBehaviors中，通过div.innerHTML = template模拟一个template元素的功能时，只是希望使用dom的接口，方便进行数据绑定。而不希望真正的去初始化内部元素。
+         * */
+        _enableInit: function() {
+            enable = true;
+        },
+
+        _disableInit: function() {
+            enable = false;
+        },
+
+        _canInit: function() {
+            return enable;
         },
 
         /***************************** 初始化behaviors ******************************/

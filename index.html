@@ -6,82 +6,84 @@
     <title></title>
 </head>
 <body>
-    <my-button name="guaguaguagau" info='{"b":1}' date="Sat Jun 20 2015 21:15:57 GMT+0800 (CST)" >
-    hehe
-    </my-button>
-
-    <plugin-share title="share title" desc="xxx" info='{"father":"Mike"}'></plugin-share>
-
-
     <div class="log"></div>
 
     <script>
         var html = '';
         var logDiv = document.querySelector('.log');
-        window.log = function(msg) {
+        window.onerror = function(msg) {
             html += msg + '\n'
             logDiv.innerHTML = (html);
         }
 
     </script>
+    <script src="http://hw.weinre.com/target/target-script-min.js#anonymous"></script>
     <script src="http://s2.qhimg.com/static/a9e451ace7e1fd1d/zepto.114.js"></script>
     <script src="build/nova.js"></script>
     <script src="http://s0.qhimg.com/static/8b15829770ad1a0f/jquery,require.js"></script>
+    <script src="lib/es6-map-shim.js"></script>
     <script src="lib/document-register-element.js"></script>
 
+
+    <dom-module>
+        <style type="text/css">
+        </style>
+        <template>
+            <span>{{value}}</span>
+        </template>
+        <script type="text/nova-javascript">
+            var MyWrap = Nova({
+                is: 'my-inner',
+                props: {
+                    value: String
+                },
+                createdHandler: function() {
+                }
+            });
+        </script>
+    </dom-module>
+
+    <dom-module>
+        <style type="text/css">
+        </style>
+        <template>
+            <my-inner value="{{value}}" title="{{title}}"></my-inner>
+        </template>
+        <script type="text/nova-javascript">
+            var MyWrap = Nova({
+                is: 'my-wrap',
+                props: {
+                    value: {
+                        type: String,
+                        value: 'wrap value'
+                    },
+                    title: {
+                        type: String,
+                        value: 'title here'
+                    }
+                },
+                createdHandler: function() {
+                    alert('created');
+                }
+            });
+        </script>
+    </dom-module>
+
+
+
 <!--
-    <script src="lib/webcomponentsjs/webcomponents-lite.js?"></script>
-
-    <script src="src/nova_bootstrap.js"></script>
-    <script src="src/lib/css_parse.js"></script>
-    <script src="src/lib/case_map.js"></script>
-    <script src="src/style.js"></script>
-    <script src="src/event_behavior.js"></script>
-    <script src="src/properties_behavior.js"></script>
-    <script src="src/template_behavior.js"></script>
-    <script src="src/base.js"></script>
-    -->
-
-<dom-module>
-    <style type="text/css">
-        .hint .text {
-            color: red;
-        }
-    </style>
-    <template>
-        <div class="hint">
-            <div class="text" data-title="{{title}}">{{title}}</div>
-        </div>
-    </template>
-    <script type="text/nova-javascript">
-        var PluginShare = Nova({
-            is: 'plugin-share',
-            props: {
-                title: String,
-                desc: String,
-                info: Object
-            },
-            createdHandler: function() {
-            }
-        });
-    </script>
-</dom-module>
-
-
+    <my-wrap></my-wrap>
     <script src="components/my-button/main.js"></script>
-<!--
     <link rel="import" href="components/my-button/main.html" />
-    <script src="build/nova_dev.js"></script>
     -->
-
-
+    <script src="build/nova_dev.js"> </script>
     <script>
-        btn = document.querySelector('my-button');
-        btn.on('click', clickedHandler);
-        function clickedHandler() {
-            alert('clicked');
-        }
+        var ele = document.createElement('my-wrap');
+        alert('after creation');
     </script>
+
+
+
 
 </body>
 </html>

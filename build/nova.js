@@ -544,9 +544,39 @@ Nova.CssParse = (function () {
             if (prop) {
                 setPropFromAttr.call(this, attrName, newVal);
             }
-        }
+        },
 
+        set: function set(path, value) {
+            var paths = path.split('.');
+            var curObj = this;
+            var oldVal = curObj[paths[0]];
+            for (var i = 0, len = paths.length; i < len - 1; i++) {
+                if (!curObj[paths[i]]) {
+                    return;
+                }
+                curObj = curObj[paths[i]];
+            }
+            var oldSubVal = curObj[paths[paths.length - 1]];
+            if (oldSubVal != value) {
+                curObj[paths[paths.length - 1]] = value;
+                triggerPropChange.call(this, getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
+            }
+        },
+
+        get: function get(path) {
+            var paths = path.split('.');
+            var curObj = this;
+            for (var i = 0, len = paths.length; i < len; i++) {
+                curObj = curObj[paths[i]];
+            }
+            return curObj;
+        }
     };
+
+    function triggerPropChange(event, args) {
+        this.trigger.apply(this, arguments);
+        this.trigger('_propsChanged', args);
+    }
 
     /*
      * 初始化props
@@ -559,10 +589,17 @@ Nova.CssParse = (function () {
         var oldProto = this.__proto__;
         this.__proto__ = proto;
         proto.__proto__ = oldProto;
+        // 定义properties
         for (var prop in this.props) {
             if (this.props.hasOwnProperty(prop)) {
                 transferProperty.call(this, prop);
                 defineProperty.call(this, prop, this.props[prop]);
+            }
+        }
+        // 设置properties初始值
+        for (var prop in this.props) {
+            if (this.props.hasOwnProperty(prop)) {
+                setPropInitVal.call(this, prop, this.props[prop]);
             }
         }
     }
@@ -597,13 +634,13 @@ Nova.CssParse = (function () {
         var self = this;
         var realPropPrefix = '_prop_';
 
+        delete this[name];
         Object.defineProperty(this.__proto__, name, {
 
             get: function get() {
                 return self[realPropPrefix + name];
             },
             set: function set(val) {
-                //alert('set:' + name + ' to ' + val);
                 var oldVal = self[realPropPrefix + name];
 
                 if (val == oldVal) {
@@ -617,7 +654,7 @@ Nova.CssParse = (function () {
                     self.setAttribute(name, fromPropToAttr.call(this, config));
                 }
                 */
-                self.trigger(getPropChangeEventName(name), [oldVal, val]);
+                triggerPropChange.call(self, getPropChangeEventName(name), [oldVal, val, name]);
             }
         });
 
@@ -629,7 +666,9 @@ Nova.CssParse = (function () {
                 }
             });
         }
+    }
 
+    function setPropInitVal(name, config) {
         // set value
         var attrName = Nova.CaseMap.camelToDashCase(name);
         if (this.hasAttribute(attrName)) {
@@ -692,10 +731,14 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
     * 2. 为template中，除content insertion的dom节点，添加tagName class
     * 3. 解析模板中的annotaion，进行单向数据绑定
     * */
+    var BIND_ATTR_NAME = '_nova-bind';
+    var bindingData = [];
+
     var TemplateBehavior = {
         BIND_TYPES: {
             INNERHTML: 1,
-            ATTRIBUTE: 2
+            PROPERTY: 2,
+            ATTRIBUTE: 3
         },
         createdHandler: function createdHandler() {
             if (!this.template) {
@@ -703,8 +746,12 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             }
 
             var self = this;
+
+            // 编译template
             var wrap = document.createElement('div');
-            wrap.innerHTML = this.template;
+            wrap.innerHTML = compileTemplate.call(this, this.template);
+
+            console.log(this.tagName, wrap.innerHTML);
 
             // 初始化每一个节点
             initNode.call(this, wrap);
@@ -716,6 +763,80 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             attach.call(this, wrap);
         }
     };
+
+    function compileTemplate(template) {
+        this._disableInit();
+
+        var wrap = document.createElement('div');
+        wrap.innerHTML = template;
+
+        compileNode.call(this, wrap);
+
+        this._enableInit();
+
+        return wrap.innerHTML;
+    }
+
+    function compileNode(node) {
+        var self = this;
+        var binds = [];
+
+        // 解析annotation
+        // 替换属性注解<div attr="{{annotation}}">
+        Array.prototype.slice.call(node.attributes || []).forEach(function (attr) {
+            if (attr.constructor == Attr) {
+                var _match = attr.value.match(/^{{(.+)}}$/);
+                if (_match) {
+                    var type = attr.name[attr.name.length - 1] == '$' ? self.BIND_TYPES.ATTRIBUTE : self.BIND_TYPES.PROPERTY;
+                    var config = {};
+                    // 绑定attribute
+                    if (type == self.BIND_TYPES.ATTRIBUTE) {
+                        config.attrName = attr.name.slice(0, attr.name.length - 1);
+                        config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
+                        node.removeAttribute(attr.name);
+                        node.setAttribute(config.attrName, self.get(_match[1]));
+                    }
+                    // 绑定property
+                    else {
+                        config.attrName = attr.name;
+                        config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
+                        node.removeAttribute(attr.name);
+                        node.setAttribute(config.attrName, self.get(_match[1]));
+                        // TODO: set init prop
+                    }
+                    binds.push({
+                        propName: _match[1],
+                        type: type,
+                        config: config
+                    });
+                }
+            }
+        });
+
+        // 替换标签注解，<tagName>{{annotaion}}</tagName>
+        var html = node.innerHTML.trim();
+        var match = html.match(/^{{(.+)}}$/);
+        if (match) {
+            node.innerHTML = self.get(match[1]);
+            binds.push({
+                propName: match[1],
+                type: this.BIND_TYPES.INNERHTML
+            });
+        }
+
+        if (binds.length > 0) {
+            var bindArr = [];
+            for (var i = 0, len = binds.length; i < len; i++) {
+                bindArr.push(bindingData.length + i);
+            }
+            node.setAttribute(BIND_ATTR_NAME, bindArr.join(','));
+            bindingData = bindingData.concat(binds);
+        }
+
+        Array.prototype.slice.call(node.children).forEach(function (child) {
+            compileNode.call(self, child);
+        });
+    }
 
     /*
     * content insertion
@@ -729,11 +850,20 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
 
             replacement = Array.prototype.slice.call((select ? self.querySelectorAll(select) : self.childNodes) || []);
             replacement.forEach(function (selectedEle) {
-                if (Array.prototype.slice.call(self.children).indexOf(selectedEle) >= 0) {
+                if (Array.prototype.slice.call(self.children).indexOf(selectedEle) >= 0 || !select) {
+                    /*
+                    let node = document.createElement('div');
+                    node.appendChild(selectedEle);
+                    let node2 = document.createElement('div');
+                    node2.innerHTML = node.innerHTML;
+                    node.remove();
+                    content.parentElement.insertBefore(node2.childNodes[0], content);
+                    */
                     content.parentElement.insertBefore(selectedEle, content);
                 }
             });
-            content.remove();
+            //content.remove();
+            content.parentElement.removeChild(content);
         });
     }
 
@@ -759,23 +889,14 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
         var className = this.is;
         node.className += ' ' + className;
 
-        // 解析annotation
-        // 替换属性注解<div attr="{{annotation}}">
-        for (var i in node.attributes) {
-            if (node.attributes.hasOwnProperty(i) && node.attributes[i].constructor == Attr) {
-                var attr = node.attributes[i];
-                var _match = attr.value.match(/^{{(.+)}}$/);
-                if (_match) {
-                    bind.call(this, node, _match[1], this.BIND_TYPES.ATTRIBUTE, { name: attr.name });
-                }
+        var binds = node.getAttribute(BIND_ATTR_NAME);
+        if (binds) {
+            binds = binds.split(',');
+            for (var i = 0, len = binds.length; i < len; i++) {
+                var bindInfo = bindingData[binds[i]];
+                bind.call(this, node, bindInfo.propName, bindInfo.type, bindInfo.config);
             }
-        }
-
-        // 替换标签注解，<tagName>{{annotaion}}</tagName>
-        var html = node.innerHTML.trim();
-        var match = html.match(/^{{(.+)}}$/);
-        if (match) {
-            bind.call(this, node, match[1], this.BIND_TYPES.INNERHTML);
+            node.removeAttribute(BIND_ATTR_NAME);
         }
 
         Array.prototype.slice.call(node.children).forEach(function (child) {
@@ -784,30 +905,53 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
     }
 
     /*
-    * 对节点进行单向绑定
+    * 对节点进行双向绑定
     * 1. html绑定
     * 2. attribute绑定
     * */
     function bind(node, prop, type, config) {
         var self = this;
-        var propPath = prop.split('.');
-        if (self.props.hasOwnProperty(prop)) {
+        var propPathString = prop.split('::')[0];
+        var propPath = propPathString.split('.');
+        var event = prop.split('::')[1];
+        if (self.props.hasOwnProperty(propPath[0])) {
+            // 绑定：从prop到node
             self.on('_' + propPath[0] + 'Changed', function (ev, oldVal, newVal) {
+                //console.log(propPath[0], 'change from', oldVal, 'to', newVal);
                 for (var i = 1; i < propPath.length; i++) {
                     newVal = newVal[propPath[i]];
                 }
 
-                if (type == self.BIND_TYPES.INNERHTML) {
-                    node.innerHTML = newVal;
-                } else if (type == self.BIND_TYPES.ATTRIBUTE) {
-                    var _type = self.props[propPath].type;
-                    if (_type == Boolean) {
-                        newVal ? node.setAttribute(config.name, '') : node.removeAttribute(config.name);
-                    } else {
-                        node.setAttribute(config.name, newVal);
-                    }
+                switch (type) {
+                    case self.BIND_TYPES.INNERHTML:
+                        node.innerHTML = newVal;
+                        break;
+                    case self.BIND_TYPES.PROPERTY:
+                        node[config.propName] = newVal;
+                        break;
+                    case self.BIND_TYPES.ATTRIBUTE:
+                        node.setAttribute(config.attrName, newVal);
+                        break;
+
                 }
             });
+
+            // 绑定：从node到prop
+            if (event) {
+                node.addEventListener(event, function () {
+                    var newVal = undefined;
+                    switch (type) {
+                        case self.BIND_TYPES.PROPERTY:
+                            newVal = node[config.propName];
+                            break;
+                        case self.BIND_TYPES.ATTRIBUTE:
+                            newVal = node.getAttribute(config.attrName);
+                            break;
+
+                    }
+                    self.set(propPathString, newVal);
+                });
+            }
         }
     }
 
@@ -819,9 +963,11 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
     * Nova Custom Element的基础原型链
     * */
     var Utils = Nova.Utils;
+    var enable = true;
+
     var Base = {
 
-        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.TemplateBehavior, Nova.PropBehavior],
+        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.PropBehavior, Nova.TemplateBehavior],
 
         behaviors: [],
 
@@ -829,25 +975,58 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
 
         /***************************** 生命周期 ******************************/
         createdCallback: function createdCallback() {
+            if (!this._canInit()) {
+                return;
+            }
+
+            //alert(this.tagName + 'created');
+            var self = this;
+            this._nova = {};
             this._initBehaviors();
 
             this.trigger('created');
-            this.createdHandler && this.createdHandler();
+            self.createdHandler && self.createdHandler();
         },
 
         attachedCallback: function attachedCallback() {
+            if (!this._canInit()) {
+                return;
+            }
             this.trigger('attached');
             this.attachedHandler && this.attachedHandler();
         },
 
         detachedCallback: function detachedCallback() {
+            if (!this._canInit()) {
+                return;
+            }
             this.trigger('detached');
             this.detachedHandler && this.detachedHandler();
         },
 
         attributeChangedCallback: function attributeChangedCallback(attrName, oldVal, newVal) {
+            if (!this._canInit()) {
+                return;
+            }
             this.trigger('attributeChanged', [attrName, oldVal, newVal]);
             this.attributeChangedHandler && this.attributeChangedHandler(attrName, oldVal, newVal);
+        },
+
+        /***************************** 控制是否初始化 ******************************/
+        /*
+         * 存在一些场景，不希望调用createdCallback
+         * 例如：在templateBehaviors中，通过div.innerHTML = template模拟一个template元素的功能时，只是希望使用dom的接口，方便进行数据绑定。而不希望真正的去初始化内部元素。
+         * */
+        _enableInit: function _enableInit() {
+            enable = true;
+        },
+
+        _disableInit: function _disableInit() {
+            enable = false;
+        },
+
+        _canInit: function _canInit() {
+            return enable;
         },
 
         /***************************** 初始化behaviors ******************************/

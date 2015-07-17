@@ -36,6 +36,36 @@
             }
         },
 
+        set: function(path, value) {
+            let paths = path.split('.');
+            let curObj = this;
+            let oldVal = curObj[paths[0]];
+            for(let i = 0, len = paths.length; i < len - 1; i++) {
+                if(!curObj[paths[i]]) {
+                    return;
+                }
+                curObj = curObj[paths[i]];
+            }
+            let oldSubVal = curObj[paths[paths.length - 1]]
+            if(oldSubVal != value) {
+                curObj[paths[paths.length - 1]] = value;
+                triggerPropChange.call(this, getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
+            }
+        },
+
+        get: function(path) {
+            let paths = path.split('.');
+            let curObj = this;
+            for(let i = 0, len = paths.length; i < len; i++) {
+                curObj = curObj[paths[i]];
+            }
+            return curObj;
+        }
+    }
+
+    function triggerPropChange(event, args) {
+        this.trigger.apply(this, arguments);
+        this.trigger('_propsChanged', args);
     }
 
     /*
@@ -49,10 +79,17 @@
         let oldProto = this.__proto__;
         this.__proto__ = proto;
         proto.__proto__ = oldProto;
+        // 定义properties
         for(let prop in this.props) {
             if(this.props.hasOwnProperty(prop)) {
                 transferProperty.call(this, prop);
                 defineProperty.call(this, prop, this.props[prop]);
+            }
+        }
+        // 设置properties初始值
+        for(let prop in this.props) {
+            if(this.props.hasOwnProperty(prop)) {
+                setPropInitVal.call(this, prop, this.props[prop]);
             }
         }
     }
@@ -87,13 +124,13 @@
         var self = this;
         var realPropPrefix = '_prop_';
 
+        delete this[name];
         Object.defineProperty(this.__proto__, name, {
 
             get: function() {
                 return self[realPropPrefix + name];
             },
             set: function(val) {
-                //alert('set:' + name + ' to ' + val);
                 let oldVal = self[realPropPrefix + name];
 
                 if(val == oldVal) {return;}
@@ -105,7 +142,7 @@
                     self.setAttribute(name, fromPropToAttr.call(this, config));
                 }
                 */
-                self.trigger(getPropChangeEventName(name), [oldVal, val]);
+                triggerPropChange.call(self, getPropChangeEventName(name), [oldVal, val, name]);
 
             }
         });
@@ -120,6 +157,9 @@
             });
         }
 
+    }
+
+    function setPropInitVal(name, config) {
         // set value
         let attrName = Nova.CaseMap.camelToDashCase(name);
         if(this.hasAttribute(attrName)) {
