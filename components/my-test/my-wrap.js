@@ -1,16 +1,12 @@
 "use strict";
 
-NovaExports.exports = { "stylesheet": "\n    ", "template": "\n        <my-inner value=\"{{value}}\" title=\"{{title}}\"></my-inner>\n        <content></content>\n    " };
+NovaExports.exports = { "stylesheet": "\n        :host {\n            //display: none;\n        }\n    ", "template": "\n        <ul>\n            <template-repeat items=\"{{data}}\">\n                <li>My name is <span>{{item.name}}</span></li>\n            </template-repeat>\n        </ul>\n    " };
 var MyWrap = NovaExports({
     is: "my-wrap",
     props: {
-        value: {
-            type: String,
-            value: "wrap value"
-        },
-        title: {
-            type: String,
-            value: "title here"
+        data: {
+            type: Array,
+            value: [{ name: "gua" }, { name: "pao" }, { name: "ting" }]
         }
     },
     createdHandler: function createdHandler() {}

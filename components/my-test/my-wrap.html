@@ -1,22 +1,80 @@
 <dom-module>
     <style type="text/css">
+        :host {
+            //display: none;
+        }
+
+        ul,
+        div {
+            display: block;
+        }
     </style>
     <template>
-        <my-inner value="{{value}}" title="{{title}}"></my-inner>
-        <content></content>
+        <ul>
+        <template-repeat items="{{data}}" id="outer">
+            <!--
+            <li>My name is <span>{{item.name}}</span>
+
+                <p>
+                    I Love
+                    <div>
+                        <template-repeat items="{{item.food}}" id="inner">
+                            <span>{{item:index}}</span>
+                            <span>{{item}}</span>
+                        </template-repeat>
+                    </div>
+                </p>
+                <p>
+                    <input type="text" value="{{item.nickName::change}}">
+                </p>
+
+            </li>
+            <select class="select" > </select>
+            <template-repeat parent-selector=".select" items="{{item.options}}">
+                <option value="{{item}}">{{item}}</option>
+            </template-repeat>
+        <div>
+            <template-if if="{{isGirl}}">
+            I am a girl. I am {{age}} years old.
+            </template-if>
+        </div>
+            -->
+                <p>
+                    My nick name is {{item.nickName}}
+                </p>
+
+
+        </template-repeat>
+        </ul>
+
     </template>
     <script type="text/nova-javascript">
         var MyWrap = Nova({
             is: 'my-wrap',
             props: {
-                value: {
-                    type: String,
-                    value: 'wrap value'
+                data: {
+                    type: Array,
+                    value: [
+                    {
+                        name:'gua', 
+                        nickName: 'pig',
+                        food: ['fish', 'pig', 'cow'],
+                        options: [1, 2, 4]
+                    }
+                        /*
+                        {name:'pao'},
+                        {name:'ting'}
+                        */
+                    ]
                 },
-                title: {
-                    type: String,
-                    value: 'title here'
-                }
+isGirl: {
+type: Boolean,
+value: true
+},
+age: {
+         type:Number,
+              value: 10
+     }
             },
             createdHandler: function() {
             }

@@ -1,32 +1,28 @@
 'use strict';
-(function() {
+(function () {
     /*
     * Template功能：
     * 1. content insertion
     * 2. 为template中，除content insertion的dom节点，添加tagName class
     * 3. 解析模板中的annotaion，进行单向数据绑定
     * */
-    let TemplateBehavior = {
-        BIND_TYPES: {
-            INNERHTML: 1,
-            PROPERTY: 2,
-            ATTRIBUTE: 3
-        },
-        createdHandler: function() {
-            if(!this.template) { return; }
+    var TemplateBehavior = {
+        createdHandler: function createdHandler() {
+            if (!this.template) {
+                return;
+            }
 
-            let self = this;
+            var self = this;
 
             self._nova.binds = new Map();
 
-            let wrap = document.createElement('div');
+            var wrap = document.createElement('div');
             wrap.innerHTML = this.template;
 
             //if(this.tagName == 'TEMPLATE-REPEAT') debugger;
 
             // 初始化每一个节点
             this.bindNode(wrap);
-
 
             // 插入content
             insertContent.call(this, wrap);
@@ -40,23 +36,23 @@
         * 1. 添加tagName Class
         * 2. 添加annotation单向数据绑定
         * */
-        bindNode: function(node) {
-            let self = this;
+        bindNode: function bindNode(node) {
+            var self = this;
 
             // 添加tagName class
-            let className = this.is;
+            var className = this.is;
             node.className += ' ' + className;
 
             // 解析annotation
             // 替换属性注解<div attr="{{annotation}}">
-            Array.prototype.slice.call(node.attributes || []).forEach(function(attr) {
-                if(attr.constructor == Attr) {
-                    let match = attr.value.match(/^{{(.+)}}$/);
-                    if(match) {
-                        let type = attr.name[attr.name.length - 1] == '$' ? self.BIND_TYPES.ATTRIBUTE : self.BIND_TYPES.PROPERTY;
-                        let config = {};
+            Array.prototype.slice.call(node.attributes || []).forEach(function (attr) {
+                if (attr.constructor == Attr) {
+                    var _match = attr.value.match(/^{{(.+)}}$/);
+                    if (_match) {
+                        var type = attr.name[attr.name.length - 1] == '$' ? self.BIND_TYPES.ATTRIBUTE : self.BIND_TYPES.PROPERTY;
+                        var config = {};
                         // 绑定attribute
-                        if(type == self.BIND_TYPES.ATTRIBUTE) {
+                        if (type == self.BIND_TYPES.ATTRIBUTE) {
                             config.attrName = attr.name.slice(0, attr.name.length - 1);
                             config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
                             node.removeAttribute(attr.name);
@@ -67,20 +63,20 @@
                             config.propName = Nova.CaseMap.dashToCamelCase(config.attrName);
                             node.removeAttribute(attr.name);
                         }
-                        bind.call(self, node, match[1], type, config);
+                        bind.call(self, node, _match[1], type, config);
                     }
                 }
             });
 
             // 替换标签注解，<tagName>{{annotaion}}</tagName>
-            let html = node.innerHTML.trim();
-            let match = html.match(/^{{(.+)}}$/);
-            if(match) {
+            var html = node.innerHTML.trim();
+            var match = html.match(/^{{(.+)}}$/);
+            if (match) {
                 bind.call(this, node, match[1], this.BIND_TYPES.INNERHTML);
             }
 
-            if(node.tagName.toLowerCase() != 'template-repeat') {
-                node.children && Array.prototype.slice.call(node.children).forEach(function(child) {
+            if (node.tagName.toLowerCase() != 'template-repeat') {
+                node.children && Array.prototype.slice.call(node.children).forEach(function (child) {
                     self.bindNode(child);
                 });
             }
@@ -88,10 +84,10 @@
         /*
         * 遍历节点，取消绑定
         * */
-        unbindNode: function(node) {
-            let self = this;
+        unbindNode: function unbindNode(node) {
+            var self = this;
             unbind.call(this, node);
-            node.children && Array.prototype.slice.call(node.children).forEach(function(child) {
+            node.children && Array.prototype.slice.call(node.children).forEach(function (child) {
                 self.unbindNode(child);
             });
         }
@@ -101,15 +97,15 @@
     * content insertion
     * */
     function insertContent(nodesWrap) {
-        let self = this;
-        let contents = Array.prototype.slice.call(nodesWrap.querySelectorAll('content'));
-        contents.forEach(function(content) {
-            let select = content.getAttribute('select');
-            let replacement;
+        var self = this;
+        var contents = Array.prototype.slice.call(nodesWrap.querySelectorAll('content'));
+        contents.forEach(function (content) {
+            var select = content.getAttribute('select');
+            var replacement = undefined;
 
             replacement = Array.prototype.slice.call((select ? self.querySelectorAll(select) : self.childNodes) || []);
-            replacement.forEach(function(selectedEle) {
-                if(Array.prototype.slice.call(self.children).indexOf(selectedEle) >= 0 || !select) {
+            replacement.forEach(function (selectedEle) {
+                if (Array.prototype.slice.call(self.children).indexOf(selectedEle) >= 0 || !select) {
                     /*
                     let node = document.createElement('div');
                     node.appendChild(selectedEle);
@@ -129,12 +125,11 @@
     * 将解析好的模板插入到DOM中
     * */
     function attach(nodesWrap) {
-        let childNodes = Array.prototype.slice.call(nodesWrap.childNodes);
-        for(let i = 0; i < childNodes.length; i++) {
+        var childNodes = Array.prototype.slice.call(nodesWrap.childNodes);
+        for (var i = 0; i < childNodes.length; i++) {
             this.appendChild(childNodes[i]);
         }
     }
-
 
     /*
     * 对节点进行双向绑定
@@ -142,22 +137,22 @@
     * 2. attribute绑定
     * */
     function bind(node, prop, type, config) {
-        let self = this;
-        let propPathString = prop.split('::')[0];
-        let propPath = propPathString.split('.');
-        let event = prop.split('::')[1];
-        if(self.props.hasOwnProperty(propPath[0])) {
+        var self = this;
+        var propPathString = prop.split('::')[0];
+        var propPath = propPathString.split('.');
+        var event = prop.split('::')[1];
+        if (self.props.hasOwnProperty(propPath[0])) {
 
-            let bind = {};
+            var _bind = {};
 
             // 绑定：从prop到node
-            let propToNodeHandler = function(ev, oldVal, newVal, path) {
+            var propToNodeHandler = function propToNodeHandler(ev, oldVal, newVal, path) {
                 //console.log('template binding', this.tagName, propPath[0], 'change from', oldVal, 'to', newVal, path);
-                for(let i = 1; i < propPath.length; i++) {
+                for (var i = 1; i < propPath.length; i++) {
                     newVal = newVal[propPath[i]];
                 }
 
-                switch(type) {
+                switch (type) {
                     case self.BIND_TYPES.INNERHTML:
                         node.innerHTML = newVal;
                         break;
@@ -170,19 +165,19 @@
 
                 }
             };
-            let propEvent = self._getPropChangeEventName(propPath[0]);
+            var propEvent = self._getPropChangeEventName(propPath[0]);
             self.on(propEvent, propToNodeHandler);
 
-            bind.propToNode = {
+            _bind.propToNode = {
                 event: propEvent,
                 handler: propToNodeHandler
-            }
+            };
 
             // 绑定：从node到prop
-            if(event) {
-                let nodeToPropHandler = function() {
-                    let newVal;
-                    switch(type) {
+            if (event) {
+                var nodeToPropHandler = function nodeToPropHandler() {
+                    var newVal = undefined;
+                    switch (type) {
                         case self.BIND_TYPES.PROPERTY:
                             newVal = node[config.propName];
                             break;
@@ -194,28 +189,27 @@
                     self.set(propPathString, newVal);
                 };
                 node.addEventListener(event, nodeToPropHandler);
-                bind.nodeToProp = {
+                _bind.nodeToProp = {
                     event: event,
                     handler: nodeToPropHandler
-                }
+                };
             }
 
-            self._nova.binds.set(node, bind);
+            self._nova.binds.set(node, _bind);
         }
     }
 
     function unbind(node) {
-        let bind = this._nova.binds.get(node);
-        if(bind) {
-            if(bind.propToNode) {
+        var bind = this._nova.binds.get(node);
+        if (bind) {
+            if (bind.propToNode) {
                 this.off(bind.propToNode.event, bind.propToNode.handler);
             }
-            if(bind.nodeToProp) {
+            if (bind.nodeToProp) {
                 this.off(bind.nodeToProp.event, bind.nodeToProp.handler);
             }
         }
     }
-
 
     Nova.TemplateBehavior = TemplateBehavior;
 })();

@@ -33,27 +33,32 @@
                 if(rule.type == Nova.CssParse.types.STYLE_RULE) {
                     // 生成selector
                     let selectors = rule.selector;
-                    selectors = selectors.replace(/([+>])/g, function(match) {
+                    selectors = selectors.replace(/([+>]|::content|::shadow)/g, function(match) {
                         return ' ' + match + ' ';
-                    });
+                    }).replace(/,/g, ' , ');
                     selectors = selectors.split(/\s+/);
                     let selector = '';
                     selectors.every(function(s, i) {
+                        // :host 替换为tagName
                         if (s.indexOf(':host') >= 0) {
                             selector += s.replace(':host', tagName) + ' ';
-                        } else if(s == '::content'){
+                        }
+                        // ::content, ::shadow 替换为空格
+                        else if(s == '::content' || s == '::shadow'){
                             if(i > 0) {
                                 for(let j = i + 1; j < selectors.length; j++) {
                                     selector += selectors[j] + ' ';
                                 }
                                 return false;
                             } else {
-                                selector += '::content ';
+                                selector += s;
                             }
                         }
-                        else if('> +'.split(' ').indexOf(s) >= 0) {
+                        // >+, 直接拼接不做处理
+                        else if('> + ,'.split(' ').indexOf(s) >= 0) {
                             selector += s + ' ';
                         }
+                        // 默认添加.tagName
                         else {
                             let pseudoStart = s.indexOf(':');
                             if(pseudoStart < 0) {

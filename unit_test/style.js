@@ -17,6 +17,8 @@
                     :host .ancestor {color:red;}\
                     :host ::content .page {color:red;}\
                     :host:first-child {color:red;}\
+                    .comma,.comma2 {color:red}\
+                    :host test-ele-style-inner::shadow span {color:red;}\
                 ',
                 template: '\
                     <div class="first-child">Test pseudo selector</div>\
@@ -28,9 +30,17 @@
                     <div class="parent">Test parent selector</div>\
                     <div class="ancestor">Test ancestor selector</div>\
                     <content selector=".page"></content>\
+                    <div class="comma"></div>\
+                    <div class="comma2"></div>\
+                    <test-ele-style-inner></test-ele-style-inner>\
                 ',
                 props: {
                 }
+            });
+
+            window.TestEleEventInner = Nova({
+                is: 'test-ele-style-inner',
+                template: '<span></span>'
             });
 
             var wrap = document.createElement('div');
@@ -67,6 +77,13 @@
         });
         it('ancestor selector', function() {
             expect(window.getComputedStyle(ins.querySelector('.ancestor')).color).to.equal('rgb(255, 0, 0)');;
+        });
+        it('comma seperator', function() {
+            expect(window.getComputedStyle(ins.querySelector('.comma')).color).to.equal('rgb(255, 0, 0)');;
+            expect(window.getComputedStyle(ins.querySelector('.comma2')).color).to.equal('rgb(255, 0, 0)');;
+        });
+        it('::shadow', function() {
+            expect(window.getComputedStyle(ins.querySelector('test-ele-style-inner span')).color).to.equal('rgb(255, 0, 0)');;
         });
     });
 })();

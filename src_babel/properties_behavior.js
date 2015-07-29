@@ -24,6 +24,11 @@
         */
         _propTypes: [Object, Number, String, Boolean, Date, Array],
 
+        /*
+         * 所有属性改变时，都会触发的事件
+         * */
+        _propsCommonChangeEvent: '_propsChanged',
+
         createdHandler: function() {
             initProperties.call(this);
         },
@@ -38,6 +43,11 @@
 
         set: function(path, value) {
             let paths = path.split('.');
+            if(path.length == 0) {
+                this[paths[0]] = value;
+                return;
+            }
+
             let curObj = this;
             let oldVal = curObj[paths[0]];
             for(let i = 0, len = paths.length; i < len - 1; i++) {
@@ -49,7 +59,7 @@
             let oldSubVal = curObj[paths[paths.length - 1]]
             if(oldSubVal != value) {
                 curObj[paths[paths.length - 1]] = value;
-                triggerPropChange.call(this, getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
+                triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
             }
         },
 
@@ -60,12 +70,21 @@
                 curObj = curObj[paths[i]];
             }
             return curObj;
+        },
+
+        notifyPath: function(path) {
+            let paths = path.split(',');
+            triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [this[paths[0]], this[paths[0]], path]);
+        },
+
+        _getPropChangeEventName: function(propName) {
+            return '_' + propName + 'Changed';
         }
     }
 
     function triggerPropChange(event, args) {
         this.trigger.apply(this, arguments);
-        this.trigger('_propsChanged', args);
+        this.trigger(this._propsCommonChangeEvent, args);
     }
 
     /*
@@ -141,7 +160,7 @@
                     self.setAttribute(name, fromPropToAttr.call(this, config));
                 }
                 */
-                triggerPropChange.call(self, getPropChangeEventName(name), [oldVal, val, name]);
+                triggerPropChange.call(self, self._getPropChangeEventName(name), [oldVal, val, name]);
 
             }
         });
@@ -149,7 +168,7 @@
 
         // init observers
         if(config.observer) {
-            this.on(getPropChangeEventName(name), function() {
+            this.on(self._getPropChangeEventName(name), function() {
                 if(self[config.observer]) {
                     self[config.observer].apply(self, arguments);
                 }
@@ -159,21 +178,26 @@
     }
 
     function setPropInitVal(name, config) {
+        let oldVal = this[name];
+        delete this[name];
+
         // set value
         let attrName = Nova.CaseMap.camelToDashCase(name);
+
+        // 优先读取attribute
         if(this.hasAttribute(attrName)) {
             setPropFromAttr.call(this, attrName);
         }
+        // 若已有绑定的值，则使用原来的值
+        else if(oldVal) {
+            this[name] = oldVal;
+        }
+        // 否则使用默认值
         else if(config.hasOwnProperty('value')) {
             if(typeof config.value == 'function') {
                 this[name] = config.value.apply(this);
             } else {
-                let val = config.value
-                if(this[name]) {
-                    val = this[name];
-                    delete this[name];
-                }
-                this[name] = val;
+                this[name] = config.value;
             }
         }
     }
@@ -181,14 +205,19 @@
     function fromAttrToProp(attrName, value, config) {
         var type = config.type;
         if(type != String) {
-            value = value.trim();
+            value && (value = value.trim());
         }
 
         let result = value;
         switch(type) {
             case Object:
             case Array:
-                result = JSON.parse(value);
+                try {
+                    result = JSON.parse(value);
+                } catch(e) {
+                    result = null;
+                    console.warn('Nova::Attributes: could not decode Array as JSON');
+                }
                 break;
             case Number:
                 result = Number(value);
@@ -201,10 +230,6 @@
                 break;
         }
         return result;
-    }
-
-    function getPropChangeEventName(propName) {
-        return '_' + propName + 'Changed';
     }
 
     Nova.PropBehavior = PropBehavior;

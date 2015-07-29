@@ -17,7 +17,11 @@
 
         /***************************** 生命周期 ******************************/
         createdCallback: function createdCallback() {
+
+            //console.log(this.tagName + this.id, 'createdCallback');
+
             //alert(this.tagName + 'created');
+            //if(this.id == 'inner') debugger;
             var self = this;
             self._nova = {}; // 内部变量命名空间
             self._initBehaviors();
@@ -26,11 +30,13 @@
             this._waitForInit(create);
 
             function create() {
+
                 eleStack.push(self);
                 self.trigger('created');
-                self.trigger('finishCreated');
+
                 self._nova.isCreated = true;
                 eleStack.pop();
+                self.trigger('finishCreated');
 
                 ready();
             }
@@ -106,6 +112,21 @@
                     }
                 });
             });
+        },
+
+        /***************************** 保存和获取内部使用属性 ******************************/
+        _getPrivateProp: function _getPrivateProp(prop) {
+            if (!this._nova) {
+                return;
+            }
+            return this._nova[prop];
+        },
+
+        _setPrivateProp: function _setPrivateProp(prop, val) {
+            if (!this._nova) {
+                this._nova = {};
+            }
+            this._nova[prop] = val;
         }
     };
 
