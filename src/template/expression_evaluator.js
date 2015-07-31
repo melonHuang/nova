@@ -77,6 +77,7 @@
 
             // 遍历scope链，生成data
             info.relatedProps.forEach(function (prop) {
+                //if(info.value.indexOf('writer') >= 0)debugger;
                 var curScope = scope;
                 while (curScope) {
                     if (curScope.props[prop.name]) {

@@ -41,9 +41,10 @@
             }
         },
 
-        set: function(path, value) {
+        set: function(path, value, opt) {
             let paths = path.split('.');
-            if(path.length == 0) {
+
+            if(paths.length == 1 && this.get(path) != value) {
                 this[paths[0]] = value;
                 return;
             }
@@ -56,11 +57,8 @@
                 }
                 curObj = curObj[paths[i]];
             }
-            let oldSubVal = curObj[paths[paths.length - 1]]
-            if(oldSubVal != value) {
-                curObj[paths[paths.length - 1]] = value;
-                triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
-            }
+            curObj[paths[paths.length - 1]] = value;
+            triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
         },
 
         get: function(path) {
@@ -70,6 +68,15 @@
                 curObj = curObj[paths[i]];
             }
             return curObj;
+        },
+
+        addProperty: function(prop, config) {
+            this.props[prop] = config;
+            defineProperty.call(this, prop, config);
+        },
+
+        hasProperty(propName) {
+            return !!this.props[propName];
         },
 
         notifyPath: function(path) {

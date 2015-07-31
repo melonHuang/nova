@@ -262,172 +262,7 @@ Nova.CssParse = (function () {
             });
 
             return str;
-        },
-        tmpl2: (function () {
-
-            var tmplFuns = {};
-            /*
-            sArrName 拼接字符串的变量名。
-            */
-            var sArrName = 'sArrCMX',
-                sLeft = sArrName + '.push("';
-            /*
-                tag:模板标签,各属性含义：
-                tagG: tag系列
-                isBgn: 是开始类型的标签
-                isEnd: 是结束类型的标签
-                cond: 标签条件
-                rlt: 标签结果
-                sBgn: 开始字符串
-                sEnd: 结束字符串
-            */
-            var tags = {
-                '=': {
-                    tagG: '=',
-                    isBgn: 1,
-                    isEnd: 1,
-                    sBgn: '",QW.StringH.encode4HtmlValue(',
-                    sEnd: '),"'
-                },
-                'js': {
-                    tagG: 'js',
-                    isBgn: 1,
-                    isEnd: 1,
-                    sBgn: '");',
-                    sEnd: ';' + sLeft
-                },
-                //任意js语句, 里面如果需要输出到模板，用print("aaa");
-                'if': {
-                    tagG: 'if',
-                    isBgn: 1,
-                    rlt: 1,
-                    sBgn: '");if',
-                    sEnd: '{' + sLeft
-                },
-                //if语句，写法为{if($a>1)},需要自带括号
-                'elseif': {
-                    tagG: 'if',
-                    cond: 1,
-                    rlt: 1,
-                    sBgn: '");} else if',
-                    sEnd: '{' + sLeft
-                },
-                //if语句，写法为{elseif($a>1)},需要自带括号
-                'else': {
-                    tagG: 'if',
-                    cond: 1,
-                    rlt: 2,
-                    sEnd: '");}else{' + sLeft
-                },
-                //else语句，写法为{else}
-                '/if': {
-                    tagG: 'if',
-                    isEnd: 1,
-                    sEnd: '");}' + sLeft
-                },
-                //endif语句，写法为{/if}
-                'for': {
-                    tagG: 'for',
-                    isBgn: 1,
-                    rlt: 1,
-                    sBgn: '");for',
-                    sEnd: '{' + sLeft
-                },
-                //for语句，写法为{for(var i=0;i<1;i++)},需要自带括号
-                '/for': {
-                    tagG: 'for',
-                    isEnd: 1,
-                    sEnd: '");}' + sLeft
-                },
-                //endfor语句，写法为{/for}
-                'while': {
-                    tagG: 'while',
-                    isBgn: 1,
-                    rlt: 1,
-                    sBgn: '");while',
-                    sEnd: '{' + sLeft
-                },
-                //while语句,写法为{while(i-->0)},需要自带括号
-                '/while': {
-                    tagG: 'while',
-                    isEnd: 1,
-                    sEnd: '");}' + sLeft
-                } //endwhile语句, 写法为{/while}
-            };
-
-            return function (sTmpl, noJoin) {
-                noJoin = noJoin ? 1 : 0;
-
-                var fun = tmplFuns[sTmpl];
-                if (!fun) {
-                    var N = -1,
-                        NStat = []; //语句堆栈;
-                    var ss = [[/\{strip\}([\s\S]*?)\{\/strip\}/g, function (a, b) {
-                        return b.replace(/[\r\n]\s*\}/g, ' }').replace(/[\r\n]\s*/g, '');
-                    }], [/\\/g, '\\\\'], [/"/g, '\\"'], [/\r/g, '\\r'], [/\n/g, '\\n'], //为js作转码.
-                    [/\{[\s\S]*?\S\}/g, //js里使用}时，前面要加空格。
-                    function (a) {
-                        a = a.substr(1, a.length - 2);
-                        for (var i = 0; i < ss2.length; i++) {
-                            a = a.replace(ss2[i][0], ss2[i][1]);
-                        }
-                        var tagName = a;
-                        if (/^(=|.\w+)/.test(tagName)) {
-                            tagName = RegExp.$1;
-                        }
-                        var tag = tags[tagName];
-                        if (tag) {
-                            if (tag.isBgn) {
-                                var stat = NStat[++N] = {
-                                    tagG: tag.tagG,
-                                    rlt: tag.rlt
-                                };
-                            }
-                            if (tag.isEnd) {
-                                if (N < 0) {
-                                    throw new Error('Unexpected Tag: ' + a);
-                                }
-                                stat = NStat[N--];
-                                if (stat.tagG != tag.tagG) {
-                                    throw new Error('Unmatch Tags: ' + stat.tagG + '--' + tagName);
-                                }
-                            } else if (!tag.isBgn) {
-                                if (N < 0) {
-                                    throw new Error('Unexpected Tag:' + a);
-                                }
-                                stat = NStat[N];
-                                if (stat.tagG != tag.tagG) {
-                                    throw new Error('Unmatch Tags: ' + stat.tagG + '--' + tagName);
-                                }
-                                if (tag.cond && !(tag.cond & stat.rlt)) {
-                                    throw new Error('Unexpected Tag: ' + tagName);
-                                }
-                                stat.rlt = tag.rlt;
-                            }
-                            return (tag.sBgn || '') + a.substr(tagName.length) + (tag.sEnd || '');
-                        } else {
-                            return '",(' + a + '),"';
-                        }
-                    }]];
-                    var ss2 = [[/\\n/g, '\n'], [/\\r/g, '\r'], [/\\"/g, '"'], [/\\\\/g, '\\'], [/\$(\w+)/g, 'opts["$1"]'], [/print\(/g, sArrName + '.push(']];
-                    for (var i = 0; i < ss.length; i++) {
-                        sTmpl = sTmpl.replace(ss[i][0], ss[i][1]);
-                    }
-                    if (N >= 0) {
-                        throw new Error('Lose end Tag: ' + NStat[N].tagG);
-                    }
-
-                    sTmpl = sTmpl.replace(/##7b/g, '{').replace(/##7d/g, '}').replace(/##23/g, '#'); //替换特殊符号{}#
-                    sTmpl = 'var ' + sArrName + '=[];' + sLeft + sTmpl + '");if(' + noJoin + ') { return ' + sArrName + ';};return ' + sArrName + '.join("");';
-
-                    //alert('转化结果\n'+sTmpl);
-                    tmplFuns[sTmpl] = fun = new Function('opts', sTmpl);
-                }
-
-                return fun;
-            };
-        })()
-
+        }
     };
 
     Nova.Utils = Utils;
@@ -735,9 +570,10 @@ Nova.CssParse = (function () {
             }
         },
 
-        set: function set(path, value) {
+        set: function set(path, value, opt) {
             var paths = path.split('.');
-            if (path.length == 0) {
+
+            if (paths.length == 1 && this.get(path) != value) {
                 this[paths[0]] = value;
                 return;
             }
@@ -750,11 +586,8 @@ Nova.CssParse = (function () {
                 }
                 curObj = curObj[paths[i]];
             }
-            var oldSubVal = curObj[paths[paths.length - 1]];
-            if (oldSubVal != value) {
-                curObj[paths[paths.length - 1]] = value;
-                triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
-            }
+            curObj[paths[paths.length - 1]] = value;
+            triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
         },
 
         get: function get(path) {
@@ -764,6 +597,15 @@ Nova.CssParse = (function () {
                 curObj = curObj[paths[i]];
             }
             return curObj;
+        },
+
+        addProperty: function addProperty(prop, config) {
+            this.props[prop] = config;
+            defineProperty.call(this, prop, config);
+        },
+
+        hasProperty: function hasProperty(propName) {
+            return !!this.props[propName];
         },
 
         notifyPath: function notifyPath(path) {
@@ -984,9 +826,11 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
         BIND_TYPES: {
             TEXT: 1,
             PROPERTY: 2,
-            ATTRIBUTE: 3
+            ATTRIBUTE: 3,
+            EVENT: 4
         },
         ANNOTATION_REGEXP: /{{.+?}}/g,
+        SCOPED_ELEMENTS: ['TEMPLATE-REPEAT-ITEM', 'TEMPLATE'],
         parse: function parse(node) {
             var data = new Map();
 
@@ -1026,12 +870,22 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             // parse attribute
             Array.prototype.slice.call(node.attributes || []).forEach(function (attr) {
                 if (attr.constructor == Attr && self._testEscape(attr.value)) {
-                    var isBindAttribute = attr.name[attr.name.length - 1] == '$';
-                    var bindObj = self._parseExpression(attr.value);
-                    $.extend(bindObj, {
-                        type: isBindAttribute ? self.BIND_TYPES.ATTRIBUTE : self.BIND_TYPES.PROPERTY,
-                        name: isBindAttribute ? attr.name.slice(0, -1) : Nova.CaseMap.dashToCamelCase(attr.name)
-                    });
+                    var bindType = self._getTypeByAttrName(attr.name);
+                    var bindObj = {
+                        type: bindType
+                    };
+
+                    switch (bindType) {
+                        case self.BIND_TYPES.EVENT:
+                            bindObj.event = Nova.CaseMap.dashToCamelCase(attr.name.match(/^on-(.+)$/)[1]);
+                            bindObj.callback = self._parseCallbackAnnotation(attr.value);
+                            break;
+                        case self.BIND_TYPES.ATTRIBUTE:
+                        case self.BIND_TYPES.PROPERTY:
+                            bindObj.name = bindType == self.BIND_TYPES.ATTRIBUTE ? attr.name.slice(0, -1) : Nova.CaseMap.dashToCamelCase(attr.name);
+                            $.extend(bindObj, self._parseExpression(attr.value));
+                            break;
+                    }
                     node.removeAttribute(attr.name);
                     bindings.push(bindObj);
                 }
@@ -1042,10 +896,25 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             }
 
             // 遍历子节点
-            if (!(node.tagName && node.tagName.toLowerCase() == 'template-repeat')) {
+            if (this.SCOPED_ELEMENTS.indexOf(node.tagName) < 0) {
                 node.childNodes && Array.prototype.slice.call(node.childNodes).forEach(function (child) {
                     self._parseNode(child, data);
                 });
+            }
+        },
+
+        _getTypeByAttrName: function _getTypeByAttrName(attrName) {
+            // event binding
+            if (attrName.match(/^on-(.+)$/)) {
+                return this.BIND_TYPES.EVENT;
+            }
+            // attr binding
+            else if (attrName[attrName.length - 1] == '$') {
+                return this.BIND_TYPES.ATTRIBUTE;
+            }
+            // prop binding
+            else {
+                return this.BIND_TYPES.PROPERTY;
             }
         },
 
@@ -1060,7 +929,7 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             });
 
             // 判断annotation中的表达式，是否是左值
-            if (/^{{\s*([_$a-zA-Z][\w_\$\d\[\].]*)\s*}}$/.test(value.trim())) {
+            if (/^{{\s*([_$a-zA-Z][\w_\$\d\[\].:]*)\s*}}$/.test(value.trim())) {
                 isLeftValue = true;
                 event = annotations[0].event;
             }
@@ -1096,10 +965,10 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             var isLeftValue = undefined;
 
             // 移除表达式中的字符串
-            // TODO: 排除字符串中有\'的场景
-            var tmp = expression.replace(/"/g, '\'').replace(/'.*?'/g, '');
+            var tmp = expression.replace(/"/g, '\'').replace(/\\\'/g, '').replace(/'.*?'/g, '');
 
             // 解析annotation中的属性
+            // TODO: 现在把a.b.c()，解析出a.b.c。实际应该是a.b
             tmp.replace(/([_$a-zA-Z][\w_\$\d\[\].]*)/g, function (match, prop) {
                 props.push({
                     name: prop.split('.')[0],
@@ -1112,6 +981,11 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
                 relatedProps: props,
                 event: event
             };
+        },
+
+        _parseCallbackAnnotation: function _parseCallbackAnnotation(annotation) {
+            var match = annotation.match(/^{{([_$a-zA-Z][\w_\$\d]*)}}$/);
+            return match ? match[1] : undefined;
         },
 
         _testEscape: function _testEscape(value) {
@@ -1127,24 +1001,15 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             var self = this;
             var annotations = info.annotations;
 
-            // 编译获取tmplFun
-            /*
-            if(!info.tmplFun) {
-                let tmplValue = info.value;
-                annotations.forEach(function(annotation) {
-                    let annotationTmplValue = self.generateAnnotationTmplValue(annotation);
-                    tmplValue = tmplValue.replace(annotation.value, annotationTmplValue);
-                });
-                info.tmplFun = Nova.Utils.tmpl(tmplValue, true);
-            }
-            */
-
             // 遍历scope链，获得渲染data
             var data = this.getTmplData(info, scope);
 
-            return this.evaluate(info.value, data, info);
+            var tmplString = this.compileTmplString(info);
+
+            return this.evaluate(tmplString, data, info);
         },
 
+        // TODO: 支持输入{}转义
         evaluate: function evaluate(str, data, extra) {
             // 如果绑定的是属性，且expression只有一个annotation，且annotation两边没有其他字符
             // 则返回的值，不能转换成字符串
@@ -1165,18 +1030,29 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             return Nova.Utils.tmpl(str, data);
         },
 
-        // 为占位符中的属性，添加'$'前缀，准备在模板中使用
-        generateAnnotationTmplValue: function generateAnnotationTmplValue(annotation) {
+        compileTmplString: function compileTmplString(info) {
+            var self = this;
+            if (!info.tmplString) {
+                (function () {
+                    var tmplValue = info.value;
+                    info.annotations.forEach(function (annotation) {
+                        var annotationTmplValue = self.compileAnnotationTmplString(annotation);
+                        tmplValue = tmplValue.replace(annotation.value, annotationTmplValue);
+                    });
+                    info.tmplString = tmplValue;
+                })();
+            }
+            return info.tmplString;
+        },
+
+        compileAnnotationTmplString: function compileAnnotationTmplString(annotation) {
             var self = this;
             var tmplValue = annotation.value;
 
             // 去除::event
             tmplValue = tmplValue.replace(/::.+?}}/g, '}}');
 
-            // 将{{}}替换为{}
-            tmplValue = tmplValue.slice(1).slice(0, -1);
-
-            // 给所有属性添加$前缀
+            // 将a.0.b替换为a[0].b
             annotation.relatedProps.forEach(function (propObj) {
                 var prop = propObj.path;
                 // TODO: 排除字符串
@@ -1186,32 +1062,22 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
                         return '[' + p1 + ']' + p2;
                     });
 
-                    return '$' + tmp;
+                    return tmp;
                 });
             });
             return tmplValue;
         },
 
         getTmplData: function getTmplData(info, scope) {
-            var propList = [];
             var data = {};
 
-            // 整理出所有bind的属性
-            info.annotations.forEach(function (annotation) {
-                annotation.relatedProps.forEach(function (propObj) {
-                    var prop = propObj.name;
-                    if (propList.indexOf(prop) < 0) {
-                        propList.push(prop);
-                    }
-                });
-            });
-
             // 遍历scope链，生成data
-            propList.forEach(function (prop) {
+            info.relatedProps.forEach(function (prop) {
+                //if(info.value.indexOf('writer') >= 0)debugger;
                 var curScope = scope;
                 while (curScope) {
-                    if (curScope.props[prop]) {
-                        data[prop] = curScope[prop];
+                    if (curScope.props[prop.name]) {
+                        data[prop.name] = curScope[prop.name];
                         break;
                     }
                     curScope = curScope._nova.parentScope;
@@ -1225,44 +1091,14 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
 'use strict';
 (function () {
     /*
-     * generated this._nova.binds:
-     * {
-     *  propName: {
-     *      node: {
-     *          type: 'attribute',
-     *          name: 'attr-name',
-     *          value: '{{a}}hehe{{b}}',
-     *          annotations: [{
-     *              value: '{{a}}',
-     *              properties: ['a'],
-     *              event: 'change'
-     *          }, {
-     *              value: '{{b}}',
-     *              properties: ['b']
-     *          }];
-     *      }
-     *  }
-     * }
-     *
-     * generated this._nova.listeningNodes
-     * {
-     *  node: {
-     *      event: [{
-     *          type: 'attribute',
-     *          name: 'attr-name',
-     *          value: '{{a}}'
-     *      }]
-     *  }
-     * }
-     *
-     * */
-    /*
     * Template功能：
     * 1. content insertion
     * 2. 为template中，除content insertion的dom节点，添加tagName class
     * 3. 解析模板中的annotaion，进行单向数据绑定
     * */
     var TemplateBehavior = {
+        parentScope: null,
+
         createdHandler: function createdHandler() {
             if (!this.template) {
                 return;
@@ -1273,9 +1109,9 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             // 内部使用属性
             this._nova.binds = {
                 hostToChild: {},
-                childToHost: new Map()
+                childToHost: new Map(),
+                allBindings: [] // 所有绑定，包括与父scope的绑定
             };
-            //this._nova.listeningNodes = new Map();
 
             // 绑定事件，包括：
             // 1. 监听属性变化，属性改变时同步到child node
@@ -1289,6 +1125,8 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
 
             // 将编译好的节点插入到DOM中
             attach.call(this, nodeWrap);
+
+            this.updateTemplate();
         },
 
         /*
@@ -1297,7 +1135,6 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
          * 2. data binding
          * */
         compileNode: function compileNode(node) {
-
             addClass.call(this, node);
 
             // 绑定节点与属性
@@ -1311,51 +1148,40 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             var self = this;
             var bindData = Nova.ExpressionParser.parse(node);
 
+            //if(this.is == 'template-repeat-item' && bindData.size > 0) debugger;
+
             // 遍历有绑定关系的节点
             bindData.forEach(function (bindings, node) {
                 // 遍历节点与host绑定的不同attr/prop/textContent
                 bindings.forEach(function (bindObj) {
-                    // 遍历相关的属性
-                    bindObj.relatedProps.forEach(function (prop) {
-                        childListenToHost.call(self, node, prop.name, bindObj);
-                    });
+                    // 通过on-event, 绑定child和host的方法
+                    if (bindObj.type == Nova.ExpressionParser.BIND_TYPES.EVENT) {
+                        var scope = findScopeByProp.call(self, bindObj.callback, true);
+                        scope && hostListenToChild.call(self, node, bindObj.event, bindObj);
+                    }
+                    // 绑定child和host的属性
+                    else {
+                        // From host to child 遍历被模板监听的属性
+                        bindObj.relatedProps.forEach(function (prop) {
+                            var scope = findScopeByProp.call(self, prop.name);
+                            scope && childListenToHost.call(scope, node, prop.name, prop.path, bindObj);
+                            self._nova.binds.allBindings.push(bindObj);
+                        });
 
-                    if (bindObj.event) {
-                        hostListenToChild.call(self, child, event, bindObj);
+                        //  From child to host
+                        if (bindObj.event) {
+                            var scope = findScopeByProp.call(self, bindObj.relatedProps[0].name);
+                            scope && hostListenToChild.call(self, node, bindObj.event, bindObj);
+                        }
                     }
                 });
-            });
 
-            /*
-            bindList.forEach(function(nodeObj) {
-                nodeObj.bindings.forEach(function(bindObj) {
-                    let listenedProps = [];
-                    bindObj.annotations.forEach(function(annotation) {
-                        // binding: 从prop到node
-                        annotation.properties.forEach(function(prop) {
-                            prop = prop.split('.')[0];
-                            if(!self._nova.binds[prop]) {
-                                watchPropAndBind.call(self, prop);
-                            }
-                            // 将节点加入监听属性的列表
-                            self._nova.binds[prop].set(nodeObj.node, bindObj);
-                            listenedProps.push(prop);
-                        });
-                         // binding: 从node到prop
-                        if(annotation.event) {
-                            if(!self._nova.listeningNodes.get(node) || !self._nova.listeningNodes.get(node)[annotation.event]) {
-                                watchNodeAndBind.call(self, nodeObj.node, annotation.event);
-                            }
-                            self._nova.listeningNodes.get(nodeObj.node)[annotation.event].push(bindObj);
-                        }
-                    });
-                    // 记录节点监听的属性
-                    nodeObj.node._nova = nodeObj.node._nova || {};
-                    nodeObj.node._nova.listens = nodeObj.node._nova.listens || new Map();
-                    nodeObj.node._nova.listens.set(self, listenedProps.join(' '));
-                });
+                // 添加scope
+                if (Nova.ExpressionParser.SCOPED_ELEMENTS.indexOf(node.tagName) >= 0) {
+                    node._nova = node._nova || {};
+                    node._nova.parentScope = self;
+                }
             });
-            */
         },
 
         /*
@@ -1371,8 +1197,53 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             node.childNodes && Array.prototype.slice.call(node.childNodes).forEach(function (child) {
                 self.unbindNode(child);
             });
+        },
+
+        updateTemplate: function updateTemplate(props) {
+            var self = this;
+
+            // 获取要刷新的属性列表
+            if (props) {
+                if (props.constructor != Array) {
+                    props = [props];
+                }
+            }
+            // 若没穿prop，则获取template中所有相关的属性，包括父级属性
+            else {
+                props = [];
+                this._nova.binds.allBindings.forEach(function (bindObj) {
+                    bindObj.relatedProps.forEach(function (prop) {
+                        if (props.indexOf(prop.name) < 0) {
+                            props.push(prop.path);
+                        }
+                    });
+                });
+            }
+
+            // 遍历props，刷新属性相关节点
+            props.forEach(function (propPath) {
+                var scope = findScopeByProp.call(self, propPath.split('.')[0]);
+                scope && updateTemplateByPropPath.call(scope, propPath);
+            });
         }
     };
+
+    // 寻找最近的scope
+    // prop: 属性名
+    // notDefinedProp: 若为true, 则寻找最近的拥有prop属性的scope，若为false，则寻找最近的通过props定义了属性的scope
+    function findScopeByProp(prop, notDefinedProp) {
+        var scope = this;
+        while (scope) {
+            if (!notDefinedProp && scope.hasProperty(prop)) {
+                break;
+            }
+            if (notDefinedProp && typeof scope[prop] == 'function') {
+                break;
+            }
+            scope = scope._nova.parentScope;
+        }
+        return scope;
+    }
 
     function bindEvents() {
         this.on(this._propsCommonChangeEvent, propsChangedHandler);
@@ -1382,7 +1253,7 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
     function bindTemplate() {
         var wrap = document.createElement('div');
         wrap.innerHTML = this.template;
-        this.bindNode(wrap);
+        this.compileNode(wrap);
         return wrap;
     }
 
@@ -1391,20 +1262,34 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
      * 同步监听host变化属性的child
      * */
     function propsChangedHandler(ev, oldVal, newVal, path) {
+        updateTemplateByPropPath.call(this, path);
+    }
+
+    function updateTemplateByPropPath(path) {
         var self = this;
-        var prop = path.split('.')[0];
+        var prop = path ? path.split('.')[0] : '';
         var bindingNodes = this._nova.binds.hostToChild[prop];
 
-        bindingNodes && bindingNodes.forEach(function (bindObj, node) {
-            var value = Nova.ExpressionEvaluator.compile(bindObj, self);
-            syncChild.call(self, node, value, bindObj);
+        bindingNodes && bindingNodes.forEach(function (bindArray, node) {
+            bindArray && bindArray.forEach(function (bindInfo) {
+                // 若path是bindInfo.propPath的父属性，eg.path:a.b, propPath:a.b.c，则同步数据
+                if (bindInfo.propPath.slice(0, path.length) == path) {
+                    var value = Nova.ExpressionEvaluator.compile(bindInfo.bindObj, self);
+                    syncChild.call(self, node, value, bindInfo.bindObj);
+                }
+            });
         });
     }
 
-    function childListenToHost(child, prop, bindObj) {
-        var binds = this._nova.binds.hostToChild[prop] || new Map();
-        this._nova.binds.hostToChild[prop] = binds;
-        binds.set(child, bindObj);
+    function childListenToHost(child, propName, propPath, bindObj) {
+        var binds = this._nova.binds.hostToChild[propName] || new Map();
+        this._nova.binds.hostToChild[propName] = binds;
+        var bindArray = binds.get(child) || [];
+        binds.set(child, bindArray);
+        bindArray.push({
+            propPath: propPath,
+            bindObj: bindObj
+        });
     }
 
     function hostListenToChild(child, event, bindObj) {
@@ -1414,20 +1299,46 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
 
         if (!binds[event]) {
             binds[event] = [];
-            var callback = function callback() {
+            var callback = function callback(ev) {
                 binds[event].forEach(function (bindObj) {
-                    syncHost.call(self, child, bindObj.relatedProps[0].path, bindObj);
+                    if (bindObj.type == Nova.ExpressionParser.BIND_TYPES.EVENT) {
+                        var args = [ev].concat(ev.detail || []);
+                        self[bindObj.callback].apply(self, args);
+                    } else {
+                        syncHost.call(self, child, bindObj.relatedProps[0].path, bindObj);
+                    }
                 });
             };
             child.addEventListener(event, callback);
+            binds[event].callback = callback;
         }
 
         binds[event].push(bindObj);
     }
 
-    function childUnlistenHost(child) {}
+    function childUnlistenHost(child) {
+        var self = this;
+        for (var prop in this._nova.binds.hostToChild) {
+            var bindArray = this._nova.binds.hostToChild[prop].get(child);
+            bindArray && bindArray.forEach(function (bindInfo) {
+                var index = self._nova.binds.allBindings.indexOf(bindInfo.bindObj);
+                self._nova.binds.allBindings.splice(index, 1);
+            });
+            this._nova.binds.hostToChild[prop]['delete'](child);
+        }
+    }
 
-    function hostUnListenChild(child) {}
+    function hostUnListenChild(child) {
+        var binds = this._nova.binds.childToHost.get(child);
+        if (binds) {
+            for (var _event in binds) {
+                if (binds.hasOwnProperty(_event)) {
+                    child.removeEventListener(_event, binds[_event].callback);
+                }
+            }
+            this._nova.binds.childToHost['delete'](child);
+        }
+    }
 
     /*
      * 将host的属性同步到child
@@ -1435,13 +1346,19 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
     function syncChild(child, value, extra) {
         switch (extra.type) {
             case Nova.ExpressionParser.BIND_TYPES.ATTRIBUTE:
-                child.setAttribute(extra.name, value);
+                if (child.getAttribute(extra.name) != value) {
+                    child.setAttribute(extra.name, value);
+                }
                 break;
             case Nova.ExpressionParser.BIND_TYPES.PROPERTY:
-                child[extra.name] = value;
+                if (child[extra.name] != value) {
+                    child[extra.name] = value;
+                }
                 break;
             case Nova.ExpressionParser.BIND_TYPES.TEXT:
-                child.textContent = value;
+                if (child.textContent != value) {
+                    child.textContent = value;
+                }
                 break;
         }
     }
@@ -1456,65 +1373,8 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
                 newVal = child.getAttribute(extra.name);
                 break;
         }
-        self.set(propPath, newVal);
+        this.set(propPath, newVal);
     }
-
-    /*
-    function watchPropAndBind(prop) {
-        let self = this;
-        self._nova.binds[prop] = new Map();
-        let binds = this._nova.binds[prop];
-         this.on(this._getPropChangeEventName(prop), function(e, oldVal, newVal, path) {
-            binds.forEach(function(bindObj, node) {
-                let value = Nova.Expression.compile(bindObj, self);
-                switch(bindObj.type) {
-                    case Nova.ExpressionParser.BIND_TYPES.ATTRIBUTE:
-                        node.setAttribute(bindObj.name, value);
-                        break;
-                    case Nova.ExpressionParser.BIND_TYPES.PROPERTY:
-                        node[bindObj.name] = value;
-                        break;
-                    case Nova.ExpressionParser.BIND_TYPES.TEXT:
-                        if(node.nodeType == Node.TEXT_NODE) {
-                            node.textContent = value;
-                        } else {
-                            node.innerHTML = value;
-                        }
-                        break;
-                }
-            });
-        });
-    }
-    function watchNodeAndBind(node, event) {
-        let self = this;
-        if(!this._nova.listeningNodes.get(node)) {
-            this._nova.listeningNodes.set(node, {});
-        }
-        if(!this._nova.listeningNodes.get(node)[event]) {
-            this._nova.listeningNodes.get(node)[event] = [];
-        }
-        node.addEventListener(event, function() {
-            let propList = self._nova.listeningNodes.get(node)[event];
-            propList && propList.forEach(function(prop) {
-                let propPath;
-                prop.value.replace(/{{(.+)}}/, function(match, p) {
-                    propPath = p;
-                });
-                propPath = propPath.split('::')[0];
-                 let newVal;
-                switch(prop.type) {
-                    case Nova.ExpressionParser.BIND_TYPES.PROPERTY:
-                        newVal = node[prop.name];
-                        break;
-                    case Nova.ExpressionParser.BIND_TYPES.ATTRIBUTE:
-                        newVal = node.getAttribute(prop.name);
-                        break;
-                }
-                self.set(propPath, newVal);
-            });
-        });
-    }
-     */
 
     /******************************* content insertion ***********************************/
     function insertContent(nodesWrap) {
@@ -1543,11 +1403,19 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
         var self = this;
 
         // 添加tagName class, 支持css scope
-        node.className += this.is;
+        var scope = this;
+        while (scope) {
+            if (Nova.ExpressionParser.SCOPED_ELEMENTS.indexOf(scope.tagName) < 0) {
+                if (!node.className || node.className.indexOf(scope.is) < 0) {
+                    node.className += ' ' + scope.is;
+                }
+            }
+            scope = scope._nova.parentScope;
+        }
 
         // traverse childNodes
         node.childNodes && Array.prototype.slice.call(node.childNodes).forEach(function (child) {
-            addClass.call(addClass, child);
+            addClass.call(self, child);
         });
     }
 
@@ -1574,7 +1442,7 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
 
     var Base = {
 
-        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.TemplateBehavior, Nova.PropBehavior],
+        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.PropBehavior, Nova.TemplateBehavior],
 
         behaviors: [],
 
@@ -1583,12 +1451,12 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
         /***************************** 生命周期 ******************************/
         createdCallback: function createdCallback() {
 
-            //console.log(this.tagName + this.id, 'createdCallback');
+            //console.log(this.is, 'createdCallback');
 
             //alert(this.tagName + 'created');
             //if(this.id == 'inner') debugger;
             var self = this;
-            self._nova = {}; // 内部变量命名空间
+            self._nova = self._nova || {}; // 内部变量命名空间
             self._initBehaviors();
 
             // 当parent完成created初始化后，才能开始create
@@ -1648,6 +1516,8 @@ prop2: Object       // Object, Number, String, Boolean, Date, Array
             }
         },
 
+        /***************************** 控制初始化 ******************************/
+
         /***************************** 初始化behaviors ******************************/
         _initBehaviors: function _initBehaviors() {
             var self = this;
@@ -1704,6 +1574,7 @@ NovaExports.exports = { "stylesheet": "\n        :host {display:none;}\n    ", "
 "use strict";
 var TemplateRepeat = NovaExports({
     is: "template-repeat",
+    "extends": "template",
     props: {
         items: {
             type: Array,
@@ -1711,43 +1582,35 @@ var TemplateRepeat = NovaExports({
                 return [];
             }
         },
-        itemNodes: {
+        as: {
             type: Array,
-            value: function value() {
-                return [];
-            }
+            value: "item"
+        },
+        indexAs: {
+            type: String,
+            value: "index"
         },
         parentSelector: String
     },
     createdHandler: function createdHandler() {
         var self = this;
 
-        this.repeatTemplate = this.compileTemplate();
         this.insertParent = this.parentSelector ? this.parentElement.querySelector(this.parentSelector) : this.parentElement;
+
         // NOTICE: 通过setTimeout，保证使用js通过wrap创建元素后，能获取内部的template-repeat
         setTimeout(function () {
             self.parentElement && self.parentElement.removeChild(self);
         }, 0);
 
-        this.on("_itemsChanged", this.itemsObserver);
-        this.trigger("_itemsChanged", [[], this.items]);
+        this.on("_itemsChanged", this._itemsObserver);
+        this.notifyPath("items");
     },
-    itemsObserver: function itemsObserver(ev, oldVal, newVal, path, noNeedToRender) {
-        // 由最后一行主动触发时，无需重新渲染
-        if (noNeedToRender) {
-            return;
-        }
-        if (!newVal || newVal.constructor != Array) {
+    _itemsObserver: function _itemsObserver(ev, oldVal, newVal, path) {
+        if (path != "items" || !newVal) {
             return;
         }
 
-        // 进行diff，若无改变，则返回
-        var valString = JSON.stringify(newVal);
-        if (this._lastVal == valString) {
-            return;
-        }
-
-        this._lastVal = valString;
+        this.itemNodes = this.itemNodes || [];
 
         // 删除所有项
         for (var i = this.itemNodes.length - 1; i >= 0; i--) {
@@ -1757,92 +1620,35 @@ var TemplateRepeat = NovaExports({
         for (var i = 0, len = newVal.length; i < len; i++) {
             this.appendItem(i);
         }
-
-        // 触发change，渲染刚刚添加的模板
-        this.trigger("_itemsChanged", [[], this.items, path, true]);
     },
     appendItem: function appendItem(index) {
         var self = this;
-
-        // 编译模板
         var wrap = document.createElement("div");
-        var tmpl = this.repeatTemplate.replace(/{{items\[i\]:index}}/g, function () {
-            return index;
-        });
-        tmpl = tmpl.replace(/{{items\[i\]/g, function () {
-            return "{{items." + index;
-        });
-        wrap.innerHTML = tmpl;
-        this.bindNode(wrap);
+        wrap.innerHTML = "<template-repeat-item index=\"" + index + "\" item=\"{{items." + index + "}}\" as=\"" + this.as + "\" index-as=\"" + this.indexAs + "\">" + this.innerHTML + "</template-repeat-item>";
+        var item = wrap.querySelector("template-repeat-item");
 
-        // 插入到父元素
-        var nodes = Array.prototype.slice.call(wrap.childNodes);
-        nodes.forEach(function (node) {
-            self.insertParent.appendChild(node);
+        console.log("append Item", { item: item, html: item.innerHTML });
+
+        this.compileNode(wrap);
+        item.insertParent = this.insertParent;
+        item.readyToRender = true;
+
+        item.on("_itemChanged", function (ev, oldVal, newVal, path) {
+            self.itemChangedHandler.call(self, ev, oldVal, newVal, path, index);
         });
 
-        // 保存到cache
-        this.itemNodes.push(nodes);
+        this.itemNodes.push(item);
     },
     removeItem: function removeItem(index) {
         var self = this;
-        var nodes = this.itemNodes.splice(index, 1)[0];
-        nodes.forEach(function (node) {
+        var item = this.itemNodes.splice(index, 1)[0];
+        item._childNodes.forEach(function (node) {
             node.parentElement && node.parentElement.removeChild(node);
-            self.unbindNode(node);
+            self.unbindNode(item);
         });
     },
-    /*
-    * 遍历除了内嵌的template-repeat以外的所有节点
-    * 将{{item}}或{{item.xx}}替换为{{items[i].xx}}
-    * 将{{item:index}}替换为{{items[i]:index}}
-    * 保证appendItem替换占位符时，不会影响到内嵌的template-repeat
-    */
-    compileTemplate: function compileTemplate() {
-        var self = this;
-        this.compileNode(this);
-        Array.prototype.slice.call(this.childNodes).forEach(function (child) {
-            self.compileNode(child);
-        });
-        return this.innerHTML;
-    },
-    compileNode: function compileNode(node) {
-        var self = this;
-
-        // 替换{{item.name}}为{{item[i].name}}
-
-        if (node.nodeType == Node.TEXT_NODE) {
-            var cont = node.textContent.replace(/{{item(\..+|:index)?}}/g, function (match, p) {
-                return "{{items[i]" + (p || "") + "}}";
-            });
-            //console.log(node.textContent, cont);
-            node.textContent = cont;
-        } else {
-            // 遍历attribute
-            Array.prototype.slice.call(node.attributes || []).forEach(function (attr) {
-                if (attr.constructor == Attr) {
-                    var match = attr.value.match(/^{{item(\..+|:index)?}}$/);
-                    if (match) {
-                        node.setAttribute(attr.name, "{{items[i]" + (match[1] || "") + "}}");
-                    }
-                }
-            });
-        }
-
-        // 替换innerHTML
-        /*
-        let html = node.innerHTML.trim();
-        let match = html.match(/^{{item(\..+|:index)?}}$/);
-        if(match) {
-            node.innerHTML = '{{items[i]' + (match[1] || '') + '}}';
-        }
-        */
-
-        if (!(node.tagName && node.tagName.toLowerCase() == "template-repeat")) {
-            node.childNodes && Array.prototype.slice.call(node.childNodes).forEach(function (child) {
-                self.compileNode(child);
-            });
-        }
+    itemChangedHandler: function itemChangedHandler(ev, oldVal, newVal, path, index) {
+        this.trigger("itemChanged", oldVal, newVal, path, index);
     }
 });
 "use strict";
@@ -1880,4 +1686,73 @@ var TemplateRepeat = NovaExports({
             });
         }
     }
+});
+"use strict";
+
+NovaExports.exports = { "stylesheet": null, "template": "\n        <content></content>\n    " };
+"use strict";
+var TemplateRepeat = NovaExports({
+    is: "template-repeat-item",
+    props: {
+        insertParent: {
+            type: Object
+        },
+        item: {
+            type: null
+        },
+        index: {
+            type: Number
+        },
+        as: {
+            type: String,
+            value: "item"
+        },
+        indexAs: {
+            type: String,
+            value: "index"
+        },
+        readyToRender: Boolean
+    },
+    createdHandler: function createdHandler() {
+        var self = this;
+        // 根据this.as和this.indexAs声明两个属性，为data-binding做准备
+        if (!this.hasProperty(this.as)) {
+            this.addProperty(this.as, { type: null, value: this.item });
+            this[this.as] = this.item;
+            this._bindProps("item", this.as);
+        }
+        if (!this.hasProperty(this.indexAs)) {
+            this.addProperty(this.indexAs, { type: null, value: this.index });
+            this[this.indexAs] = this.index;
+            this._bindProps("index", this.indexAs);
+        }
+
+        // 绑定所有子节点
+        this._childNodes = Array.prototype.slice.call(this.childNodes);
+
+        // item改变时
+        this.on("_itemChanged", function () {
+            self.updateTemplate();
+        });
+
+        this.on("_readyToRenderChanged", function () {
+            if (self.readyToRender) {
+                self._childNodes.forEach(function (child) {
+                    self.compileNode(child);
+                    self.insertParent.appendChild(child);
+                });
+            }
+        });
+    },
+    render: function render(html) {},
+    _bindProps: function _bindProps(p1, p2) {
+        var self = this;
+        this.on(this._getPropChangeEventName(p1), function () {
+            self[p2] = self[p1];
+        });
+        this.on(this._getPropChangeEventName(p2), function () {
+            self[p1] = self[p2];
+        });
+    }
+
 });

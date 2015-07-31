@@ -1,0 +1,94 @@
+'use strict';
+(function() {
+    Nova.ExpressionEvaluator = {
+        compile: function(info, scope) {
+            let self = this;
+            let annotations = info.annotations;
+
+            // 遍历scope链，获得渲染data
+            let data = this.getTmplData(info, scope);
+
+            let tmplString = this.compileTmplString(info);
+
+            return this.evaluate(tmplString, data, info);
+        },
+
+        // TODO: 支持输入{}转义
+        evaluate: function(str, data, extra) {
+            // 如果绑定的是属性，且expression只有一个annotation，且annotation两边没有其他字符
+            // 则返回的值，不能转换成字符串
+            if(extra.type == Nova.ExpressionParser.BIND_TYPES.PROPERTY && extra.annotations.length == 1 && str.trim().match(/^\{\{[^\{\}]*}\}$/)) {
+                let result;
+                str.replace(/\{\{([^\{\}]*)\}\}/g, function(sub, expr) {
+                    if(!expr) return '';
+                    try{
+                        result = (new Function("data", "with(data){return (" + expr + ");}"))(data);
+                    } catch(ex){
+                        result = sub;
+                    }
+                });
+
+                return result;
+            }
+
+            return Nova.Utils.tmpl(str, data);
+        },
+
+
+        compileTmplString: function(info) {
+            let self = this;
+            if(!info.tmplString) {
+               let tmplValue = info.value;
+               info.annotations.forEach(function(annotation) {
+                   let annotationTmplValue = self.compileAnnotationTmplString(annotation);
+                   tmplValue = tmplValue.replace(annotation.value, annotationTmplValue);
+               });
+               info.tmplString = tmplValue;
+           }
+           return info.tmplString;
+        },
+
+
+        compileAnnotationTmplString: function(annotation) {
+            var self = this;
+            var tmplValue = annotation.value;
+
+            // 去除::event
+            tmplValue = tmplValue.replace(/::.+?}}/g, '}}');
+
+            // 将a.0.b替换为a[0].b
+            annotation.relatedProps.forEach(function (propObj) {
+                var prop = propObj.path;
+                // TODO: 排除字符串
+                tmplValue = tmplValue.replace(new RegExp(prop, 'g'), function (match) {
+                    // 将items.0转换为items[0]
+                    var tmp = prop.replace(/\.(\d+)($|\.)/g, function (match, p1, p2) {
+                        return '[' + p1 + ']' + p2;
+                    });
+
+                    return tmp;
+                });
+            });
+            return tmplValue;
+        },
+
+        getTmplData: function(info, scope) {
+            let data = {};
+
+            // 遍历scope链，生成data
+            info.relatedProps.forEach(function(prop) {
+                //if(info.value.indexOf('writer') >= 0)debugger;
+                let curScope = scope;
+                while(curScope) {
+                    if(curScope.props[prop.name]) {
+                        data[prop.name] = curScope[prop.name];
+                        break;
+                    }
+                    curScope = curScope._nova.parentScope;
+                }
+            });
+
+            return data;
+        }
+    }
+})();

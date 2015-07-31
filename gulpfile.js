@@ -39,7 +39,7 @@ gulp.task('build-nova', function() {
         .pipe(gulp.dest('src'))
         .pipe(plugins.rename(function(path) {
             gulp.start('release');
-        }))
+        }));
 });
 
 gulp.task('release', function() {
@@ -69,12 +69,13 @@ gulp.task('concat-nova', function() {
              'src/event_behavior.js',
              'src/aspect_behavior.js',
              'src/properties_behavior.js',
-             'src/template/annotation.js',
-             'src/template/expression.js',
+             'src/template/expression_parser.js',
+             'src/template/expression_evaluator.js',
              'src/template/template_behavior.js',
              'src/base.js',
              'src/components/template-repeat/main.js',
-             'src/components/template-if/main.js'
+             'src/components/template-if/main.js',
+             'src/components/template-repeat-item/main.js'
         ])
         .pipe(plugins.concat('nova.js'))
         .pipe(gulp.dest('./build'));

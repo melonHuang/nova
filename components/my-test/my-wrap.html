@@ -11,17 +11,19 @@
     </style>
     <template>
         <ul>
-        <template-repeat items="{{data}}" id="outer">
-            <!--
+        <template is="template-repeat" items="{{data}}" id="outer">
             <li>My name is <span>{{item.name}}</span>
+                <div>
+                    {{writer}}
+                </div>
 
                 <p>
                     I Love
                     <div>
-                        <template-repeat items="{{item.food}}" id="inner">
-                            <span>{{item:index}}</span>
+                        <template is="template-repeat" items="{{item.food}}" id="inner">
+                            <span>{{index}}</span>
                             <span>{{item}}</span>
-                        </template-repeat>
+                        </template>
                     </div>
                 </p>
                 <p>
@@ -29,29 +31,38 @@
                 </p>
 
             </li>
-            <select class="select" > </select>
-            <template-repeat parent-selector=".select" items="{{item.options}}">
-                <option value="{{item}}">{{item}}</option>
-            </template-repeat>
-        <div>
-            <template-if if="{{isGirl}}">
-            I am a girl. I am {{age}} years old.
+            <div>
+            <template-if if="{{item.option == 4}}">
+                you choose 4
             </template-if>
-        </div>
-            -->
+            </div>
+            <select class="select" value="{{item.option::change}}"> </select>
+            <template is="template-repeat" parent-selector=".select" items="{{item.options}}">
+                <option value="{{item}}">{{item}}</option>
+            </template>
                 <p>
                     My nick name is {{item.nickName}}
                 </p>
+            <!--
+            -->
+            <li>{{item.name}}</li>
+            {{writer}}
 
 
-        </template-repeat>
+        </template>
         </ul>
 
+
+        
     </template>
     <script type="text/nova-javascript">
         var MyWrap = Nova({
             is: 'my-wrap',
             props: {
+                writer: {
+                    type: String,
+                    value: 'Melon.H'
+                },
                 data: {
                     type: Array,
                     value: [
@@ -59,6 +70,7 @@
                         name:'gua', 
                         nickName: 'pig',
                         food: ['fish', 'pig', 'cow'],
+                        option: 2,
                         options: [1, 2, 4]
                     }
                         /*
@@ -77,6 +89,7 @@ age: {
      }
             },
             createdHandler: function() {
+                                //alert();
             }
         });
     </script>

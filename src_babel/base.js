@@ -12,8 +12,8 @@
         _behaviors: [
             Nova.EventBehavior,
             Nova.AspectBehavior,
-            Nova.TemplateBehavior,
-            Nova.PropBehavior
+            Nova.PropBehavior,
+            Nova.TemplateBehavior
         ],
 
         behaviors: [],
@@ -23,13 +23,12 @@
 
         /***************************** 生命周期 ******************************/
         createdCallback: function() {
-
-            //console.log(this.tagName + this.id, 'createdCallback');
+            //console.log(this.is, 'createdCallback');
 
             //alert(this.tagName + 'created');
             //if(this.id == 'inner') debugger;
             let self = this;
-            self._nova = {};            // 内部变量命名空间
+            self._nova = self._nova || {};            // 内部变量命名空间
             self._initBehaviors();
 
             // 当parent完成created初始化后，才能开始create
@@ -83,10 +82,19 @@
             if(!parent  || parent._nova.isCreated) {
                 callback();
             } else {
-                parent.on('finishCreated', function() {
+                let finishCb = function() {
+                    parent.off('finishCreated', finishCb);
                     callback();
-                })
+                }
+                parent.on('finishCreated', finishCb)
             }
+        },
+
+        /***************************** 控制初始化 ******************************/
+        _block: function() {
+        },
+
+        _unblock: function() {
         },
 
         /***************************** 初始化behaviors ******************************/

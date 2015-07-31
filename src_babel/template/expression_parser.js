@@ -45,9 +45,11 @@
         BIND_TYPES: {
             TEXT: 1,
             PROPERTY: 2,
-            ATTRIBUTE: 3
+            ATTRIBUTE: 3,
+            EVENT: 4
         },
         ANNOTATION_REGEXP: /{{.+?}}/g,
+        SCOPED_ELEMENTS: ['TEMPLATE-REPEAT-ITEM', 'TEMPLATE'],
         parse: function(node) {
             let data = new Map();
 
@@ -87,12 +89,22 @@
             // parse attribute
             Array.prototype.slice.call(node.attributes || []).forEach(function(attr) {
                 if(attr.constructor == Attr && self._testEscape(attr.value)) {
-                    let isBindAttribute = attr.name[attr.name.length - 1] == '$';
-                    let bindObj = self._parseExpression(attr.value);
-                    $.extend(bindObj, {
-                        type: isBindAttribute ? self.BIND_TYPES.ATTRIBUTE : self.BIND_TYPES.PROPERTY,
-                        name: isBindAttribute ? attr.name.slice(0, -1) : Nova.CaseMap.dashToCamelCase(attr.name),
-                    });
+                    let bindType = self._getTypeByAttrName(attr.name);
+                    let bindObj = {
+                        type: bindType
+                    };
+
+                    switch(bindType) {
+                        case self.BIND_TYPES.EVENT:
+                              bindObj.event = Nova.CaseMap.dashToCamelCase(attr.name.match(/^on-(.+)$/)[1]);
+                              bindObj.callback = self._parseCallbackAnnotation(attr.value);
+                              break;
+                        case self.BIND_TYPES.ATTRIBUTE:
+                        case self.BIND_TYPES.PROPERTY:
+                              bindObj.name = bindType == self.BIND_TYPES.ATTRIBUTE ? attr.name.slice(0, -1) : Nova.CaseMap.dashToCamelCase(attr.name);
+                              $.extend(bindObj, self._parseExpression(attr.value));
+                              break;
+                    }
                     node.removeAttribute(attr.name);
                     bindings.push(bindObj);
                 }
@@ -103,10 +115,25 @@
             }
 
             // 遍历子节点
-            if(!(node.tagName && node.tagName.toLowerCase() == 'template-repeat')) {
+            if(this.SCOPED_ELEMENTS.indexOf(node.tagName) < 0) {
                 node.childNodes && Array.prototype.slice.call(node.childNodes).forEach(function(child) {
                     self._parseNode(child, data);
                 });
+            }
+        },
+
+        _getTypeByAttrName: function(attrName) {
+            // event binding
+            if(attrName.match(/^on-(.+)$/)) {
+                return this.BIND_TYPES.EVENT;
+            }
+            // attr binding
+            else if(attrName[attrName.length - 1] == '$') {
+                return this.BIND_TYPES.ATTRIBUTE;
+            }
+            // prop binding
+            else {
+                return this.BIND_TYPES.PROPERTY;
             }
         },
 
@@ -121,7 +148,7 @@
             });
 
             // 判断annotation中的表达式，是否是左值
-            if(/^{{\s*([_$a-zA-Z][\w_\$\d\[\].]*)\s*}}$/.test(value.trim())) {
+            if(/^{{\s*([_$a-zA-Z][\w_\$\d\[\].:]*)\s*}}$/.test(value.trim())) {
                 isLeftValue = true;
                 event = annotations[0].event;
             }
@@ -157,10 +184,10 @@
             let isLeftValue;
 
             // 移除表达式中的字符串
-            // TODO: 排除字符串中有\'的场景
-            let tmp = expression.replace(/"/g, '\'').replace(/'.*?'/g, '');
+            let tmp = expression.replace(/"/g, '\'').replace(/\\\'/g, '').replace(/'.*?'/g, '');
 
             // 解析annotation中的属性
+            // TODO: 现在把a.b.c()，解析出a.b.c。实际应该是a.b
             tmp.replace(/([_$a-zA-Z][\w_\$\d\[\].]*)/g, function(match, prop) {
                 props.push({
                     name: prop.split('.')[0],
@@ -175,6 +202,10 @@
             };
         },
 
+        _parseCallbackAnnotation: function(annotation) {
+            let match = annotation.match(/^{{([_$a-zA-Z][\w_\$\d]*)}}$/);
+            return match ? match[1] : undefined;
+        },
 
         _testEscape: function(value) {
             return value.match(this.ANNOTATION_REGEXP);

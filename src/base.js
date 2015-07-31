@@ -9,7 +9,7 @@
 
     var Base = {
 
-        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.TemplateBehavior, Nova.PropBehavior],
+        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.PropBehavior, Nova.TemplateBehavior],
 
         behaviors: [],
 
@@ -18,12 +18,12 @@
         /***************************** 生命周期 ******************************/
         createdCallback: function createdCallback() {
 
-            //console.log(this.tagName + this.id, 'createdCallback');
+            //console.log(this.is, 'createdCallback');
 
             //alert(this.tagName + 'created');
             //if(this.id == 'inner') debugger;
             var self = this;
-            self._nova = {}; // 内部变量命名空间
+            self._nova = self._nova || {}; // 内部变量命名空间
             self._initBehaviors();
 
             // 当parent完成created初始化后，才能开始create
@@ -82,6 +82,8 @@
                 });
             }
         },
+
+        /***************************** 控制初始化 ******************************/
 
         /***************************** 初始化behaviors ******************************/
         _initBehaviors: function _initBehaviors() {
