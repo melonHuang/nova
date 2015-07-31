@@ -14,6 +14,13 @@
         return registerd;
     };
 
+    Nova.Utils.mix(Nova, {
+        setInitAttributes: function() {
+        },
+        setInitProperties: function() {
+        }
+    });
+
     let NovaExports = function(prototype) {
         Nova.Utils.mix(prototype, NovaExports.exports);
         var ret = Nova(prototype);
