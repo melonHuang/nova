@@ -4,7 +4,7 @@
     </template>
     <script typee="text/nova-javascript">
         'use strict';
-        let TemplateRepeat = Nova({
+        window.TemplateRepeatItem = Nova({
             is: 'template-repeat-item',
             props: {
                 insertParent: {
@@ -48,13 +48,10 @@
                     self.updateTemplate();
                 });
 
-                this.on('_readyToRenderChanged', function() {
-                    if(self.readyToRender) {
-                        self._childNodes.forEach(function(child) {
-                            self.compileNode(child);
-                            self.insertParent.appendChild(child);
-                        });
-                    }
+                // 绑定子节点，插入到insertParent
+                self._childNodes.forEach(function(child) {
+                    self.compileNode(child);
+                    self.insertParent.appendChild(child);
                 });
             },
             _bindProps: function(p1, p2) {

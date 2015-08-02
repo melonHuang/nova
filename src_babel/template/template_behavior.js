@@ -65,7 +65,7 @@
                     // 通过on-event, 绑定child和host的方法
                     if(bindObj.type == Nova.ExpressionParser.BIND_TYPES.EVENT) {
                         let scope = findScopeByProp.call(self, bindObj.callback, true);
-                        scope && hostListenToChild.call(self, node, bindObj.event, bindObj);
+                        scope && hostListenToChild.call(scope, node, bindObj.event, bindObj);
                     }
                     // 绑定child和host的属性
                     else {
@@ -79,7 +79,7 @@
                         //  From child to host
                         if(bindObj.event) {
                             let scope = findScopeByProp.call(self, bindObj.relatedProps[0].name);
-                            scope && hostListenToChild.call(self, node, bindObj.event, bindObj);
+                            scope && hostListenToChild.call(scope, node, bindObj.event, bindObj);
                         }
                     }
                 });
@@ -317,6 +317,10 @@
             if(Nova.ExpressionParser.SCOPED_ELEMENTS.indexOf(scope.tagName) < 0) {
                 if(!node.className || node.className.indexOf(scope.is) < 0) {
                     node.className += ' ' + scope.is;
+                }
+                // XXX
+                if(node.hasAttribute && node.hasAttribute('class_')) {
+                    node.setAttribute('class_', node.getAttribute('class_') + ' ' + scope.is);
                 }
             }
             scope = scope._nova.parentScope;

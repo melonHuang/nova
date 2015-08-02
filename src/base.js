@@ -17,34 +17,33 @@
 
         /***************************** 生命周期 ******************************/
         createdCallback: function createdCallback() {
-
-            //console.log(this.is, 'createdCallback');
-
-            //alert(this.tagName + 'created');
-            //if(this.id == 'inner') debugger;
             var self = this;
-            self._nova = self._nova || {}; // 内部变量命名空间
+
+            // 内部变量命名空间
+            self._nova = self._nova || {};
+
+            // 初始化behaviors
             self._initBehaviors();
 
-            // 当parent完成created初始化后，才能开始create
-            this._waitForInit(create);
-
-            function create() {
-
+            // 当parent完成created初始化后
+            // 1. 设置初始的prop和attrs
+            // 2. 调用behaviors和自定义元素的createdHandler
+            this._waitForInit(function () {
                 eleStack.push(self);
+
+                // 设置元素创建时的初始attr/prop
+                self._initInitialData();
+
+                // 调用Behaviors的createdHandler
                 self.trigger('created');
 
                 self._nova.isCreated = true;
                 eleStack.pop();
                 self.trigger('finishCreated');
 
-                ready();
-            }
-
-            function ready() {
+                // 调用自定义元素的CreatedHandler
                 self.createdHandler && self.createdHandler();
-                self._nova.ready = true;
-            }
+            });
         },
 
         attachedCallback: function attachedCallback() {
@@ -77,13 +76,37 @@
             if (!parent || parent._nova.isCreated) {
                 callback();
             } else {
-                parent.on('finishCreated', function () {
-                    callback();
-                });
+                (function () {
+                    var finishCb = function finishCb() {
+                        parent.off('finishCreated', finishCb);
+                        callback();
+                    };
+                    parent.on('finishCreated', finishCb);
+                })();
             }
         },
 
-        /***************************** 控制初始化 ******************************/
+        /***************************** 初始化initial attrs/props ******************************/
+        _initInitialData: function _initInitialData() {
+            var data = Nova.Initial.get();
+            Nova.Initial.clear();
+            if (!data) {
+                return;
+            }
+            if (data.attrs) {
+                for (var attrName in data.attrs) {
+                    this.setAttribute(attrName, data.attrs[attrName]);
+                }
+            }
+            if (data.props) {
+                for (var prop in data.props) {
+                    this[prop] = data.props[prop];
+                }
+            }
+            if (data.beforeCreated) {
+                data.beforeCreated.call(this);
+            }
+        },
 
         /***************************** 初始化behaviors ******************************/
         _initBehaviors: function _initBehaviors() {

@@ -21,13 +21,13 @@
                     I Love
                     <div>
                         <template is="template-repeat" items="{{item.food}}" id="inner">
-                            <span>{{index}}</span>
+                            <span>{{index + 1 + '.'}}</span>
                             <span>{{item}}</span>
                         </template>
                     </div>
                 </p>
                 <p>
-                    <input type="text" value="{{item.nickName::change}}">
+                    <input type="text" value="{{item.nickName::input}}">
                 </p>
 
             </li>
@@ -40,9 +40,10 @@
             <template is="template-repeat" parent-selector=".select" items="{{item.options}}">
                 <option value="{{item}}">{{item}}</option>
             </template>
-                <p>
-                    My nick name is {{item.nickName}}
-                </p>
+
+            <p>
+                My nick name is {{item.nickName}}
+            </p>
             <!--
             -->
             <li>{{item.name}}</li>
@@ -59,6 +60,12 @@
         var MyWrap = Nova({
             is: 'my-wrap',
             props: {
+                warning:  {
+                    type: Object,
+                    value: {
+                        msg: 'hey'
+                    }
+                },
                 writer: {
                     type: String,
                     value: 'Melon.H'

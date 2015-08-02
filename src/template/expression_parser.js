@@ -128,7 +128,7 @@
                 return this.BIND_TYPES.EVENT;
             }
             // attr binding
-            else if (attrName[attrName.length - 1] == '$') {
+            else if (attrName[attrName.length - 1] == '_') {
                 return this.BIND_TYPES.ATTRIBUTE;
             }
             // prop binding

@@ -6,20 +6,20 @@
         if(prototype.extends) {
             opts.extends = prototype.extends
         }
-        let registerd = document.registerElement(prototype.is, opts);
+        let registered = document.registerElement(prototype.is, opts);
 
         // 初始化stylesheet
         Nova.Style.init(prototype);
 
-        return registerd;
+        return getConstructor(registered);
     };
 
-    Nova.Utils.mix(Nova, {
-        setInitAttributes: function() {
-        },
-        setInitProperties: function() {
+    function getConstructor(realConstructor) {
+        return function(initData) {
+            initData && Nova.Initial.set(initData);
+            return new realConstructor();
         }
-    });
+    }
 
     let NovaExports = function(prototype) {
         Nova.Utils.mix(prototype, NovaExports.exports);

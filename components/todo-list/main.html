@@ -1,0 +1,72 @@
+<dom-module>
+    <style type="text/css">
+        .todo-done {
+            text-decoration: line-through;
+        }
+    </style>
+    <template>
+        <h2>Todo</h2>
+        <div>
+            <p>
+                {{remaining}} of {{todos.length}} remaining
+            </p>
+            <ul>
+                <template class="template-repeat" on-item-changed="{{changeTodoStatus}}" is="template-repeat" items="{{todos}}">
+                <li>
+                    <input type="checkbox" checked="{{item.done::change}}"/>
+                    <p class_="todo-{{item.done ? 'done' : 'undone'}}">
+                        {{item.text}}
+                    </p>
+                </li>
+                </template>
+            </ul>
+
+            <form on-submit="{{addTodo}}">
+                <input type="text" value="{{todoText::change}}"/>
+                <button>Submit</button>
+            </form>
+        </div>
+    </template>
+    <script type="text/nova">
+        'use strict';
+        let TodoList = Nova({
+            is: 'todo-list',
+            props: {
+                todos: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                },
+                remaining: {
+                    type: Number,
+                    value: 0
+                },
+                todoText: {
+                    type: String,
+                    value: ''
+                }
+            },
+            createdHandler: function() {
+                this.repeat = this.querySelector('.template-repeat');
+            },
+            addTodo: function(e) {
+                e.preventDefault();
+                this.todos.push({
+                    text: this.todoText
+                });
+                this.todos = this.todos.slice();
+                this.todoText = '';
+            },
+            changeTodoStatus: function() {
+                let remaining = 0;
+                this.todos.forEach(function(todo) {
+                    if(!todo.done) {
+                        remaining++;
+                    }
+                });
+                this.remaining = remaining;
+            }
+        });
+    </script>
+</dom-module>

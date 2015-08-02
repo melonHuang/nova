@@ -1,6 +1,6 @@
 "use strict";
 
-NovaExports.exports = { "stylesheet": "\n        :host {display:none;}\n    ", "template": "\n    " };
+NovaExports.exports = { "stylesheet": "<style>\n        :host {display:none;}\n    </style>", "template": "<template>\n    </template>" };
 "use strict";
 var TemplateRepeat = NovaExports({
     is: "template-repeat",

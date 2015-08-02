@@ -65,6 +65,7 @@ gulp.task('concat-nova', function() {
              'src/lib/css_parse.js',
              'src/lib/case_map.js',
              'src/lib/utils.js',
+             'src/lib/initial.js',
              'src/style.js',
              'src/event_behavior.js',
              'src/aspect_behavior.js',

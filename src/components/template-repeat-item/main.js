@@ -1,8 +1,8 @@
 "use strict";
 
-NovaExports.exports = { "stylesheet": null, "template": "\n        <content></content>\n    " };
+NovaExports.exports = { "stylesheet": "", "template": "<template>\n        <content></content>\n    </template>" };
 "use strict";
-var TemplateRepeat = NovaExports({
+window.TemplateRepeatItem = NovaExports({
     is: "template-repeat-item",
     props: {
         insertParent: {
@@ -46,16 +46,12 @@ var TemplateRepeat = NovaExports({
             self.updateTemplate();
         });
 
-        this.on("_readyToRenderChanged", function () {
-            if (self.readyToRender) {
-                self._childNodes.forEach(function (child) {
-                    self.compileNode(child);
-                    self.insertParent.appendChild(child);
-                });
-            }
+        // 绑定子节点，插入到insertParent
+        self._childNodes.forEach(function (child) {
+            self.compileNode(child);
+            self.insertParent.appendChild(child);
         });
     },
-    render: function render(html) {},
     _bindProps: function _bindProps(p1, p2) {
         var self = this;
         this.on(this._getPropChangeEventName(p1), function () {

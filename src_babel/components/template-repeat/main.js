@@ -1,4 +1,4 @@
-NovaExports.exports={"stylesheet":"\n        :host {display:none;}\n    ","template":"\n    "};
+NovaExports.exports={"stylesheet":"<style>\n        :host {display:none;}\n    </style>","template":"<template>\n    </template>"};
         'use strict';
         let TemplateRepeat = NovaExports({
             is: 'template-repeat',
@@ -49,15 +49,23 @@ NovaExports.exports={"stylesheet":"\n        :host {display:none;}\n    ","templ
             },
             appendItem: function(index) {
                 let self = this;
-                let wrap = document.createElement('div');
-                wrap.innerHTML = '<template-repeat-item index="' + index + '" item="{{items.' + index + '}}" as="' + this.as + '" index-as="' + this.indexAs + '">' + this.innerHTML + '</template-repeat-item>';
-                let item = wrap.querySelector('template-repeat-item');
 
-                console.log('append Item', {item: item, html: item.innerHTML});
-
-                this.compileNode(wrap);
-                item.insertParent = this.insertParent;
-                item.readyToRender = true;
+                let item = new TemplateRepeatItem({
+                    attrs: {
+                        index: index,
+                        item: '{{items.' + index + '}}',
+                        as: this.as,
+                        'index-as': this.indexAs
+                    },
+                    props: {
+                        item: self.items[index],
+                        template: this.innerHTML,
+                        insertParent: this.insertParent,
+                    },
+                    beforeCreated: function() {
+                        self.compileNode(this);
+                    }
+                });
 
                 item.on('_itemChanged', function(ev, oldVal, newVal, path) {
                     self.itemChangedHandler.call(self, ev, oldVal, newVal, path, index);
