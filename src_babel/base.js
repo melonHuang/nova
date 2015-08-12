@@ -1,4 +1,5 @@
 'use strict';
+console.log('nova');
 (function() {
     /*
     * Nova Custom Element的基础原型链
@@ -28,8 +29,7 @@
             // 内部变量命名空间
             self._nova = self._nova || {};
 
-
-            // 初始化behaviors
+            // mix behaviors
             self._initBehaviors();
 
             // 当parent完成created初始化后
@@ -40,6 +40,7 @@
 
                 // 设置元素创建时的初始attr/prop
                 self._initInitialData();
+
 
                 // 调用Behaviors的createdHandler
                 self.trigger('created');
@@ -135,6 +136,7 @@
             this.on('created attached detached attributeChanged', function(e) {
                 let args = arguments;
                 behaviors.forEach(function(behavior) {
+
                     var handler = behavior[e.type + 'Handler'];
                     if(handler) {
                         handler.apply(self, Array.prototype.slice.call(args, 1));

@@ -10,6 +10,8 @@
         parentScope: null,
 
         createdHandler: function() {
+            this.beforeTemplateInit && this.beforeTemplateInit();
+
             if(!this.template) { return; }
 
             let self = this;
@@ -21,9 +23,8 @@
                 allBindings: []         // 所有绑定，包括与父scope的绑定
             };
 
-            // 绑定事件，包括：
-            // 1. 监听属性变化，属性改变时同步到child node
-            bindEvents.call(self);
+            // 监听属性变化，属性改变时同步到child node
+            listenToProps.call(self);
 
             // Data binding
             let nodeWrap = bindTemplate.call(this);
@@ -42,19 +43,40 @@
          * 1. 给每个节点添加tagName class，支持Scoped CSS
          * 2. data binding
          * */
-        compileNode: function(node) {
+        compileNodes: function(node) {
             addClass.call(this, node);
 
             // 绑定节点与属性
-            this.bindNode(node);
+            this.bindNodes(node);
+        },
+
+        bindNodeByConfigs: function(node, configs) {
+            let self = this;
+            configs.forEach(function(config) {
+                let bindObj = $.extend({}, config, {
+                    scope: self
+                });
+                switch(bindObj.type) {
+                    case Nova.ExpressionParser.BIND_TYPES.ATTRIBUTE:
+                    case Nova.ExpressionParser.BIND_TYPES.PROPERTY:
+                          $.extend(bindObj, Nova.ExpressionParser._parseExpression(bindObj.value));
+                          break;
+                }
+                bind.call(self, node, bindObj);
+            });
+            // 添加scope
+            if(Nova.ExpressionParser.SCOPED_ELEMENTS.indexOf(node.tagName) >= 0) {
+                node._nova = node._nova || {};
+                node._nova.parentScope = self;
+            }
         },
 
         /*
          * Data binding
          * */
-        bindNode: function(node) {
+        bindNodes: function(node) {
             let self = this;
-            let bindData = Nova.ExpressionParser.parse(node);
+            let bindData = Nova.ExpressionParser.parse(node, this);
 
             //if(this.is == 'template-repeat-item' && bindData.size > 0) debugger;
 
@@ -62,26 +84,7 @@
             bindData.forEach(function(bindings, node) {
                 // 遍历节点与host绑定的不同attr/prop/textContent
                 bindings.forEach(function(bindObj) {
-                    // 通过on-event, 绑定child和host的方法
-                    if(bindObj.type == Nova.ExpressionParser.BIND_TYPES.EVENT) {
-                        let scope = findScopeByProp.call(self, bindObj.callback, true);
-                        scope && hostListenToChild.call(scope, node, bindObj.event, bindObj);
-                    }
-                    // 绑定child和host的属性
-                    else {
-                        // From host to child 遍历被模板监听的属性
-                        bindObj.relatedProps.forEach(function(prop) {
-                            let scope = findScopeByProp.call(self, prop.name);
-                            scope && childListenToHost.call(scope, node, prop.name, prop.path, bindObj);
-                            self._nova.binds.allBindings.push(bindObj);
-                        });
-
-                        //  From child to host
-                        if(bindObj.event) {
-                            let scope = findScopeByProp.call(self, bindObj.relatedProps[0].name);
-                            scope && hostListenToChild.call(scope, node, bindObj.event, bindObj);
-                        }
-                    }
+                    bind.call(self, node, bindObj);
                 });
 
                 // 添加scope
@@ -95,7 +98,7 @@
         /*
          * 取消节点与host的data binding
          * */
-        unbindNode: function(node) {
+        unbindNodes: function(node) {
             let self = this;
 
             childUnlistenHost.call(self, node);
@@ -103,7 +106,7 @@
 
             // traverse childNodes
             node.childNodes && Array.prototype.slice.call(node.childNodes).forEach(function(child) {
-                self.unbindNode(child);
+                self.unbindNodes(child);
             });
         },
 
@@ -121,9 +124,13 @@
                 props = [];
                 this._nova.binds.allBindings.forEach(function(bindObj) {
                     bindObj.relatedProps.forEach(function(prop) {
-                        if(props.indexOf(prop.name) < 0) {
-                            props.push(prop.path);
+                        let exist;
+                        for(let i = 0, len = props.length; i < len; i++) {
+                            if(prop.path.indexOf(props[i]) == 0 && (!prop.path[props[i]] || prop.prop[props[i]] == '.')) {
+                                exist = true;
+                            }
                         }
+                        !exist && props.push(prop.path);
                     });
                 });
             }
@@ -135,6 +142,30 @@
             });
         }
     };
+
+    function bind(node, bindObj) {
+        let self = this;
+        // 通过on-event, 绑定child和host的方法
+        if(bindObj.type == Nova.ExpressionParser.BIND_TYPES.EVENT) {
+            let scope = findScopeByProp.call(self, bindObj.callback, true);
+            scope && hostListenToChild.call(scope, node, bindObj.event, bindObj);
+        }
+        // 绑定child和host的属性
+        else {
+            // From host to child 遍历被模板监听的属性
+            bindObj.relatedProps.forEach(function(prop) {
+                let scope = findScopeByProp.call(self, prop.name);
+                scope && childListenToHost.call(scope, node, prop.name, prop.path, bindObj);
+                self._nova.binds.allBindings.push(bindObj);
+            });
+
+            //  From child to host
+            if(bindObj.event) {
+                let scope = findScopeByProp.call(self, bindObj.relatedProps[0].name);
+                scope && hostListenToChild.call(scope, node, bindObj.event, bindObj);
+            }
+        }
+    }
 
     // 寻找最近的scope
     // prop: 属性名
@@ -153,7 +184,7 @@
         return scope;
     }
 
-    function bindEvents() {
+    function listenToProps() {
         this.on(this._propsCommonChangeEvent, propsChangedHandler);
     }
 
@@ -161,7 +192,7 @@
     function bindTemplate() {
         let wrap = document.createElement('div');
         wrap.innerHTML = this.template;
-        this.compileNode(wrap);
+        this.compileNodes(wrap);
         return wrap;
     }
 
@@ -182,7 +213,7 @@
             bindArray && bindArray.forEach(function(bindInfo) {
                 // 若path是bindInfo.propPath的父属性，eg.path:a.b, propPath:a.b.c，则同步数据
                 if(bindInfo.propPath.slice(0, path.length) == path) {
-                    let value = Nova.ExpressionEvaluator.compile(bindInfo.bindObj, self);
+                    let value = Nova.ExpressionEvaluator.compile(bindInfo.bindObj);
                     syncChild.call(self, node, value, bindInfo.bindObj);
                 }
             });

@@ -20,9 +20,10 @@
                 <p>
                     I Love
                     <div>
-                        <template is="template-repeat" items="{{item.food}}" id="inner">
-                            <span>{{index + 1 + '.'}}</span>
-                            <span>{{item}}</span>
+                        <template is="template-repeat" items="{{item.food}}" id="inner" as="food" index-as="j">
+                            <div>{{index}}</div>
+                            <span>{{j + 1 + '.'}}</span>
+                            <span>{{food}}</span>
                         </template>
                     </div>
                 </p>

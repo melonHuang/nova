@@ -36,7 +36,9 @@
                 </template-if>
             </div>
         -->
-            
+            <template is="template-repeat" items="{{list}}">
+            {{item.name}}
+            </template>
         </template>
         <script type="text/nova">
             var Ele = Nova({
@@ -60,7 +62,6 @@
                     }
                 },
                 createdHandler: function() {
-                    alert('outer created');
                     this.on('change', function() {
                         console.log('change!!');
                     });
@@ -73,7 +74,10 @@
     <link rel="import" href="components/todo-list/main.html" />
     <script src="build/nova_dev.js"> </script>
 
+    <!--
     <todo-list></todo-list>
+    -->
+    <my-ele></my-ele>
 
     <script>
     </script>

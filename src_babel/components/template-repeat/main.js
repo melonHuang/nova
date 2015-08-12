@@ -1,6 +1,6 @@
-NovaExports.exports={"stylesheet":"<style>\n        :host {display:none;}\n    </style>","template":"<template>\n    </template>"};
+NovaExports.exports={"stylesheet":"\n        :host {display:none;}\n    ","template":"\n    "};
         'use strict';
-        let TemplateRepeat = NovaExports({
+        window.TemplateRepeat = NovaExports({
             is: 'template-repeat',
             extends: 'template',
             props: {
@@ -11,7 +11,7 @@ NovaExports.exports={"stylesheet":"<style>\n        :host {display:none;}\n    <
                     }
                 },
                 as: {
-                    type: Array,
+                    type: String,
                     value: 'item'
                 },
                 indexAs: {
@@ -34,7 +34,7 @@ NovaExports.exports={"stylesheet":"<style>\n        :host {display:none;}\n    <
                 this.notifyPath('items');
             },
             _itemsObserver: function(ev, oldVal, newVal, path) {
-                if(path != 'items' || !newVal) { return; }
+                if(path != 'items' || !newVal || newVal.constructor != Array) { return; }
 
                 this.itemNodes = this.itemNodes || [];
 
@@ -51,25 +51,28 @@ NovaExports.exports={"stylesheet":"<style>\n        :host {display:none;}\n    <
                 let self = this;
 
                 let item = new TemplateRepeatItem({
-                    attrs: {
-                        index: index,
-                        item: '{{items.' + index + '}}',
-                        as: this.as,
-                        'index-as': this.indexAs
-                    },
                     props: {
+                        as: this.as,
+                        indexAs: this.indexAs,
+                        index: index,
                         item: self.items[index],
                         template: this.innerHTML,
                         insertParent: this.insertParent,
                     },
                     beforeCreated: function() {
-                        self.compileNode(this);
+                        self.compileNodes(this);
+                        self.bindNodeByConfigs(this, [{
+                            type: Nova.ExpressionParser.BIND_TYPES.PROPERTY,
+                            value: '{{items.' + index + '}}',
+                            name: self.as
+                        }, {
+                            type: Nova.ExpressionParser.BIND_TYPES.EVENT,
+                            callback: 'itemChangedHandler',
+                            event: self._getPropChangeEventName(self.as)
+                        }]);
                     }
                 });
 
-                item.on('_itemChanged', function(ev, oldVal, newVal, path) {
-                    self.itemChangedHandler.call(self, ev, oldVal, newVal, path, index);
-                });
 
                 this.itemNodes.push(item);
             },
@@ -78,7 +81,7 @@ NovaExports.exports={"stylesheet":"<style>\n        :host {display:none;}\n    <
                 let item = this.itemNodes.splice(index, 1)[0];
                 item._childNodes.forEach(function(node) {
                     node.parentElement && node.parentElement.removeChild(node);
-                    self.unbindNode(item);
+                    self.unbindNodes(item);
                 });
             },
             itemChangedHandler: function(ev, oldVal, newVal, path, index) {

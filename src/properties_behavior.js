@@ -20,6 +20,10 @@
         _propsCommonChangeEvent: '_propsChanged',
 
         createdHandler: function createdHandler() {
+            this.beforePropsInit && this.beforePropsInit();
+
+            this.props = Nova.Utils.mix({}, [this.props]);
+
             initProperties.call(this);
         },
 
@@ -63,6 +67,7 @@
         addProperty: function addProperty(prop, config) {
             this.props[prop] = config;
             defineProperty.call(this, prop, config);
+            setPropInitVal.call(this, prop, config);
         },
 
         hasProperty: function hasProperty(propName) {

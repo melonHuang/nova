@@ -1,9 +1,10 @@
 'use strict';
 (function () {
     Nova.ExpressionEvaluator = {
-        compile: function compile(info, scope) {
+        compile: function compile(info) {
             var self = this;
             var annotations = info.annotations;
+            var scope = info.scope;
 
             // 遍历scope链，获得渲染data
             var data = this.getTmplData(info, scope);

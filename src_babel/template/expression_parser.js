@@ -24,6 +24,7 @@
      *          // 当表达式可作为左值时，可以进行双向绑定
      *          isLeftValue: true,
      *          event: 'change',
+     *          callback: 'handlerName',
      *
      *          relatedProps: [{name:'prop1', path: 'prop1.value'}, {name:'prop2', path:'prop2.value'}],
      *          annotations: [
@@ -50,37 +51,38 @@
         },
         ANNOTATION_REGEXP: /{{.+?}}/g,
         SCOPED_ELEMENTS: ['TEMPLATE-REPEAT-ITEM', 'TEMPLATE'],
-        parse: function(node) {
+        parse: function(node, scope) {
             let data = new Map();
 
-            this._parseNode(node, data);
+            this._parseNode(node, scope, data);
 
             return data;
         },
 
         // 解析一个节点
-        _parseNode: function(node, data) {
+        _parseNode: function(node, scope, data) {
             if(node.nodeType == Node.TEXT_NODE) {
-                this._parseTextNode(node, data);
+                this._parseTextNode(node, scope, data);
             } else {
-                this._parseElementNode(node, data);
+                this._parseElementNode(node, scope, data);
             }
         },
 
-        _parseTextNode: function(node, data) {
+        _parseTextNode: function(node, scope, data) {
             let value = node.textContent;
             if(!this._testEscape(value)) {return;}
 
             let self = this;
             let bindObj = this._parseExpression(value);
             $.extend(bindObj, {
-                type: this.BIND_TYPES.TEXT
+                type: this.BIND_TYPES.TEXT,
+                scope: scope
             })
             data.set(node, [bindObj]);
         },
 
 
-        _parseElementNode: function(node, data) {
+        _parseElementNode: function(node, scope, data) {
             let self = this;
 
             let bindings = [];
@@ -91,7 +93,8 @@
                 if(attr.constructor == Attr && self._testEscape(attr.value)) {
                     let bindType = self._getTypeByAttrName(attr.name);
                     let bindObj = {
-                        type: bindType
+                        type: bindType,
+                        scope: scope
                     };
 
                     switch(bindType) {
@@ -117,7 +120,7 @@
             // 遍历子节点
             if(this.SCOPED_ELEMENTS.indexOf(node.tagName) < 0) {
                 node.childNodes && Array.prototype.slice.call(node.childNodes).forEach(function(child) {
-                    self._parseNode(child, data);
+                    self._parseNode(child, scope, data);
                 });
             }
         },

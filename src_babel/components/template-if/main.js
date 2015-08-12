@@ -1,6 +1,6 @@
-NovaExports.exports={"stylesheet":"","template":""};
+NovaExports.exports={"stylesheet":null,"template":null};
         'use strict';
-        let TemplateRepeat = NovaExports({
+        let TemplateIf = NovaExports({
             is: 'template-if',
             props: {
                 "if": {

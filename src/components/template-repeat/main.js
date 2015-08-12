@@ -1,8 +1,8 @@
 "use strict";
 
-NovaExports.exports = { "stylesheet": "<style>\n        :host {display:none;}\n    </style>", "template": "<template>\n    </template>" };
+NovaExports.exports = { "stylesheet": "\n        :host {display:none;}\n    ", "template": "\n    " };
 "use strict";
-var TemplateRepeat = NovaExports({
+window.TemplateRepeat = NovaExports({
     is: "template-repeat",
     "extends": "template",
     props: {
@@ -13,7 +13,7 @@ var TemplateRepeat = NovaExports({
             }
         },
         as: {
-            type: Array,
+            type: String,
             value: "item"
         },
         indexAs: {
@@ -36,7 +36,7 @@ var TemplateRepeat = NovaExports({
         this.notifyPath("items");
     },
     _itemsObserver: function _itemsObserver(ev, oldVal, newVal, path) {
-        if (path != "items" || !newVal) {
+        if (path != "items" || !newVal || newVal.constructor != Array) {
             return;
         }
 
@@ -55,24 +55,26 @@ var TemplateRepeat = NovaExports({
         var self = this;
 
         var item = new TemplateRepeatItem({
-            attrs: {
-                index: index,
-                item: "{{items." + index + "}}",
-                as: this.as,
-                "index-as": this.indexAs
-            },
             props: {
+                as: this.as,
+                indexAs: this.indexAs,
+                index: index,
                 item: self.items[index],
                 template: this.innerHTML,
                 insertParent: this.insertParent
             },
             beforeCreated: function beforeCreated() {
-                self.compileNode(this);
+                self.compileNodes(this);
+                self.bindNodeByConfigs(this, [{
+                    type: Nova.ExpressionParser.BIND_TYPES.PROPERTY,
+                    value: "{{items." + index + "}}",
+                    name: self.as
+                }, {
+                    type: Nova.ExpressionParser.BIND_TYPES.EVENT,
+                    callback: "itemChangedHandler",
+                    event: self._getPropChangeEventName(self.as)
+                }]);
             }
-        });
-
-        item.on("_itemChanged", function (ev, oldVal, newVal, path) {
-            self.itemChangedHandler.call(self, ev, oldVal, newVal, path, index);
         });
 
         this.itemNodes.push(item);
@@ -82,7 +84,7 @@ var TemplateRepeat = NovaExports({
         var item = this.itemNodes.splice(index, 1)[0];
         item._childNodes.forEach(function (node) {
             node.parentElement && node.parentElement.removeChild(node);
-            self.unbindNode(item);
+            self.unbindNodes(item);
         });
     },
     itemChangedHandler: function itemChangedHandler(ev, oldVal, newVal, path, index) {
