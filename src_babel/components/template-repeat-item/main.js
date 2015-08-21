@@ -3,18 +3,6 @@ NovaExports.exports={"stylesheet":null,"template":"\n        <content></content>
         window.TemplateRepeatItem = NovaExports({
             is: 'template-repeat-item',
             props: {
-                insertParent: {
-                    type: Object
-                },
-                as: {
-                    type: String,
-                    value: 'item'
-                },
-                indexAs: {
-                    type: String,
-                    value: 'index'
-                },
-                readyToRender: Boolean
             },
             beforeTemplateInit: function() {
                 let self = this;

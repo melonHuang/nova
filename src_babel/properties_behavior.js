@@ -155,6 +155,7 @@
         var self = this;
         var realPropPrefix = '_prop_';
 
+        debugger;
         Object.defineProperty(this.__proto__, name, {
 
             get: function() {
@@ -193,7 +194,6 @@
         let oldVal = this[name];
         delete this[name];
 
-        // set value
         let attrName = Nova.CaseMap.camelToDashCase(name);
 
         // 优先读取attribute

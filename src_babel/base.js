@@ -14,7 +14,8 @@ console.log('nova');
             Nova.EventBehavior,
             Nova.AspectBehavior,
             Nova.PropBehavior,
-            Nova.TemplateBehavior
+            Nova.TemplateBehavior,
+            Nova.StyleBehavior
         ],
 
         behaviors: [],

@@ -82,7 +82,7 @@
                 //if(info.value.indexOf('writer') >= 0)debugger;
                 let curScope = scope;
                 while(curScope) {
-                    if(curScope.props[prop.name]) {
+                    if( (curScope == scope || curScope.enumerableAsParentScope) && curScope.hasProperty(prop.name)) {
                         data[prop.name] = curScope[prop.name];
                         break;
                     }
