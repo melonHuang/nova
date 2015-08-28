@@ -163,7 +163,7 @@
             set: function(val) {
                 let oldVal = self[realPropPrefix + name];
 
-                if(val == oldVal) {return;}
+                if (val == oldVal || (val != val && oldVal != oldVal)) {
 
                 self[realPropPrefix + name] = val;
                 // TODO: 实现relectToAttribute
