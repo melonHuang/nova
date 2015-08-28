@@ -155,7 +155,6 @@
         var self = this;
         var realPropPrefix = '_prop_';
 
-        debugger;
         Object.defineProperty(this.__proto__, name, {
 
             get: function() {
@@ -192,6 +191,7 @@
 
     function setPropInitVal(name, config) {
         let oldVal = this[name];
+        let hasOldVal = this.hasOwnProperty(name);
         delete this[name];
 
         let attrName = Nova.CaseMap.camelToDashCase(name);
@@ -201,7 +201,7 @@
             setPropFromAttr.call(this, attrName);
         }
         // 若已有绑定的值，则使用原来的值
-        else if(oldVal) {
+        else if(hasOldVal) {
             this[name] = oldVal;
         }
         // 否则使用默认值
