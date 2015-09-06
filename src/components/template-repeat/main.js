@@ -5,27 +5,23 @@ NovaExports.exports = { "stylesheet": "\n        :host {display:none;}\n    ", "
 window.TemplateRepeat = NovaExports({
     is: "template-repeat",
     "extends": "template",
+    enumerableAsParentScope: false,
     props: {
         items: {
             type: Array,
             value: function value() {
                 return [];
             }
-        },
-        as: {
-            type: String,
-            value: "item"
-        },
-        indexAs: {
-            type: String,
-            value: "index"
-        },
-        parentSelector: String
+        }
     },
     createdHandler: function createdHandler() {
         var self = this;
 
-        this.insertParent = this.parentSelector ? this.parentElement.querySelector(this.parentSelector) : this.parentElement;
+        this.as = this.getAttribute("as") || "item";
+        this.indexAs = this.getAttribute("index-as") || "index";
+
+        var parentSelector = this.getAttribute("parent-selector");
+        this.insertParent = parentSelector ? this.parentElement.querySelector(parentSelector) : this.parentElement;
 
         // NOTICE: 通过setTimeout，保证使用js通过wrap创建元素后，能获取内部的template-repeat
         setTimeout(function () {

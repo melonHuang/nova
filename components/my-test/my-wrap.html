@@ -1,7 +1,6 @@
 <dom-module>
     <style type="text/css">
         :host {
-            //display: none;
         }
 
         ul,
@@ -10,8 +9,9 @@
         }
     </style>
     <template>
+        <my-inner writer="{{writer}}"></my-inner>
         <ul>
-        <template is="template-repeat" items="{{data}}" id="outer">
+        <template is="template-repeat" items="{{data}}" id="outer" index-as="outerIndex">
             <li>My name is <span>{{item.name}}</span>
                 <div>
                     {{writer}}
@@ -21,7 +21,7 @@
                     I Love
                     <div>
                         <template is="template-repeat" items="{{item.food}}" id="inner" as="food" index-as="j">
-                            <div>{{index}}</div>
+                            <div>{{outerIndex  + '' + j}}</div>
                             <span>{{j + 1 + '.'}}</span>
                             <span>{{food}}</span>
                         </template>
@@ -87,18 +87,23 @@
                         */
                     ]
                 },
-isGirl: {
-type: Boolean,
-value: true
-},
-age: {
-         type:Number,
-              value: 10
-     }
+                isGirl: {
+                    type: Boolean,
+                    value: true
+                },
+                age: {
+                     type:Number,
+                    value: 10
+                },
+                items: {
+                    type: String,
+                    value: 'items wahahahah'
+                }
             },
             createdHandler: function() {
                                 //alert();
-            }
+            },
+            _clickHandler: function() {alert('click')}
         });
     </script>
 </dom-module>

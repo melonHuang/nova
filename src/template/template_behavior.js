@@ -7,7 +7,9 @@
     * 3. 解析模板中的annotaion，进行单向数据绑定
     * */
     var TemplateBehavior = {
+        host: null,
         parentScope: null,
+        enumerableAsParentScope: true,
 
         createdHandler: function createdHandler() {
             this.beforeTemplateInit && this.beforeTemplateInit();
@@ -66,10 +68,11 @@
                 }
                 bind.call(self, node, bindObj);
             });
+            node._nova = node._nova || {};
+            node._nova.host = self;
             // 添加scope
             if (Nova.ExpressionParser.SCOPED_ELEMENTS.indexOf(node.tagName) >= 0) {
-                node._nova = node._nova || {};
-                node._nova.parentScope = self;
+                node._nova.parentScope = node._nova.host;
             }
         },
 
@@ -90,9 +93,10 @@
                 });
 
                 // 添加scope
+                node._nova = node._nova || {};
+                node._nova.host = self;
                 if (Nova.ExpressionParser.SCOPED_ELEMENTS.indexOf(node.tagName) >= 0) {
-                    node._nova = node._nova || {};
-                    node._nova.parentScope = self;
+                    node._nova.parentScope = node._nova.host;
                 }
             });
         },
@@ -162,9 +166,10 @@
             });
 
             //  From child to host
-            if (bindObj.event) {
+            if (bindObj.isLeftValue) {
                 var scope = findScopeByProp.call(self, bindObj.relatedProps[0].name);
-                scope && hostListenToChild.call(scope, node, bindObj.event, bindObj);
+                scope && bindObj.event && hostListenToChild.call(scope, node, bindObj.event, bindObj);
+                scope && bindObj.type == Nova.ExpressionParser.BIND_TYPES.PROPERTY && hostListenToChild.call(scope, node, this._getPropChangeEventName(bindObj.name), bindObj);
             }
         }
     }
@@ -175,11 +180,13 @@
     function findScopeByProp(prop, notDefinedProp) {
         var scope = this;
         while (scope) {
-            if (!notDefinedProp && scope.hasProperty(prop)) {
-                break;
-            }
-            if (notDefinedProp && typeof scope[prop] == 'function') {
-                break;
+            if (scope == this || scope.enumerableAsParentScope) {
+                if (!notDefinedProp && scope.hasProperty(prop)) {
+                    break;
+                }
+                if (notDefinedProp && typeof scope[prop] == 'function') {
+                    break;
+                }
             }
             scope = scope._nova.parentScope;
         }

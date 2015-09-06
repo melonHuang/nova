@@ -4,20 +4,7 @@ NovaExports.exports = { "stylesheet": null, "template": "\n        <content></co
 "use strict";
 window.TemplateRepeatItem = NovaExports({
     is: "template-repeat-item",
-    props: {
-        insertParent: {
-            type: Object
-        },
-        as: {
-            type: String,
-            value: "item"
-        },
-        indexAs: {
-            type: String,
-            value: "index"
-        },
-        readyToRender: Boolean
-    },
+    props: {},
     beforeTemplateInit: function beforeTemplateInit() {
         var self = this;
         // 根据this.as和this.indexAs声明两个属性，为data-binding做准备

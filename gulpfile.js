@@ -73,12 +73,14 @@ gulp.task('concat-nova', function() {
              'src/template/expression_parser.js',
              'src/template/expression_evaluator.js',
              'src/template/template_behavior.js',
+             'src/style_behavior.js',
              'src/base.js',
              'src/components/template-repeat/main.js',
              'src/components/template-if/main.js',
              'src/components/template-repeat-item/main.js'
         ])
         .pipe(plugins.concat('nova.js'))
+        .pipe(plugins.removeUseStrict())
         .pipe(gulp.dest('./build'));
 });
 

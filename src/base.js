@@ -10,7 +10,7 @@ console.log('nova');
 
     var Base = {
 
-        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.PropBehavior, Nova.TemplateBehavior],
+        _behaviors: [Nova.EventBehavior, Nova.AspectBehavior, Nova.PropBehavior, Nova.TemplateBehavior, Nova.StyleBehavior],
 
         behaviors: [],
 

@@ -182,7 +182,6 @@
         var oldVal = this[name];
         delete this[name];
 
-        // set value
         var attrName = Nova.CaseMap.camelToDashCase(name);
 
         // 优先读取attribute
