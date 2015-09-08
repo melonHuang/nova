@@ -74,10 +74,10 @@
 
             let self = this;
             let bindObj = this._parseExpression(value);
-            $.extend(bindObj, {
+            Nova.Utils.mix(bindObj, [{
                 type: this.BIND_TYPES.TEXT,
                 scope: scope
-            })
+            }])
             data.set(node, [bindObj]);
         },
 
@@ -105,7 +105,7 @@
                         case self.BIND_TYPES.ATTRIBUTE:
                         case self.BIND_TYPES.PROPERTY:
                               bindObj.name = bindType == self.BIND_TYPES.ATTRIBUTE ? attr.name.slice(0, -1) : Nova.CaseMap.dashToCamelCase(attr.name);
-                              $.extend(bindObj, self._parseExpression(attr.value));
+                              Nova.Utils.mix(bindObj, [self._parseExpression(attr.value)]);
                               break;
                     }
                     node.removeAttribute(attr.name);

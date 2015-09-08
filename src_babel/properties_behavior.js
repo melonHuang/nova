@@ -164,6 +164,8 @@
                 let oldVal = self[realPropPrefix + name];
 
                 if (val == oldVal || (val != val && oldVal != oldVal)) {
+                    return;
+                }
 
                 self[realPropPrefix + name] = val;
                 // TODO: 实现relectToAttribute
