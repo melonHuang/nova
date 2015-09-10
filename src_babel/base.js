@@ -33,63 +33,63 @@ console.log('nova');
             // mix behaviors
             self._initBehaviors();
 
-            // 当parent完成created初始化后
-            // 1. 设置初始的prop和attrs
-            // 2. 调用behaviors和自定义元素的createdHandler
-            this._waitForInit(function() {
+            // 等待parent完成behaviors初始化，再开始自身的初始化
+            // 原因：自身的prop/attr，需要先由parent的behaviors初始化
+            this._waitForParentBehaviorsReady(function() {
                 eleStack.push(self);
 
                 // 设置元素创建时的初始attr/prop
                 self._initInitialData();
 
-
                 // 调用Behaviors的createdHandler
-                self.trigger('created');
-
-                self._nova.isCreated = true;
+                self.trigger('nova.behaviors.created');
+                self._nova.isBehaviorsReady = true;
                 eleStack.pop();
-                self.trigger('finishCreated');
+                self.trigger('nova.behaviors.ready');
 
                 // 调用自定义元素的CreatedHandler
                 self.createdHandler && self.createdHandler();
+
+                self.trigger('nova.ready');
+                self._nova.isReady = true;
             });
         },
 
         attachedCallback: function() {
             let self = this;
-            this._waitForInit(function() {
-                self.trigger('attached');
+            this._waitForParentBehaviorsReady(function() {
+                self.trigger('nova.behaviors.attached');
                 self.attachedHandler && self.attachedHandler();
             });
         },
 
         detachedCallback: function() {
             let self = this;
-            this._waitForInit(function() {
-                self.trigger('detached');
+            this._waitForParentBehaviorsReady(function() {
+                self.trigger('nova.behaviors.detached');
                 self.detachedHandler && self.detachedHandler();
             });
         },
 
         attributeChangedCallback: function(attrName, oldVal, newVal) {
             let self = this;
-            if(this._nova.isCreated) {
-                self.trigger('attributeChanged', [attrName, oldVal, newVal]);
+            if(this._nova.isBehaviorsReady) {
+                self.trigger('nova.behaviors.attributeChanged', [attrName, oldVal, newVal]);
                 self.attributeChangedHandler && self.attributeChangedHandler(attrName, oldVal, newVal);
             }
         },
 
-        _waitForInit: function(callback) {
+        _waitForParentBehaviorsReady: function(callback) {
             // 当parent完成created初始化后，才能开始create
             let parent = eleStack[eleStack.length - 1];
-            if(!parent  || parent._nova.isCreated) {
+            if(!parent  || parent._nova.isBehaviorsReady) {
                 callback();
             } else {
                 let finishCb = function() {
-                    parent.off('finishCreated', finishCb);
+                    parent.off('nova.behaviors.ready', finishCb);
                     callback();
                 }
-                parent.on('finishCreated', finishCb)
+                parent.on('nova.behaviors.ready', finishCb)
             }
         },
 
@@ -134,11 +134,11 @@ console.log('nova');
             });
 
             /* 在生命周期的各个阶段初始化behaviors */
-            this.on('created attached detached attributeChanged', function(e) {
+            this.on('nova.behaviors.created nova.behaviors.attached nova.behaviors.detached nova.behaviors.attributeChanged', function(e) {
                 let args = arguments;
+                let type = e.type.match(/nova\.behaviors\.(.+)$/)[1];
                 behaviors.forEach(function(behavior) {
-
-                    var handler = behavior[e.type + 'Handler'];
+                    var handler = behavior[type + 'Handler'];
                     if(handler) {
                         handler.apply(self, Array.prototype.slice.call(args, 1));
                     }

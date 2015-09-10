@@ -1,5 +1,6 @@
 'use strict';
 (function() {
+    /******************** Nova **********************/
     let Nova = function(prototype) {
         Nova.Utils.chainObject(prototype, Nova.Base);
         let opts = { prototype };
@@ -14,13 +15,8 @@
         return getConstructor(registered);
     };
 
-    function getConstructor(realConstructor) {
-        return function(initData) {
-            initData && Nova.Initial.set(initData);
-            return new realConstructor();
-        }
-    }
 
+    /******************** NovaExports **********************/
     let NovaExports = function(prototype) {
         Nova.Utils.mix(prototype, NovaExports.exports);
         var ret = Nova(prototype);
@@ -29,6 +25,16 @@
     }
     NovaExports.exports = {};
 
+
+    /******************** Helpers **********************/
+    function getConstructor(realConstructor) {
+        return function(initData) {
+            initData && Nova.Initial.set(initData);
+            return new realConstructor();
+        }
+    }
+
     window.Nova = Nova;
     window.NovaExports = NovaExports;
+
 })();

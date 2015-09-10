@@ -57,13 +57,13 @@
         bindNodeByConfigs: function bindNodeByConfigs(node, configs) {
             var self = this;
             configs.forEach(function (config) {
-                var bindObj = $.extend({}, config, {
+                var bindObj = Nova.Utils.mix({}, [config, {
                     scope: self
-                });
+                }]);
                 switch (bindObj.type) {
                     case Nova.ExpressionParser.BIND_TYPES.ATTRIBUTE:
                     case Nova.ExpressionParser.BIND_TYPES.PROPERTY:
-                        $.extend(bindObj, Nova.ExpressionParser._parseExpression(bindObj.value));
+                        Nova.Utils.mix(bindObj, [Nova.ExpressionParser._parseExpression(bindObj.value)], true);
                         break;
                 }
                 bind.call(self, node, bindObj);

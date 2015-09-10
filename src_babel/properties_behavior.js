@@ -47,14 +47,21 @@
 
         set: function(path, value, opt) {
             let paths = path.split('.');
+            let oldVal = this[paths[0]];
 
-            if(paths.length == 1 && this.get(path) != value) {
-                this[paths[0]] = value;
-                return;
+            this._setProp(path, value);
+
+            // 若不会触发setter，则需手动触发_propChange事件
+            if(!(paths.length == 1 && this.get(path) != value)) {
+                if(oldVal != value) {
+                    triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
+                }
             }
+        },
 
+        _setProp: function(path, value) {
+            let paths = path.split('.');
             let curObj = this;
-            let oldVal = curObj[paths[0]];
             for(let i = 0, len = paths.length; i < len - 1; i++) {
                 if(!curObj[paths[i]]) {
                     return;
@@ -62,7 +69,6 @@
                 curObj = curObj[paths[i]];
             }
             curObj[paths[paths.length - 1]] = value;
-            triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
         },
 
         get: function(path) {

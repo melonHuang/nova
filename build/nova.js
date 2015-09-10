@@ -1,4 +1,6 @@
+'use strict';
 (function () {
+    /******************** Nova **********************/
     var Nova = function Nova(prototype) {
         Nova.Utils.chainObject(prototype, Nova.Base);
         var opts = { prototype: prototype };
@@ -10,12 +12,7 @@
         Nova.Style.init(prototype);
         return getConstructor(registered);
     };
-    function getConstructor(realConstructor) {
-        return function (initData) {
-            initData && Nova.Initial.set(initData);
-            return new realConstructor();
-        };
-    }
+    /******************** NovaExports **********************/
     var NovaExports = function NovaExports(prototype) {
         Nova.Utils.mix(prototype, NovaExports.exports);
         var ret = Nova(prototype);
@@ -23,6 +20,13 @@
         return ret;
     };
     NovaExports.exports = {};
+    /******************** Helpers **********************/
+    function getConstructor(realConstructor) {
+        return function (initData) {
+            initData && Nova.Initial.set(initData);
+            return new realConstructor();
+        };
+    }
     window.Nova = Nova;
     window.NovaExports = NovaExports;
 }());
@@ -267,6 +271,33 @@ Nova.CssParse = function () {
             }
         };
     Nova.Initial = Initial;
+}());
+(function () {
+    Nova.Utils.mix(Nova, {
+        ready: function ready(eles, callback) {
+            if (eles.constructor != Array) {
+                eles = [eles];
+            }
+            var count = eles.length;
+            var readyCount = 0;
+            eles.forEach(function (ele) {
+                if (ele._nova && ele._nova.isReady) {
+                    readyCount++;
+                } else {
+                    ele.addEventListener('nova.ready', function () {
+                        readyCount++;
+                        checkForReady();
+                    });
+                }
+            });
+            checkForReady();
+            function checkForReady() {
+                if (readyCount == count) {
+                    callback();
+                }
+            }
+        }
+    });
 }());
 (function () {
     var lastInsertedStylesheet = undefined;
@@ -540,12 +571,18 @@ Nova.CssParse = function () {
             },
             set: function set(path, value, opt) {
                 var paths = path.split('.');
-                if (paths.length == 1 && this.get(path) != value) {
-                    this[paths[0]] = value;
-                    return;
+                var oldVal = this[paths[0]];
+                this._setProp(path, value);
+                // 若不会触发setter，则需手动触发_propChange事件
+                if (!(paths.length == 1 && this.get(path) != value)) {
+                    if (oldVal != value) {
+                        triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
+                    }
                 }
+            },
+            _setProp: function _setProp(path, value) {
+                var paths = path.split('.');
                 var curObj = this;
-                var oldVal = curObj[paths[0]];
                 for (var i = 0, len = paths.length; i < len - 1; i++) {
                     if (!curObj[paths[i]]) {
                         return;
@@ -553,7 +590,6 @@ Nova.CssParse = function () {
                     curObj = curObj[paths[i]];
                 }
                 curObj[paths[paths.length - 1]] = value;
-                triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
             },
             get: function get(path) {
                 var paths = path.split('.');
@@ -633,16 +669,13 @@ Nova.CssParse = function () {
     function defineProperty(name, config) {
         var self = this;
         var realPropPrefix = '_prop_';
-        debugger;
-        this['_nova_old_' + name] = this[name];
-        delete this[name];
         Object.defineProperty(this.__proto__, name, {
             get: function get() {
                 return self[realPropPrefix + name];
             },
             set: function set(val) {
                 var oldVal = self[realPropPrefix + name];
-                if (val == oldVal) {
+                if (val == oldVal || val != val && oldVal != oldVal) {
                     return;
                 }
                 self[realPropPrefix + name] = val;
@@ -666,12 +699,14 @@ Nova.CssParse = function () {
     }
     function setPropInitVal(name, config) {
         var oldVal = this[name];
+        var hasOldVal = this.hasOwnProperty(name);
+        delete this[name];
         var attrName = Nova.CaseMap.camelToDashCase(name);
         // 优先读取attribute
         if (this.hasAttribute(attrName)) {
             setPropFromAttr.call(this, attrName);
         }    // 若已有绑定的值，则使用原来的值
-        else if (oldVal) {
+        else if (hasOldVal) {
             this[name] = oldVal;
         }    // 否则使用默认值
         else if (config.hasOwnProperty('value')) {
@@ -784,10 +819,10 @@ Nova.CssParse = function () {
             }
             var self = this;
             var bindObj = this._parseExpression(value);
-            $.extend(bindObj, {
-                type: this.BIND_TYPES.TEXT,
-                scope: scope
-            });
+            Nova.Utils.mix(bindObj, [{
+                            type: this.BIND_TYPES.TEXT,
+                            scope: scope
+                        }]);
             data.set(node, [bindObj]);
         },
         _parseElementNode: function _parseElementNode(node, scope, data) {
@@ -809,7 +844,7 @@ Nova.CssParse = function () {
                     case self.BIND_TYPES.ATTRIBUTE:
                     case self.BIND_TYPES.PROPERTY:
                         bindObj.name = bindType == self.BIND_TYPES.ATTRIBUTE ? attr.name.slice(0, -1) : Nova.CaseMap.dashToCamelCase(attr.name);
-                        $.extend(bindObj, self._parseExpression(attr.value));
+                        Nova.Utils.mix(bindObj, [self._parseExpression(attr.value)]);
                         break;
                     }
                     node.removeAttribute(attr.name);
@@ -1031,11 +1066,13 @@ Nova.CssParse = function () {
             bindNodeByConfigs: function bindNodeByConfigs(node, configs) {
                 var self = this;
                 configs.forEach(function (config) {
-                    var bindObj = $.extend({}, config, { scope: self });
+                    var bindObj = Nova.Utils.mix({}, [config, {
+                                            scope: self
+                                        }]);
                     switch (bindObj.type) {
                     case Nova.ExpressionParser.BIND_TYPES.ATTRIBUTE:
                     case Nova.ExpressionParser.BIND_TYPES.PROPERTY:
-                        $.extend(bindObj, Nova.ExpressionParser._parseExpression(bindObj.value));
+                        Nova.Utils.mix(bindObj, [Nova.ExpressionParser._parseExpression(bindObj.value)], true);
                         break;
                     }
                     bind.call(self, node, bindObj);
@@ -1346,55 +1383,56 @@ console.log('nova');
                 self._nova = self._nova || {};
                 // mix behaviors
                 self._initBehaviors();
-                // 当parent完成created初始化后
-                // 1. 设置初始的prop和attrs
-                // 2. 调用behaviors和自定义元素的createdHandler
-                this._waitForInit(function () {
+                // 等待parent完成behaviors初始化，再开始自身的初始化
+                // 原因：自身的prop/attr，需要先由parent的behaviors初始化
+                this._waitForParentBehaviorsReady(function () {
                     eleStack.push(self);
                     // 设置元素创建时的初始attr/prop
                     self._initInitialData();
                     // 调用Behaviors的createdHandler
-                    self.trigger('created');
-                    self._nova.isCreated = true;
+                    self.trigger('nova.behaviors.created');
+                    self._nova.isBehaviorsReady = true;
                     eleStack.pop();
-                    self.trigger('finishCreated');
+                    self.trigger('nova.behaviors.ready');
                     // 调用自定义元素的CreatedHandler
                     self.createdHandler && self.createdHandler();
+                    self.trigger('nova.ready');
+                    self._nova.isReady = true;
                 });
             },
             attachedCallback: function attachedCallback() {
                 var self = this;
-                this._waitForInit(function () {
-                    self.trigger('attached');
+                this._waitForParentBehaviorsReady(function () {
+                    self.trigger('nova.behaviors.attached');
                     self.attachedHandler && self.attachedHandler();
                 });
             },
             detachedCallback: function detachedCallback() {
                 var self = this;
-                this._waitForInit(function () {
-                    self.trigger('detached');
+                this._waitForParentBehaviorsReady(function () {
+                    self.trigger('nova.behaviors.detached');
                     self.detachedHandler && self.detachedHandler();
                 });
             },
             attributeChangedCallback: function attributeChangedCallback(attrName, oldVal, newVal) {
                 var self = this;
-                if (this._nova.isCreated) {
-                    self.trigger('attributeChanged', [attrName, oldVal, newVal]);
+                if (this._nova.isBehaviorsReady) {
+                    self.trigger('nova.behaviors.attributeChanged', [attrName, oldVal, newVal]);
                     self.attributeChangedHandler && self.attributeChangedHandler(attrName, oldVal, newVal);
                 }
             },
-            _waitForInit: function _waitForInit(callback) {
+            _waitForParentBehaviorsReady: function _waitForParentBehaviorsReady(callback) {
                 // 当parent完成created初始化后，才能开始create
                 var parent = eleStack[eleStack.length - 1];
-                if (!parent || parent._nova.isCreated) {
+                if (!parent || parent._nova.isBehaviorsReady) {
                     callback();
                 } else {
                     (function () {
                         var finishCb = function finishCb() {
-                            parent.off('finishCreated', finishCb);
+                            parent.off('nova.behaviors.ready', finishCb);
                             callback();
                         };
-                        parent.on('finishCreated', finishCb);
+                        parent.on('nova.behaviors.ready', finishCb);
                     }());
                 }
             },
@@ -1435,10 +1473,11 @@ console.log('nova');
                     Utils.mix(self.props, toMix.props);
                 });
                 /* 在生命周期的各个阶段初始化behaviors */
-                this.on('created attached detached attributeChanged', function (e) {
+                this.on('nova.behaviors.created nova.behaviors.attached nova.behaviors.detached nova.behaviors.attributeChanged', function (e) {
                     var args = arguments;
+                    var type = e.type.match(/nova\.behaviors\.(.+)$/)[1];
                     behaviors.forEach(function (behavior) {
-                        var handler = behavior[e.type + 'Handler'];
+                        var handler = behavior[type + 'Handler'];
                         if (handler) {
                             handler.apply(self, Array.prototype.slice.call(args, 1));
                         }

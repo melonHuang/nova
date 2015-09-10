@@ -5,7 +5,7 @@
         it('init', function() {
             window.TestEleTemplate = Nova({
                 is: 'test-ele-template',
-                template: '<span class="name-wrap" is-gay="{{isGay}}" age="{{age}}" data-name$="{{name}}">{{name}}</span>\
+                template: '<span class="name-wrap" is-gay="{{isGay}}" age="{{age}}" data-name_="{{name}}">{{name}}</span>\
                         <div class="page-wrap">\
                             <content select=".page"></content>\
                         </div>\

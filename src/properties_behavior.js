@@ -37,14 +37,21 @@
 
         set: function set(path, value, opt) {
             var paths = path.split('.');
+            var oldVal = this[paths[0]];
 
-            if (paths.length == 1 && this.get(path) != value) {
-                this[paths[0]] = value;
-                return;
+            this._setProp(path, value);
+
+            // 若不会触发setter，则需手动触发_propChange事件
+            if (!(paths.length == 1 && this.get(path) != value)) {
+                if (oldVal != value) {
+                    triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
+                }
             }
+        },
 
+        _setProp: function _setProp(path, value) {
+            var paths = path.split('.');
             var curObj = this;
-            var oldVal = curObj[paths[0]];
             for (var i = 0, len = paths.length; i < len - 1; i++) {
                 if (!curObj[paths[i]]) {
                     return;
@@ -52,7 +59,6 @@
                 curObj = curObj[paths[i]];
             }
             curObj[paths[paths.length - 1]] = value;
-            triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
         },
 
         get: function get(path) {
@@ -153,7 +159,7 @@
             set: function set(val) {
                 var oldVal = self[realPropPrefix + name];
 
-                if (val == oldVal) {
+                if (val == oldVal || val != val && oldVal != oldVal) {
                     return;
                 }
 
@@ -180,6 +186,7 @@
 
     function setPropInitVal(name, config) {
         var oldVal = this[name];
+        var hasOldVal = this.hasOwnProperty(name);
         delete this[name];
 
         var attrName = Nova.CaseMap.camelToDashCase(name);
@@ -189,7 +196,7 @@
             setPropFromAttr.call(this, attrName);
         }
         // 若已有绑定的值，则使用原来的值
-        else if (oldVal) {
+        else if (hasOldVal) {
             this[name] = oldVal;
         }
         // 否则使用默认值
