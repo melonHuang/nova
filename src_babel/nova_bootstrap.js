@@ -2,11 +2,23 @@
 (function() {
     /******************** Nova **********************/
     let Nova = function(prototype) {
-        Nova.Utils.chainObject(prototype, Nova.Base);
+        var Base = Nova.Utils.mix({}, Nova.Base);
+        Nova.Utils.chainObject(prototype, Base);
+
         let opts = { prototype };
+
+        // 处理继承
         if(prototype.extends) {
+            var tmpEle = document.createElement(prototype.extends);
+            if(tmpEle.constructor == HTMLUnknownElement) {
+                console.warn('extends to HTMLUnknownElement');
+            }
+            Nova.Utils.chainObject(Base, tmpEle.constructor.prototype);
             opts.extends = prototype.extends
+        } else {
+            Nova.Utils.chainObject(Base, HTMLElement.prototype);
         }
+
         let registered = document.registerElement(prototype.is, opts);
 
         // 初始化stylesheet

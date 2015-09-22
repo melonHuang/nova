@@ -158,6 +158,6 @@ console.log('nova');
         }
     };
 
-    Base = Utils.chainObject(Base, HTMLElement.prototype);
+    //Base = Utils.chainObject(Base, HTMLElement.prototype);
     Nova.Base = Base;
 })();

@@ -2,10 +2,19 @@
 (function () {
     /******************** Nova **********************/
     var Nova = function Nova(prototype) {
-        Nova.Utils.chainObject(prototype, Nova.Base);
+        var Base = Nova.Utils.mix({}, Nova.Base);
+        Nova.Utils.chainObject(prototype, Base);
         var opts = { prototype: prototype };
+        // 处理继承
         if (prototype['extends']) {
+            var tmpEle = document.createElement(prototype['extends']);
+            if (tmpEle.constructor == HTMLUnknownElement) {
+                console.warn('extends to HTMLUnknownElement');
+            }
+            Nova.Utils.chainObject(Base, tmpEle.constructor.prototype);
             opts['extends'] = prototype['extends'];
+        } else {
+            Nova.Utils.chainObject(Base, HTMLElement.prototype);
         }
         var registered = document.registerElement(prototype.is, opts);
         // 初始化stylesheet
@@ -298,6 +307,14 @@ Nova.CssParse = function () {
             }
         }
     });
+}());
+(function () {
+    Nova.devOpt = {
+        umd: {
+            baseUrl: '',
+            root: 'window'
+        }
+    };
 }());
 (function () {
     var lastInsertedStylesheet = undefined;
@@ -1498,7 +1515,7 @@ console.log('nova');
                 this._nova[prop] = val;
             }
         };
-    Base = Utils.chainObject(Base, HTMLElement.prototype);
+    //Base = Utils.chainObject(Base, HTMLElement.prototype);
     Nova.Base = Base;
 }());
 NovaExports.exports = {
