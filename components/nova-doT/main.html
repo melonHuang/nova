@@ -1,0 +1,34 @@
+<template is="dom-module">
+    <style>
+        :host { display: block; }
+    </style>
+    <template>
+        <content></content>
+    </template>
+    <script>
+        Nova({
+            is: 'nova-doT',
+            props: {
+                data: {
+                    type: Object
+                }
+            },
+            createdHandler: function() {
+                var tmplSrc = this.querySelector('script').innerHTML;
+                this.tmplFun = doT.template(tmplSrc);
+
+                this.on('_dataChanged', this.dataObserver);
+
+                var html = this.tmplFun(this.data);
+                this.refreshHTML(html);
+            },
+            dataObserver: function(e, oldVal, newVal) {
+                var html = this.tmplFun(newVal);
+                this.refreshHTML(html);
+            },
+            refreshHTML: function(html) {
+                this.innerHTML = html;
+            }
+        });
+    </script>
+</template>

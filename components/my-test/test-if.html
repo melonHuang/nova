@@ -1,0 +1,27 @@
+<template is="dom-module">
+    <template>
+    <div>
+        <template-if if="{{gender == 'female'}}">
+            I'm a girl, {{gender}}
+        </template-if>
+    </div>
+    <div>
+        <template-if if="{{gender != 'female'}}">
+            I'm a boy, {{gender}}
+        </template-if>
+    </div>
+    </template>
+    <script>
+        Nova({
+            is: 'test-if',
+            props: {
+                gender: {
+                    type: String,
+                    value: 'female'
+                }
+            },
+            createdHandler: function() {
+            }
+        });
+    </script>
+</template>

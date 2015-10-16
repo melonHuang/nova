@@ -1,0 +1,50 @@
+<template is="dom-module">
+    <template>
+    <div>
+
+        <template is="template-repeat" items="{{rooms}}" as="room" index-as="i">
+        <div>
+            Room{{i + 1}}:
+            <div>
+                <template is="template-repeat" items="{{room}}" as="man" index-as="j">
+                <div>
+                    {{j + 1}}.{{man}}
+                </div>
+                </template>
+            </div>
+        </div>
+        </template>
+    </div>
+
+    <!-- Android浏览器中，select option必须为父子关系。因此无法通过template-repeat循环得到 -->
+    <select>
+    </select>
+    <template is="template-repeat" items="{{rooms}}" as="room" parent-selector="select">
+        <option value="{{room}}">{{room}}</option>
+    </template>
+
+
+    </template>
+    <script>
+        Nova({
+            is: 'test-repeat',
+            props: {
+                rooms: {
+                    type: Array,
+                    value: [
+                        [
+                            'melon',
+                            'tt'
+                        ],
+                        [
+                            'zmy',
+                            'ms'
+                        ]
+                    ]
+                }
+            },
+            createdHandler: function() {
+            }
+        });
+    </script>
+</template>

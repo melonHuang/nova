@@ -10,7 +10,7 @@
         // 处理继承
         if (prototype['extends']) {
             var tmpEle = document.createElement(prototype['extends']);
-            if (tmpEle.constructor == HTMLUnknownElement) {
+            if (tmpEle.toString() == '[object HTMLUnknownElement]') {
                 console.warn('extends to HTMLUnknownElement');
             }
             Nova.Utils.chainObject(Base, tmpEle.constructor.prototype);

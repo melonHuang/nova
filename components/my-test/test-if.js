@@ -21,17 +21,16 @@
       return ({})[name];
     }
 
-    var _bundleExports = NovaExports.__fixedUglify = 'script>';NovaExports.exports = { 'stylesheet': '', 'template': '\n        <span>Writer: {{writer}}</span>\n    ' };
-    var MyWrap = NovaExports({
-      is: 'my-inner',
+    var _bundleExports = NovaExports.__fixedUglify = 'script>';NovaExports.exports = { 'stylesheet': '', 'template': '\n    <div>\n        <template-if if="{{gender == &apos;female&apos;}}">\n            I&apos;m a girl, {{gender}}\n        </template-if>\n    </div>\n    <div>\n        <template-if if="{{gender != &apos;female&apos;}}">\n            I&apos;m a boy, {{gender}}\n        </template-if>\n    </div>\n    ' };
+    NovaExports({
+      is: 'test-if',
       props: {
-        writer: {
+        gender: {
           type: String,
-          value: 'sdfsd'
+          value: 'female'
         }
       },
-      createdHandler: function createdHandler() {},
-      attributeChangedHandler: function attributeChangedHandler() {}
+      createdHandler: function createdHandler() {}
     });
 
     return _bundleExports;

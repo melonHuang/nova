@@ -1,4 +1,4 @@
-<dom-module>
+<template is="dom-module">
     <style type="text/css">
         .todo-done {
             text-decoration: line-through;
@@ -27,7 +27,7 @@
             </form>
         </div>
     </template>
-    <script type="text/nova">
+    <script>
         'use strict';
         let TodoList = Nova({
             is: 'todo-list',
@@ -69,4 +69,4 @@
             }
         });
     </script>
-</dom-module>
+</template>

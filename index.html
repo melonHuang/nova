@@ -11,17 +11,19 @@
     <script>
         var html = '';
         var logDiv = document.querySelector('.log');
+        var errors = [];
         window.onerror = function(msg) {
             html += msg + '\n'
+            errors.push(msg);
             logDiv.innerHTML = (html);
         }
 
     </script>
     <script src="http://s2.qhimg.com/!d5f32f54/doT.min.js"></script>
-    <script src="http://hw.weinre.com/target/target-script-min.js#anonymous"></script>
     <script src="http://s2.qhimg.com/static/a9e451ace7e1fd1d/zepto.114.js"></script>
     <script src="build/nova_polyfills.js"></script>
     <!--
+    <script src="http://hw.weinre.com/target/target-script-min.js#anonymous"></script>
     <script src="src_babel/nova_bootstrap.js"></script>
     <script src="src_babel/lib/css_parse.js"></script>
     <script src="src_babel/lib/case_map.js"></script>
@@ -39,9 +41,9 @@
     <script src="src_babel/components/template-repeat.js"></script>
     <script src="src_babel/components/template-if.js"></script>
     <script src="src_babel/components/template-repeat-item.js"></script>
-    -->
-    <script src="build/nova.js?xxxxxxxxxx"></script>
     <script src="http://s0.qhimg.com/static/8b15829770ad1a0f/jquery,require.js"></script>
+    -->
+    <script src="build/nova.js"></script>
 
 
 
@@ -49,14 +51,36 @@
 
 <!--
     <link rel="import" href="components/my-test/my-inner.html" />
-    <script src="components/my-test/my-wrap.js?aa"></script>
-    -->
     <link rel="import" href="components/my-test/my-wrap.html" />
+    <link rel="import" href="components/nova-doT/main.html" />
+-->
+    <script src="components/my-test/my-wrap.js"></script>
+    <script src="components/my-test/my-inner.js"></script>
+    <script src="components/my-test/test-if.js"></script>
+    <script src="components/my-test/test-repeat.js"></script>
+    <script src="components/todo-list/main.js"></script>
+    <script src="components/nova-doT/main.js"></script>
     <script src="build/nova_dev.js"> </script>
 
 
 
+    <!--
     <my-wrap></my-wrap>
+    <test-repeat></test-repeat>
+    <todo-list></todo-list>
+    <test-if></test-if>
+    -->
+
+    <nova-doT data='[1,2,3]'>
+        <script type="text/tmpl">
+            <select>
+            {{~ it :v:index}}
+                <option value="{{= v}}">{{= v}}</option>
+            {{~}}
+            </select>
+        </script>
+    </nova-doT>
+
 
 
 
