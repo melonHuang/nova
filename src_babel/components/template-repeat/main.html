@@ -1,12 +1,12 @@
-<dom-module>
+<template is="dom-module">
     <style>
         :host {display:none;}
     </style>
     <template>
     </template>
-    <script typee="text/nova-javascript">
+    <script>
         'use strict';
-        window.TemplateRepeat = Nova({
+        Nova.Components.TemplateRepeat = Nova({
             is: 'template-repeat',
             extends: 'template',
             enumerableAsParentScope: false,
@@ -26,6 +26,7 @@
 
                 let parentSelector = this.getAttribute('parent-selector');
                 this.insertParent = parentSelector ? this.parentElement.querySelector(parentSelector) :  this.parentElement;
+                this.insertNextSibling = this.nextSibling;
 
                 // NOTICE: 通过setTimeout，保证使用js通过wrap创建元素后，能获取内部的template-repeat
                 setTimeout(function() {
@@ -52,7 +53,7 @@
             appendItem: function(index) {
                 let self = this;
 
-                let item = new TemplateRepeatItem({
+                let item = new Nova.Components.TemplateRepeatItem({
                     props: {
                         as: this.as,
                         indexAs: this.indexAs,
@@ -60,6 +61,7 @@
                         item: self.items[index],
                         template: this.innerHTML,
                         insertParent: this.insertParent,
+                        insertNextSibling: this.insertNextSibling
                     },
                     beforeCreated: function() {
                         self.compileNodes(this);
@@ -91,4 +93,4 @@
             }
         });
     </script>
-</dom-module>
+</template>

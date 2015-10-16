@@ -14,27 +14,9 @@
             return this.evaluate(tmplString, data, info);
         },
 
-        // TODO: 支持输入{}转义
         evaluate: function evaluate(str, data, extra) {
-            // 如果绑定的是属性，且expression只有一个annotation，且annotation两边没有其他字符
-            // 则返回的值，不能转换成字符串
-            if (extra.type == Nova.ExpressionParser.BIND_TYPES.PROPERTY && extra.annotations.length == 1 && str.trim().match(/^\{\{[^\{\}]*}\}$/)) {
-                var result = undefined;
-                str.replace(/\{\{([^\{\}]*)\}\}/g, function (sub, expr) {
-                    if (!expr) return '';
-                    try {
-                        result = new Function('data', 'with(data){return (' + expr + ');}')(data);
-                    } catch (ex) {
-                        result = sub;
-                    }
-                });
-
-                return result;
-            }
-
             return Nova.Utils.tmpl(str, data);
         },
-
         compileTmplString: function compileTmplString(info) {
             var self = this;
             if (!info.tmplString) {

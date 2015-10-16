@@ -294,6 +294,9 @@
             case Nova.ExpressionParser.BIND_TYPES.ATTRIBUTE:
                 if(child.getAttribute(extra.name) != value) {
                     child.setAttribute(extra.name, value);
+                    if(value === false) {
+                        child.removeAttribute(extra.name);
+                    }
                 }
                 break;
             case Nova.ExpressionParser.BIND_TYPES.PROPERTY:

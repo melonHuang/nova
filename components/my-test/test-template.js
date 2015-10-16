@@ -21,13 +21,17 @@
       return ({})[name];
     }
 
-    var _bundleExports = NovaExports.__fixedUglify = 'script>';NovaExports.exports = { 'stylesheet': '', 'template': '\n        <p>Welcome</p>\n        <p>-------start--------</p>\n        <template-if if="{{gender == &apos;female&apos;}}">\n            I&apos;m a girl, {{gender}}\n        </template-if>\n        <p>---------------</p>\n        <template-if if="{{gender == &apos;male&apos;}}">\n            I&apos;m a boy, {{gender}}\n        </template-if>\n        <p>-------end--------</p>\n    ' };
+    var _bundleExports = NovaExports.__fixedUglify = 'script>';NovaExports.exports = { 'stylesheet': '.box{width:75pt;height:75pt;background:#000}.box[gender=m]{background:#00f}.box[gender=f]{background:red}', 'template': '\n        <div class="box" gender_="{{gender == &apos;male&apos; ? &apos;m&apos; : &apos;f&apos;}}" g_="{{isFemale}}">\n        </div>\n    ' };
     NovaExports({
-      is: 'test-if',
+      is: 'test-template',
       props: {
         gender: {
           type: String,
-          value: 'female'
+          value: 'male'
+        },
+        isFemale: {
+          type: Boolean,
+          value: false
         }
       },
       createdHandler: function createdHandler() {}

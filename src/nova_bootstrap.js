@@ -27,6 +27,8 @@
         return getConstructor(registered);
     };
 
+    Nova.Components = {};
+
     /******************** NovaExports **********************/
     var NovaExports = function NovaExports(prototype) {
         Nova.Utils.mix(prototype, NovaExports.exports);

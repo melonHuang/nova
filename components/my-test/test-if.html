@@ -1,15 +1,15 @@
 <template is="dom-module">
     <template>
-    <div>
+        <p>Welcome</p>
+        <p>-------start--------</p>
         <template-if if="{{gender == 'female'}}">
             I'm a girl, {{gender}}
         </template-if>
-    </div>
-    <div>
-        <template-if if="{{gender != 'female'}}">
+        <p>---------------</p>
+        <template-if if="{{gender == 'male'}}">
             I'm a boy, {{gender}}
         </template-if>
-    </div>
+        <p>-------end--------</p>
     </template>
     <script>
         Nova({

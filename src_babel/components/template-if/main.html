@@ -1,4 +1,4 @@
-<dom-module>
+<template is="dom-module">
     <script>
         'use strict';
         let TemplateIf = Nova({
@@ -9,7 +9,9 @@
                 }
             },
             createdHandler: function() {
+                var self = this;
                 this.insertParent = this.parentSelector ? this.parentElement.querySelector(this.parentSelector) :  this.parentElement;
+                this.insertNextSibling = this.nextSibling;
                 this.nodes = Array.prototype.slice.call(this.childNodes);
 
                 // NOTICE: 通过setTimeout，保证使用js通过wrap创建元素后，能获取内部的template-if
@@ -24,14 +26,24 @@
                 let self = this;
                 if(newVal) {
                     this.nodes.forEach(function(node) {
-                        self.insertParent.appendChild(node);
+                        self.append(node);
                     });
                 } else {
-                    Array.prototype.slice.call(this.insertParent.childNodes).forEach(function(node) {
-                        self.insertParent.removeChild(node);
+                    this.nodes.forEach(function(node) {
+                        if(node.parentElement == self.insertParent) {
+                            self.insertParent.removeChild(node);
+                        }
                     });
+                }
+            },
+            // 插入策略类似template-repeat
+            append: function(child) {
+                if(this.insertNextSibling && this.insertNextSibling.parentElement == this.insertParent) {
+                    this.insertParent.insertBefore(child, this.insertNextSibling);
+                } else {
+                    this.insertParent.appendChild(child);
                 }
             }
         });
     </script>
-</dom-module>
+</template>

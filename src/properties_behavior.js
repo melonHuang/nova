@@ -222,7 +222,7 @@
                 try {
                     result = JSON.parse(value);
                 } catch (e) {
-                    result = value;
+                    result = null;
                     console.warn('Nova::Attributes: could not decode Array as JSON');
                 }
                 break;

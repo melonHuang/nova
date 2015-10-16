@@ -27,6 +27,7 @@
         return getConstructor(registered);
     };
 
+    Nova.Components = {};
 
     /******************** NovaExports **********************/
     let NovaExports = function(prototype) {

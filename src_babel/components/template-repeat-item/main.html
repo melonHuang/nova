@@ -1,10 +1,10 @@
-<dom-module>
+<template is="dom-module">
     <template>
         <content></content>
     </template>
-    <script typee="text/nova-javascript">
+    <script>
         'use strict';
-        window.TemplateRepeatItem = Nova({
+        Nova.Components.TemplateRepeatItem = Nova({
             is: 'template-repeat-item',
             props: {
             },
@@ -27,10 +27,24 @@
                 // 绑定子节点，插入到insertParent
                 self._childNodes.forEach(function(child) {
                     self.compileNodes(child);
-                    self.insertParent.appendChild(child);
+                    self.append(child);
                 });
+            },
+
+            /*
+             * 插入策略优先级：
+             * 1. 优先寻找template-repeat后面的兄弟节点，若有且其父元素未变更、则插入到这个节点之前
+             * 2. 否则直接追加到template-repeat的父元素之后
+             * 注意：若template-repeat的兄弟节点可能被移动、建议使用单独的元素包裹template-repeat
+             */
+            append: function(child) {
+                if(this.insertNextSibling && this.insertNextSibling.parentElement == this.insertParent) {
+                    this.insertParent.insertBefore(child, this.insertNextSibling);
+                } else {
+                    this.insertParent.appendChild(child);
+                }
             }
 
         });
     </script>
-</dom-module>
+</template>

@@ -40,18 +40,31 @@
             }
             return object;
         },
+        /*
+         * 模板函数
+         * @param {String} str 模板字符串，表达式定界符为{{exp}}，表达式中不可包含连续的大括号，如'{{'或'}}'
+         * @param {Object} data 数据
+         * @param {Function} format
+         * */
         tmpl: function tmpl(str, data, format) {
-            str = str.replace(/\{\{([^\{\}]*)\}\}/g, function (sub, expr) {
+            var toString = true;
+            if (str.trim().match(/^{{.*}}$/) && str.trim().match(/{{(.*?)}}/g).length == 1) {
+                toString = false;
+            }
+
+            var r;
+            str = str.replace(/\{\{(.*?)\}\}/g, function (sub, expr) {
                 if (!expr) return '';
                 try {
-                    var r = new Function('data', 'with(data){return (' + expr + ');}')(data);
+                    r = new Function('data', 'with(data){return (' + expr + ');}')(data);
                     return format ? format(r, expr) : r;
                 } catch (ex) {
+                    r = sub;
                     return sub;
                 }
             });
 
-            return str;
+            return toString ? str : r;
         }
     };
 

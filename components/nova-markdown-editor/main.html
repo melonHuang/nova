@@ -1,0 +1,27 @@
+<template is="dom-module">
+    <style>
+        textarea {
+            width: 100%;
+            height: 100px;
+        }
+    </style>
+    <template>
+        <textarea>#Welcome</textarea>
+        <nova-markdown></nova-markdown>
+    </template>
+    <script>
+        Nova({
+            is: 'nova-markdown-editor',
+            createdHandler: function() {
+                var textarea = this.querySelector('textarea');
+                var markdown = this.querySelector('nova-markdown');
+                textarea.addEventListener('input', function() {
+                    markdown.content = textarea.value;
+                });
+                Nova.ready(markdown, function() {
+                    markdown.content = textarea.value.trim();
+                });
+            }
+        });
+    </script>
+</template>

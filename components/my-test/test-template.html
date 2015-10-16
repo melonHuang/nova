@@ -1,0 +1,36 @@
+<template is="dom-module">
+    <style>
+        .box {
+            width: 100px;
+            height: 100px;
+            background: black;
+        }
+        .box[gender=m] {
+            background: blue;
+        }
+        .box[gender=f] {
+            background: red;
+        }
+    </style>
+    <template>
+        <div class="box" gender_="{{gender == 'male' ? 'm' : 'f'}}" g_="{{isFemale}}" >
+        </div>
+    </template>
+    <script>
+        Nova({
+            is: 'test-template',
+            props: {
+                gender: {
+                    type: String,
+                    value: 'male'
+                },
+                isFemale: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+            createdHandler: function() {
+            }
+        });
+    </script>
+</template>

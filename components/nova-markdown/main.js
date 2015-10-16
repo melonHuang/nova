@@ -7,7 +7,7 @@
     } else if (typeof define === 'function' && define.amd) {
       define([], factory);
     } else {
-      var globalAlias = 'MyTest';
+      var globalAlias = 'NovaMarkdown';
       var namespace = globalAlias.split('.');
       var parent = root;
       for (var i = 0; i < namespace.length - 1; i++) {
@@ -21,16 +21,19 @@
       return ({})[name];
     }
 
-    var _bundleExports = NovaExports.__fixedUglify = 'script>';NovaExports.exports = { 'stylesheet': '', 'template': '\n        <p>Welcome</p>\n        <p>-------start--------</p>\n        <template-if if="{{gender == &apos;female&apos;}}">\n            I&apos;m a girl, {{gender}}\n        </template-if>\n        <p>---------------</p>\n        <template-if if="{{gender == &apos;male&apos;}}">\n            I&apos;m a boy, {{gender}}\n        </template-if>\n        <p>-------end--------</p>\n    ' };
+    var _bundleExports = NovaExports.__fixedUglify = 'script>';NovaExports.exports = { 'stylesheet': '', 'template': '' };
     NovaExports({
-      is: 'test-if',
+      is: 'nova-markdown',
       props: {
-        gender: {
-          type: String,
-          value: 'female'
-        }
+        content: String
       },
-      createdHandler: function createdHandler() {}
+      createdHandler: function createdHandler() {
+        this.on('_contentChanged', this.contentChanged);
+        this.content = this.innerHTML;
+      },
+      contentChanged: function contentChanged() {
+        this.innerHTML = markdown.toHTML(this.content);
+      }
     });
 
     return _bundleExports;

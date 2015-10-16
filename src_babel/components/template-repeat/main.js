@@ -1,6 +1,28 @@
-NovaExports.exports={"stylesheet":"\n        :host {display:none;}\n    ","template":"\n    "};
+(function() {(function (root, factory) {
+  if (typeof exports === 'object') {
+    module.exports = factory();
+  }
+  else if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  }
+  else {
+    var globalAlias = 'TemplateRepeat';
+    var namespace = globalAlias.split('.');
+    var parent = root;
+    for ( var i = 0; i < namespace.length-1; i++ ) {
+      if ( parent[namespace[i]] === undefined ) parent[namespace[i]] = {};
+      parent = parent[namespace[i]];
+    }
+    parent[namespace[namespace.length-1]] = factory();
+  }
+}(this, function() {
+  function _requireDep(name) {
+    return {}[name];
+  }
+
+  var _bundleExports = NovaExports.__fixedUglify="script>";NovaExports.exports={"stylesheet":":host{display:none}","template":"\n    "};
         'use strict';
-        window.TemplateRepeat = NovaExports({
+        Nova.Components.TemplateRepeat = NovaExports({
             is: 'template-repeat',
             extends: 'template',
             enumerableAsParentScope: false,
@@ -20,6 +42,7 @@ NovaExports.exports={"stylesheet":"\n        :host {display:none;}\n    ","templ
 
                 let parentSelector = this.getAttribute('parent-selector');
                 this.insertParent = parentSelector ? this.parentElement.querySelector(parentSelector) :  this.parentElement;
+                this.insertNextSibling = this.nextSibling;
 
                 // NOTICE: 通过setTimeout，保证使用js通过wrap创建元素后，能获取内部的template-repeat
                 setTimeout(function() {
@@ -46,7 +69,7 @@ NovaExports.exports={"stylesheet":"\n        :host {display:none;}\n    ","templ
             appendItem: function(index) {
                 let self = this;
 
-                let item = new TemplateRepeatItem({
+                let item = new Nova.Components.TemplateRepeatItem({
                     props: {
                         as: this.as,
                         indexAs: this.indexAs,
@@ -54,6 +77,7 @@ NovaExports.exports={"stylesheet":"\n        :host {display:none;}\n    ","templ
                         item: self.items[index],
                         template: this.innerHTML,
                         insertParent: this.insertParent,
+                        insertNextSibling: this.insertNextSibling
                     },
                     beforeCreated: function() {
                         self.compileNodes(this);
@@ -85,3 +109,6 @@ NovaExports.exports={"stylesheet":"\n        :host {display:none;}\n    ","templ
             }
         });
     
+
+  return _bundleExports;
+}));}).call(window)

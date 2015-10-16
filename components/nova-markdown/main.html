@@ -1,0 +1,17 @@
+<template is="dom-module">
+    <script>
+        Nova({
+            is: 'nova-markdown',
+            props: {
+                content: String
+            },
+            createdHandler: function() {
+                this.on('_contentChanged', this.contentChanged);
+                this.content = this.innerHTML;
+            },
+            contentChanged: function() {
+                this.innerHTML = markdown.toHTML(this.content);
+            }
+        });
+    </script>
+</template>
