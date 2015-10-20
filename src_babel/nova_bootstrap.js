@@ -28,6 +28,7 @@
     };
 
     Nova.Components = {};
+    Nova.Loader = {};
 
     /******************** NovaExports **********************/
     let NovaExports = function(prototype) {

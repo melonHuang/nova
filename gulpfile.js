@@ -7,7 +7,11 @@ gulp.task('build-component', function() {
   // place code for your default task here
     gulp.src('components/**/*.html')
         .pipe(plugins.watch('components/**/*.html'))
-        .pipe(plugins.nova())
+        .pipe(plugins.nova({
+            combo: {
+                baseUrl: '.'
+            }
+        }))
         .pipe(plugins.rename(function(path) {
             console.log('building component', path);
             path.extname = '.js';
@@ -20,7 +24,9 @@ gulp.task('build-nova-components', function() {
   // place code for your default task here
     gulp.src('src_babel/components/**/*.html')
         .pipe(plugins.watch('src_babel/components/**/*.html'))
-        .pipe(plugins.nova())
+        .pipe(plugins.nova({
+            umd: null,
+        }))
         .pipe(plugins.rename(function(path) {
             console.log('building component', path);
             path.extname = '.js';

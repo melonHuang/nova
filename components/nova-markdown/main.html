@@ -1,6 +1,7 @@
 <template is="dom-module">
+    <script require-src="components/nova-markdown/markdown.min"></script>
     <script>
-        Nova({
+        var NovaMarkdown = Nova({
             is: 'nova-markdown',
             props: {
                 content: String
@@ -14,4 +15,5 @@
             }
         });
     </script>
+    </template>
 </template>
