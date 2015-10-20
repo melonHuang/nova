@@ -1518,249 +1518,177 @@ console.log('nova');
     //Base = Utils.chainObject(Base, HTMLElement.prototype);
     Nova.Base = Base;
 }());
-(function () {
-    (function (root, factory) {
-        if (typeof exports === 'object') {
-            module.exports = factory();
-        } else if (typeof define === 'function' && define.amd) {
-            define([], factory);
-        } else {
-            var globalAlias = 'TemplateRepeat';
-            var namespace = globalAlias.split('.');
-            var parent = root;
-            for (var i = 0; i < namespace.length - 1; i++) {
-                if (parent[namespace[i]] === undefined)
-                    parent[namespace[i]] = {};
-                parent = parent[namespace[i]];
+NovaExports.__fixedUglify = 'script>';
+NovaExports.exports = {
+    'stylesheet': ':host{display:none}',
+    'template': '\n    '
+};
+Nova.Components.TemplateRepeat = NovaExports({
+    is: 'template-repeat',
+    'extends': 'template',
+    enumerableAsParentScope: false,
+    props: {
+        items: {
+            type: Array,
+            value: function value() {
+                return [];
             }
-            parent[namespace[namespace.length - 1]] = factory();
         }
-    }(this, function () {
-        function _requireDep(name) {
-            return {}[name];
+    },
+    createdHandler: function createdHandler() {
+        var self = this;
+        this.as = this.getAttribute('as') || 'item';
+        this.indexAs = this.getAttribute('index-as') || 'index';
+        var parentSelector = this.getAttribute('parent-selector');
+        this.insertParent = parentSelector ? this.parentElement.querySelector(parentSelector) : this.parentElement;
+        this.insertNextSibling = this.nextSibling;
+        // NOTICE: 通过setTimeout，保证使用js通过wrap创建元素后，能获取内部的template-repeat
+        setTimeout(function () {
+            self.parentElement && self.parentElement.removeChild(self);
+        }, 0);
+        this.on('_itemsChanged', this._itemsObserver);
+        this.notifyPath('items');
+    },
+    _itemsObserver: function _itemsObserver(ev, oldVal, newVal, path) {
+        if (path != 'items' || !newVal || newVal.constructor != Array) {
+            return;
         }
-        var _bundleExports = NovaExports.__fixedUglify = 'script>';
-        NovaExports.exports = {
-            'stylesheet': ':host{display:none}',
-            'template': '\n    '
-        };
-        Nova.Components.TemplateRepeat = NovaExports({
-            is: 'template-repeat',
-            'extends': 'template',
-            enumerableAsParentScope: false,
-            props: {
-                items: {
-                    type: Array,
-                    value: function value() {
-                        return [];
-                    }
-                }
-            },
-            createdHandler: function createdHandler() {
-                var self = this;
-                this.as = this.getAttribute('as') || 'item';
-                this.indexAs = this.getAttribute('index-as') || 'index';
-                var parentSelector = this.getAttribute('parent-selector');
-                this.insertParent = parentSelector ? this.parentElement.querySelector(parentSelector) : this.parentElement;
-                this.insertNextSibling = this.nextSibling;
-                // NOTICE: 通过setTimeout，保证使用js通过wrap创建元素后，能获取内部的template-repeat
-                setTimeout(function () {
-                    self.parentElement && self.parentElement.removeChild(self);
-                }, 0);
-                this.on('_itemsChanged', this._itemsObserver);
-                this.notifyPath('items');
-            },
-            _itemsObserver: function _itemsObserver(ev, oldVal, newVal, path) {
-                if (path != 'items' || !newVal || newVal.constructor != Array) {
-                    return;
-                }
-                this.itemNodes = this.itemNodes || [];
-                // 删除所有项
-                for (var i = this.itemNodes.length - 1; i >= 0; i--) {
-                    this.removeItem(i);
-                }
-                // 添加新项
-                for (var i = 0, len = newVal.length; i < len; i++) {
-                    this.appendItem(i);
-                }
-            },
-            appendItem: function appendItem(index) {
-                var self = this;
-                var item = new Nova.Components.TemplateRepeatItem({
-                        props: {
-                            as: this.as,
-                            indexAs: this.indexAs,
-                            index: index,
-                            item: self.items[index],
-                            template: this.innerHTML,
-                            insertParent: this.insertParent,
-                            insertNextSibling: this.insertNextSibling
-                        },
-                        beforeCreated: function beforeCreated() {
-                            self.compileNodes(this);
-                            self.bindNodeByConfigs(this, [{
-                                                        type: Nova.ExpressionParser.BIND_TYPES.PROPERTY,
-                                                        value: '{{items.' + index + '}}',
-                                                        name: self.as
-                                                    }, {
-                                                        type: Nova.ExpressionParser.BIND_TYPES.EVENT,
-                                                        callback: 'itemChangedHandler',
-                                                        event: self._getPropChangeEventName(self.as)
-                                                    }]);
-                        }
-                    });
-                this.itemNodes.push(item);
-            },
-            removeItem: function removeItem(index) {
-                var self = this;
-                var item = this.itemNodes.splice(index, 1)[0];
-                item._childNodes.forEach(function (node) {
-                    node.parentElement && node.parentElement.removeChild(node);
-                    self.unbindNodes(item);
-                });
-            },
-            itemChangedHandler: function itemChangedHandler(ev, oldVal, newVal, path, index) {
-                this.trigger('itemChanged', oldVal, newVal, path, index);
-            }
-        });
-        return _bundleExports;
-    }));
-}.call(window));
-(function () {
-    (function (root, factory) {
-        if (typeof exports === 'object') {
-            module.exports = factory();
-        } else if (typeof define === 'function' && define.amd) {
-            define([], factory);
-        } else {
-            var globalAlias = 'TemplateIf';
-            var namespace = globalAlias.split('.');
-            var parent = root;
-            for (var i = 0; i < namespace.length - 1; i++) {
-                if (parent[namespace[i]] === undefined)
-                    parent[namespace[i]] = {};
-                parent = parent[namespace[i]];
-            }
-            parent[namespace[namespace.length - 1]] = factory();
+        this.itemNodes = this.itemNodes || [];
+        // 删除所有项
+        for (var i = this.itemNodes.length - 1; i >= 0; i--) {
+            this.removeItem(i);
         }
-    }(this, function () {
-        function _requireDep(name) {
-            return {}[name];
+        // 添加新项
+        for (var i = 0, len = newVal.length; i < len; i++) {
+            this.appendItem(i);
         }
-        var _bundleExports = NovaExports.__fixedUglify = 'script>';
-        NovaExports.exports = {
-            'stylesheet': '',
-            'template': ''
-        };
-        var TemplateIf = NovaExports({
-                is: 'template-if',
-                props: { 'if': { type: Boolean } },
-                createdHandler: function createdHandler() {
-                    var self = this;
-                    this.insertParent = this.parentSelector ? this.parentElement.querySelector(this.parentSelector) : this.parentElement;
-                    this.insertNextSibling = this.nextSibling;
-                    this.nodes = Array.prototype.slice.call(this.childNodes);
-                    // NOTICE: 通过setTimeout，保证使用js通过wrap创建元素后，能获取内部的template-if
-                    setTimeout(function () {
-                        self.parentElement && self.parentElement.removeChild(self);
-                    }, 0);
-                    this.on('_ifChanged', this._ifObserver);
-                    this.trigger('_ifChanged', [this['if'], this['if']]);
+    },
+    appendItem: function appendItem(index) {
+        var self = this;
+        var item = new Nova.Components.TemplateRepeatItem({
+                props: {
+                    as: this.as,
+                    indexAs: this.indexAs,
+                    index: index,
+                    item: self.items[index],
+                    template: this.innerHTML,
+                    insertParent: this.insertParent,
+                    insertNextSibling: this.insertNextSibling
                 },
-                _ifObserver: function _ifObserver(ev, oldVal, newVal) {
-                    var self = this;
-                    if (newVal) {
-                        this.nodes.forEach(function (node) {
-                            self.append(node);
-                        });
-                    } else {
-                        this.nodes.forEach(function (node) {
-                            if (node.parentElement == self.insertParent) {
-                                self.insertParent.removeChild(node);
-                            }
-                        });
-                    }
-                },
-                // 插入策略类似template-repeat
-                append: function append(child) {
-                    if (this.insertNextSibling && this.insertNextSibling.parentElement == this.insertParent) {
-                        this.insertParent.insertBefore(child, this.insertNextSibling);
-                    } else {
-                        this.insertParent.appendChild(child);
-                    }
+                beforeCreated: function beforeCreated() {
+                    self.compileNodes(this);
+                    self.bindNodeByConfigs(this, [{
+                                        type: Nova.ExpressionParser.BIND_TYPES.PROPERTY,
+                                        value: "{{items." + index + "}}",
+                                        name: self.as
+                                    }, {
+                                        type: Nova.ExpressionParser.BIND_TYPES.EVENT,
+                                        callback: "itemChangedHandler",
+                                        event: self._getPropChangeEventName(self.as)
+                                    }]);
                 }
             });
-        return _bundleExports;
-    }));
-}.call(window));
-(function () {
-    (function (root, factory) {
-        if (typeof exports === 'object') {
-            module.exports = factory();
-        } else if (typeof define === 'function' && define.amd) {
-            define([], factory);
-        } else {
-            var globalAlias = 'TemplateRepeatItem';
-            var namespace = globalAlias.split('.');
-            var parent = root;
-            for (var i = 0; i < namespace.length - 1; i++) {
-                if (parent[namespace[i]] === undefined)
-                    parent[namespace[i]] = {};
-                parent = parent[namespace[i]];
-            }
-            parent[namespace[namespace.length - 1]] = factory();
-        }
-    }(this, function () {
-        function _requireDep(name) {
-            return {}[name];
-        }
-        var _bundleExports = NovaExports.__fixedUglify = 'script>';
-        NovaExports.exports = {
-            'stylesheet': '',
-            'template': '\n        <content></content>\n    '
-        };
-        Nova.Components.TemplateRepeatItem = NovaExports({
-            is: 'template-repeat-item',
-            props: {},
-            beforeTemplateInit: function beforeTemplateInit() {
-                var self = this;
-                // 根据this.as和this.indexAs声明两个属性，为data-binding做准备
-                this[this.as] = this.item;
-                this.addProperty(this.as, {
-                    type: null,
-                    value: this.item
-                });
-                //this._bindProps('item', this.as);
-                this[this.indexAs] = this.index;
-                this.addProperty(this.indexAs, {
-                    type: null,
-                    value: this.index
-                });    //this._bindProps('index', this.indexAs);
-            },
-            createdHandler: function createdHandler() {
-                var self = this;
-                // 绑定所有子节点
-                this._childNodes = Array.prototype.slice.call(this.childNodes);
-                // 绑定子节点，插入到insertParent
-                self._childNodes.forEach(function (child) {
-                    self.compileNodes(child);
-                    self.append(child);
-                });
-            },
-            /*
-             * 插入策略优先级：
-             * 1. 优先寻找template-repeat后面的兄弟节点，若有且其父元素未变更、则插入到这个节点之前
-             * 2. 否则直接追加到template-repeat的父元素之后
-             * 注意：若template-repeat的兄弟节点可能被移动、建议使用单独的元素包裹template-repeat
-             */
-            append: function append(child) {
-                if (this.insertNextSibling && this.insertNextSibling.parentElement == this.insertParent) {
-                    this.insertParent.insertBefore(child, this.insertNextSibling);
-                } else {
-                    this.insertParent.appendChild(child);
-                }
-            }
+        this.itemNodes.push(item);
+    },
+    removeItem: function removeItem(index) {
+        var self = this;
+        var item = this.itemNodes.splice(index, 1)[0];
+        item._childNodes.forEach(function (node) {
+            node.parentElement && node.parentElement.removeChild(node);
+            self.unbindNodes(item);
         });
-        return _bundleExports;
-    }));
-}.call(window));
+    },
+    itemChangedHandler: function itemChangedHandler(ev, oldVal, newVal, path, index) {
+        this.trigger('itemChanged', oldVal, newVal, path, index);
+    }
+});
+NovaExports.__fixedUglify = 'script>';
+NovaExports.exports = {
+    'stylesheet': '',
+    'template': ''
+};
+Nova.Components.TemplateIf = NovaExports({
+    is: 'template-if',
+    props: { 'if': { type: Boolean } },
+    createdHandler: function createdHandler() {
+        var self = this;
+        this.insertParent = this.parentSelector ? this.parentElement.querySelector(this.parentSelector) : this.parentElement;
+        this.insertNextSibling = this.nextSibling;
+        this.nodes = Array.prototype.slice.call(this.childNodes);
+        // NOTICE: 通过setTimeout，保证使用js通过wrap创建元素后，能获取内部的template-if
+        setTimeout(function () {
+            self.parentElement && self.parentElement.removeChild(self);
+        }, 0);
+        this.on('_ifChanged', this._ifObserver);
+        this.trigger('_ifChanged', [this["if"], this["if"]]);
+    },
+    _ifObserver: function _ifObserver(ev, oldVal, newVal) {
+        var self = this;
+        if (newVal) {
+            this.nodes.forEach(function (node) {
+                self.append(node);
+            });
+        } else {
+            this.nodes.forEach(function (node) {
+                if (node.parentElement == self.insertParent) {
+                    self.insertParent.removeChild(node);
+                }
+            });
+        }
+    },
+    // 插入策略类似template-repeat
+    append: function append(child) {
+        if (this.insertNextSibling && this.insertNextSibling.parentElement == this.insertParent) {
+            this.insertParent.insertBefore(child, this.insertNextSibling);
+        } else {
+            this.insertParent.appendChild(child);
+        }
+    }
+});
+NovaExports.__fixedUglify = 'script>';
+NovaExports.exports = {
+    'stylesheet': '',
+    'template': '\n        <content></content>\n    '
+};
+Nova.Components.TemplateRepeatItem = NovaExports({
+    is: 'template-repeat-item',
+    props: {},
+    beforeTemplateInit: function beforeTemplateInit() {
+        var self = this;
+        // 根据this.as和this.indexAs声明两个属性，为data-binding做准备
+        this[this.as] = this.item;
+        this.addProperty(this.as, {
+            type: null,
+            value: this.item
+        });
+        //this._bindProps('item', this.as);
+        this[this.indexAs] = this.index;
+        this.addProperty(this.indexAs, {
+            type: null,
+            value: this.index
+        });    //this._bindProps('index', this.indexAs);
+    },
+    createdHandler: function createdHandler() {
+        var self = this;
+        // 绑定所有子节点
+        this._childNodes = Array.prototype.slice.call(this.childNodes);
+        // 绑定子节点，插入到insertParent
+        self._childNodes.forEach(function (child) {
+            self.compileNodes(child);
+            self.append(child);
+        });
+    },
+    /*
+     * 插入策略优先级：
+     * 1. 优先寻找template-repeat后面的兄弟节点，若有且其父元素未变更、则插入到这个节点之前
+     * 2. 否则直接追加到template-repeat的父元素之后
+     * 注意：若template-repeat的兄弟节点可能被移动、建议使用单独的元素包裹template-repeat
+     */
+    append: function append(child) {
+        if (this.insertNextSibling && this.insertNextSibling.parentElement == this.insertParent) {
+            this.insertParent.insertBefore(child, this.insertNextSibling);
+        } else {
+            this.insertParent.appendChild(child);
+        }
+    }
+});
