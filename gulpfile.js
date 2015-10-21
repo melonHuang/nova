@@ -25,7 +25,7 @@ gulp.task('build-nova-components', function() {
     gulp.src('src_babel/components/**/*.html')
         .pipe(plugins.watch('src_babel/components/**/*.html'))
         .pipe(plugins.nova({
-            umd: null,
+            umd: null
         }))
         .pipe(plugins.rename(function(path) {
             console.log('building component', path);

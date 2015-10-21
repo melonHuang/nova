@@ -285,11 +285,11 @@
     })(this, function (e) {
       function t(t) {
         return ({ "components/nova-markdown/markdown.min": e })[t];
-      }var n = NovaExports.__fixedUglify = "script>";NovaExports.exports = { stylesheet: "", template: "" };var r = NovaExports({ is: "nova-markdown", props: { content: String }, createdHandler: function createdHandler() {
+      }var n = undefined;NovaExports.__fixedUglify = "script>", NovaExports.exports = { stylesheet: "", template: "" };var r = NovaExports({ is: "nova-markdown", props: { content: String }, createdHandler: function createdHandler() {
           this.on("_contentChanged", this.contentChanged), this.content = this.innerHTML;
         }, contentChanged: function contentChanged() {
           this.innerHTML = markdown.toHTML(this.content);
-        } });return n;
+        } });return r;
     });
   }).call(window);
 })();

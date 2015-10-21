@@ -11,7 +11,7 @@
     })(this, function () {
       function e(e) {
         return ({})[e];
-      }var t = NovaExports.__fixedUglify = "script>";return (NovaExports.exports = { stylesheet: "", template: "\n        <p>Welcome</p>\n        <p>-------start--------</p>\n        <template-if if=\"{{gender == &apos;female&apos;}}\">\n            I&apos;m a girl, {{gender}}\n        </template-if>\n        <p>---------------</p>\n        <template-if if=\"{{gender == &apos;male&apos;}}\">\n            I&apos;m a boy, {{gender}}\n        </template-if>\n        <p>-------end--------</p>\n    " }, NovaExports({ is: "test-if", props: { gender: { type: String, value: "female" } }, createdHandler: function createdHandler() {} }), t);
+      }var t = undefined;return (NovaExports.__fixedUglify = "script>", NovaExports.exports = { stylesheet: "", template: "\n        <p>Welcome</p>\n        <p>-------start--------</p>\n        <template-if if=\"{{gender == &apos;female&apos;}}\">\n            I&apos;m a girl, {{gender}}\n        </template-if>\n        <p>---------------</p>\n        <template-if if=\"{{gender == &apos;male&apos;}}\">\n            I&apos;m a boy, {{gender}}\n        </template-if>\n        <p>-------end--------</p>\n    " }, NovaExports({ is: "test-if", props: { gender: { type: String, value: "female" } }, createdHandler: function createdHandler() {} }), t);
     });
   }).call(window);
 })();

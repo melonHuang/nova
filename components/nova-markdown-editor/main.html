@@ -9,8 +9,9 @@
         <textarea>#Welcome</textarea>
         <nova-markdown></nova-markdown>
     </template>
+    <link rel="import" href="/nova/components/nova-markdown/main.html" require-src="components/nova-markdown/main">
     <script>
-        Nova({
+        var NovaMarkdownEditor = Nova({
             is: 'nova-markdown-editor',
             createdHandler: function() {
                 var textarea = this.querySelector('textarea');

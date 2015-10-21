@@ -1,6 +1,6 @@
 "use strict";
 
-NovaExports.__fixedUglify = "script>";NovaExports.exports = { "stylesheet": "", "template": "" };
+undefined;NovaExports.__fixedUglify = "script>";NovaExports.exports = { "stylesheet": "", "template": "" };
 "use strict";
 Nova.Components.TemplateIf = NovaExports({
     is: "template-if",

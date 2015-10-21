@@ -1519,6 +1519,7 @@ console.log('nova');
     //Base = Utils.chainObject(Base, HTMLElement.prototype);
     Nova.Base = Base;
 }());
+undefined;
 NovaExports.__fixedUglify = 'script>';
 NovaExports.exports = {
     'stylesheet': ':host{display:none}',
@@ -1603,6 +1604,7 @@ Nova.Components.TemplateRepeat = NovaExports({
         this.trigger('itemChanged', oldVal, newVal, path, index);
     }
 });
+undefined;
 NovaExports.__fixedUglify = 'script>';
 NovaExports.exports = {
     'stylesheet': '',
@@ -1646,6 +1648,7 @@ Nova.Components.TemplateIf = NovaExports({
         }
     }
 });
+undefined;
 NovaExports.__fixedUglify = 'script>';
 NovaExports.exports = {
     'stylesheet': '',

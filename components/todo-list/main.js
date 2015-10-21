@@ -21,7 +21,8 @@
       function _requireDep(name) {
         return ({})[name];
       }
-      var _bundleExports = NovaExports.__fixedUglify = 'script>';
+      var _bundleExports = undefined;
+      NovaExports.__fixedUglify = 'script>';
       NovaExports.exports = {
         'stylesheet': '.todo-done{text-decoration:line-through}',
         'template': '\n        <h2>Todo</h2>\n        <div>\n            <p>\n                {{remaining}} of {{todos.length}} remaining\n            </p>\n            <ul>\n                <template class="template-repeat" on-item-changed="{{changeTodoStatus}}" is="template-repeat" items="{{todos}}">\n                <li>\n                    <input type="checkbox" checked="{{item.done::change}}">\n                    <p class_="todo-{{item.done ? &apos;done&apos; : &apos;undone&apos;}}">\n                        {{item.text}}\n                    </p>\n                </li>\n                </template>\n            </ul>\n\n            <form on-submit="{{addTodo}}">\n                <input type="text" value="{{todoText::change}}">\n                <button>Submit</button>\n            </form>\n        </div>\n    '

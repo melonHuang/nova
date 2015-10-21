@@ -11,7 +11,7 @@
     })(this, function () {
       function e(e) {
         return ({})[e];
-      }var t = NovaExports.__fixedUglify = "script>";NovaExports.exports = { stylesheet: "", template: "\n        <span>Writer: {{writer}}</span>\n    " };var n = NovaExports({ is: "my-inner", props: { writer: { type: String, value: "sdfsd" } }, createdHandler: function createdHandler() {}, attributeChangedHandler: function attributeChangedHandler() {} });return t;
+      }var t = undefined;NovaExports.__fixedUglify = "script>", NovaExports.exports = { stylesheet: "", template: "\n        <span>Writer: {{writer}}</span>\n    " };var n = NovaExports({ is: "my-inner", props: { writer: { type: String, value: "sdfsd" } }, createdHandler: function createdHandler() {}, attributeChangedHandler: function attributeChangedHandler() {} });return t;
     });
   }).call(window);
 })();

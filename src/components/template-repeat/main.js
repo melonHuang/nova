@@ -1,6 +1,6 @@
 "use strict";
 
-NovaExports.__fixedUglify = "script>";NovaExports.exports = { "stylesheet": ":host{display:none}", "template": "\n    " };
+undefined;NovaExports.__fixedUglify = "script>";NovaExports.exports = { "stylesheet": ":host{display:none}", "template": "\n    " };
 "use strict";
 Nova.Components.TemplateRepeat = NovaExports({
     is: "template-repeat",

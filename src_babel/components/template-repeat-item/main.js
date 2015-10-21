@@ -1,4 +1,4 @@
-NovaExports.__fixedUglify="script>";NovaExports.exports={"stylesheet":"","template":"\n        <content></content>\n    "};
+undefined;NovaExports.__fixedUglify="script>";NovaExports.exports={"stylesheet":"","template":"\n        <content></content>\n    "};
         'use strict';
         Nova.Components.TemplateRepeatItem = NovaExports({
             is: 'template-repeat-item',

@@ -59,7 +59,7 @@
     })(this, function (e) {
       function t(t) {
         return ({ "components/nova-doT/doT": e })[t];
-      }var n = NovaExports.__fixedUglify = "script>";return (NovaExports.exports = { stylesheet: ":host{display:block}", template: "\n        <content></content>\n    " }, NovaExports({ is: "nova-doT", props: { data: { type: Object } }, createdHandler: function createdHandler() {
+      }var n = undefined;return (NovaExports.__fixedUglify = "script>", NovaExports.exports = { stylesheet: ":host{display:block}", template: "\n        <content></content>\n    " }, NovaExports({ is: "nova-doT", props: { data: { type: Object } }, createdHandler: function createdHandler() {
           var e = this.querySelector("script").innerHTML;this.tmplFun = doT.template(e), this.on("_dataChanged", this.dataObserver);var t = this.tmplFun(this.data);this.refreshHTML(t);
         }, dataObserver: function dataObserver(e, t, n) {
           var r = this.tmplFun(n);this.refreshHTML(r);
