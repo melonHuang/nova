@@ -8,7 +8,7 @@
       } else if (typeof define === 'function' && define.amd) {
         define('components/todo-list/main', [], factory);
       } else {
-        var globalAlias = 'TodoList';
+        var globalAlias = 'Nova.Components.TodoList';
         var namespace = globalAlias.split('.');
         var parent = root;
         for (var i = 0; i < namespace.length - 1; i++) {
@@ -65,6 +65,7 @@
           this.remaining = remaining;
         }
       });
+      return TodoList;
       return _bundleExports;
     });
   }).call(window);

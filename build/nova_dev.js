@@ -1,6 +1,8 @@
 'use strict';
 (function () {
 
+    /*
+     * */
     if (!window.require) {
 
         var baseUrl = document.currentScript.getAttribute('base-url') || '/';
@@ -42,10 +44,13 @@
                     document.body.appendChild(link.cloneNode());
                 });
 
+                var scriptEle = this.content.querySelector('script:not([require-src])');
+                var moduleExports = scriptEle.getAttribute('exports');
+
                 // 将代码包装成UMD模块并执行
                 var wrappedScript = umdWrap({
                     code: script,
-                    exports: '_' + Math.floor(Math.random() * 1000),
+                    exports: moduleExports || 'Nova.Components.__' + Math.floor(Math.random() * 1000),
                     dependencies: dependencies.dependScripts
                 });
                 wrappedScript = '(function() {' + wrappedScript + '}).call(' + Nova.devOpt.umd.root + ')';
@@ -129,7 +134,7 @@
             data.globalDependencies.join(',');
             data.dependencyExports.join(',');
 
-            var template = '\n            (function (root, factory) {\n              if (typeof exports === \'object\') {\n                module.exports = factory(<%= cjsDependencies %>);\n              }\n              else if (typeof Nova.Loader.define === \'function\' && Nova.Loader.define.amd) {\n                Nova.Loader.require([<%= amdDependencies %>], factory);\n              }\n              else {\n                var globalAlias = \'<%= globalAlias %>\';\n                var namespace = globalAlias.split(\'.\');\n                var parent = root;\n                for ( var i = 0; i < namespace.length-1; i++ ) {\n                  if ( parent[namespace[i]] === undefined ) parent[namespace[i]] = {};\n                  parent = parent[namespace[i]];\n                }\n                parent[namespace[namespace.length-1]] = factory(<%= globalDependencies %>);\n              }\n            }(this, function(<%= dependencyExports %>) {\n\n              var _bundleExports = <%= script %>\n              return  _bundleExports;\n            }));\n            ';
+            var template = '\n            (function (root, factory) {\n              Nova.Loader.require([<%= amdDependencies %>], factory);\n            }(this, function(<%= dependencyExports %>) {\n\n              var _bundleExports = (function() {<%= script %>})();\n\n              if(!window.require) {\n                  (function() {\n                    var globalAlias = \'<%= globalAlias %>\';\n                    var namespace = globalAlias.split(\'.\');\n                    var parent = window;\n                    for ( var i = 0; i < namespace.length-1; i++ ) {\n                      if ( parent[namespace[i]] === undefined ) parent[namespace[i]] = {};\n                      parent = parent[namespace[i]];\n                    }\n                    parent[namespace[namespace.length-1]] = _bundleExports;\n                  })();\n              }\n\n              return  _bundleExports;\n            }));\n            ';
 
             var wrappedScript = template;
             // 替换占位符

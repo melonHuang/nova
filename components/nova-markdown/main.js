@@ -278,7 +278,7 @@
   })()), e = undefined, (function () {
     (function (t, n) {
       if (typeof exports == "object") module.exports = n(e);else if (typeof define == "function" && define.amd) define("components/nova-markdown/main", ["components/nova-markdown/markdown.min"], n);else {
-        var r = "NovaMarkdown",
+        var r = "Nova.Components.NovaMarkdown",
             i = r.split("."),
             s = t;for (var o = 0; o < i.length - 1; o++) s[i[o]] === undefined && (s[i[o]] = {}), s = s[i[o]];s[i[i.length - 1]] = n(t._2);
       }

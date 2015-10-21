@@ -27,7 +27,7 @@
             </form>
         </div>
     </template>
-    <script>
+    <script exports="Nova.Components.TodoList">
         'use strict';
         let TodoList = Nova({
             is: 'todo-list',
@@ -68,5 +68,6 @@
                 this.remaining = remaining;
             }
         });
+        return TodoList;
     </script>
 </template>

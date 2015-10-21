@@ -52,20 +52,20 @@
   })(), (function () {
     (function (e, t) {
       if (typeof exports == "object") module.exports = t(require("components/nova-doT/doT"));else if (typeof define == "function" && define.amd) define("components/nova-doT/main", ["components/nova-doT/doT"], t);else {
-        var n = "NovaDoT",
+        var n = "Nova.Components.NovaDot",
             r = n.split("."),
             i = e;for (var s = 0; s < r.length - 1; s++) i[r[s]] === undefined && (i[r[s]] = {}), i = i[r[s]];i[r[r.length - 1]] = t(e._1);
       }
     })(this, function (e) {
       function t(t) {
         return ({ "components/nova-doT/doT": e })[t];
-      }var n = undefined;return (NovaExports.__fixedUglify = "script>", NovaExports.exports = { stylesheet: ":host{display:block}", template: "\n        <content></content>\n    " }, NovaExports({ is: "nova-doT", props: { data: { type: Object } }, createdHandler: function createdHandler() {
+      }var n = undefined;NovaExports.__fixedUglify = "script>", NovaExports.exports = { stylesheet: ":host{display:block}", template: "\n        <content></content>\n    " };var r = NovaExports({ is: "nova-dot", props: { data: { type: Object } }, createdHandler: function createdHandler() {
           var e = this.querySelector("script").innerHTML;this.tmplFun = doT.template(e), this.on("_dataChanged", this.dataObserver);var t = this.tmplFun(this.data);this.refreshHTML(t);
         }, dataObserver: function dataObserver(e, t, n) {
           var r = this.tmplFun(n);this.refreshHTML(r);
         }, refreshHTML: function refreshHTML(e) {
           this.innerHTML = e;
-        } }), n);
+        } });return r;
     });
   }).call(window);
 })();

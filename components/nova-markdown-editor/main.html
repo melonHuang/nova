@@ -1,4 +1,5 @@
 <template is="dom-module">
+
     <style>
         textarea {
             width: 100%;
@@ -10,7 +11,7 @@
         <nova-markdown></nova-markdown>
     </template>
     <link rel="import" href="/nova/components/nova-markdown/main.html" require-src="components/nova-markdown/main">
-    <script>
+    <script exports="Nova.Components.NovaMarkdownEditor">
         var NovaMarkdownEditor = Nova({
             is: 'nova-markdown-editor',
             createdHandler: function() {
@@ -24,5 +25,6 @@
                 });
             }
         });
+        return NovaMarkdownEditor;
     </script>
 </template>

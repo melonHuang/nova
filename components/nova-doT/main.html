@@ -8,9 +8,9 @@
     <script require-src="components/nova-doT/doT"></script>
     <!--
     -->
-    <script>
-        Nova({
-            is: 'nova-doT',
+    <script exports="Nova.Components.NovaDot">
+        var NovaDot = Nova({
+            is: 'nova-dot',
             props: {
                 data: {
                     type: Object
@@ -33,5 +33,7 @@
                 this.innerHTML = html;
             }
         });
+
+        return NovaDot;
     </script>
 </template>
