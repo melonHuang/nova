@@ -301,7 +301,7 @@
     })(this, function (e) {
       function t(t) {
         return ({ "components/nova-markdown/main": e })[t];
-      }var n = undefined;NovaExports.__fixedUglify = "script>", NovaExports.exports = { stylesheet: "textarea{width:100%;height:75pt}", template: "\n        <textarea>#Welcome</textarea>\n        <nova-markdown></nova-markdown>\n    " };var r = NovaExports({ is: "nova-markdown-editor", createdHandler: function createdHandler() {
+      }var n = undefined;NovaExports.__fixedUglify = "script>", NovaExports.exports = { stylesheet: "textarea{width:100%;height:100px}", template: "\n        <textarea>#Welcome</textarea>\n        <nova-markdown></nova-markdown>\n    " };var r = NovaExports({ is: "nova-markdown-editor", createdHandler: function createdHandler() {
           var e = this.querySelector("textarea"),
               t = this.querySelector("nova-markdown");e.addEventListener("input", function () {
             t.content = e.value;

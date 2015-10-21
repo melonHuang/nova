@@ -10,7 +10,7 @@
     "through2": "~2.0.0",
     "gulp-rename": "~1.2.2",
     "gulp-babel": "~5.1.0",
-    "gulp-nova": "~0.0.0",
+    "gulp-nova": "~1.0.0",
     "gulp-concat": "~2.5.2",
     "gulp-watch": "~4.2.4"
   },
