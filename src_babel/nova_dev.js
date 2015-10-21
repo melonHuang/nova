@@ -1,6 +1,8 @@
 'use strict';
 (function() {
 
+    /*
+     * */
     if(!window.require) {
 
         var baseUrl = document.currentScript.getAttribute('base-url') || '/';
@@ -42,10 +44,13 @@
                     document.body.appendChild(link.cloneNode());
                 });
 
+                var scriptEle = this.content.querySelector('script:not([require-src])');
+                var moduleExports = scriptEle.getAttribute('exports');
+
                 // 将代码包装成UMD模块并执行
                 var wrappedScript = umdWrap({
                     code: script,
-                    exports: '_' + Math.floor(Math.random() * 1000),
+                    exports: moduleExports || 'Nova.Components.__' + Math.floor(Math.random() * 1000),
                     dependencies: dependencies.dependScripts
                 });
                 wrappedScript = '(function() {' + wrappedScript + '}).call(' + Nova.devOpt.umd.root + ')';
@@ -133,25 +138,24 @@
 
             let template = `
             (function (root, factory) {
-              if (typeof exports === 'object') {
-                module.exports = factory(<%= cjsDependencies %>);
-              }
-              else if (typeof Nova.Loader.define === 'function' && Nova.Loader.define.amd) {
-                Nova.Loader.require([<%= amdDependencies %>], factory);
-              }
-              else {
-                var globalAlias = '<%= globalAlias %>';
-                var namespace = globalAlias.split('.');
-                var parent = root;
-                for ( var i = 0; i < namespace.length-1; i++ ) {
-                  if ( parent[namespace[i]] === undefined ) parent[namespace[i]] = {};
-                  parent = parent[namespace[i]];
-                }
-                parent[namespace[namespace.length-1]] = factory(<%= globalDependencies %>);
-              }
+              Nova.Loader.require([<%= amdDependencies %>], factory);
             }(this, function(<%= dependencyExports %>) {
 
-              var _bundleExports = <%= script %>
+              var _bundleExports = (function() {<%= script %>})();
+
+              if(!window.require) {
+                  (function() {
+                    var globalAlias = '<%= globalAlias %>';
+                    var namespace = globalAlias.split('.');
+                    var parent = window;
+                    for ( var i = 0; i < namespace.length-1; i++ ) {
+                      if ( parent[namespace[i]] === undefined ) parent[namespace[i]] = {};
+                      parent = parent[namespace[i]];
+                    }
+                    parent[namespace[namespace.length-1]] = _bundleExports;
+                  })();
+              }
+
               return  _bundleExports;
             }));
             `;
