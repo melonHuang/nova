@@ -3,7 +3,7 @@
 
     if(!window.require) {
 
-        var baseUrl = document.currentScript.getAttribute('base-url') || '.';
+        var baseUrl = document.currentScript.getAttribute('base-url') || '/';
         var requireScript = document.createElement('script');
         requireScript.onload = function() {
             Nova.Loader.requirejs.config({
