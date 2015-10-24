@@ -1,0 +1,49 @@
+body {
+    background: #f9f9f9;
+}
+
+/* aside */
+aside {
+    width: 260px;
+    box-sizing: border-box;
+    margin: 34px 0;
+    padding-right: 40px;
+    float: left;
+    border-right: 1px solid #dde5ec;
+}
+
+aside h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 10px 0;
+    padding-left: 34px;
+}
+
+.directory-list[data-level="1"] {
+}
+
+.directory-list[data-level="1"] > li {
+    padding: 10px 0;
+}
+
+.directory-list[data-level="1"] > li + li {
+    border-top: 1px solid #dde5ec;
+}
+
+.directory-list[data-level="2"] > li {
+    line-height: 32px;
+    padding-left: 34px;
+}
+
+.directory-list[data-level="2"] > li.selected {
+    background: #dde5ec;
+}
+
+.directory-list[data-level="2"] > li.selected a {
+    color: #8B21ED;
+}
+
+/* main */
+main {
+    overflow: hidden;
+}

@@ -1,0 +1,125 @@
+.btn-start {
+    font-size: 18px;
+    width: 240px;
+    height: 54px;
+    line-height: 54px;
+    background: #46a9f5;
+    border-radius: 27px;
+    overflow: hidden;
+    position: relative;
+    border: none;
+}
+
+.btn-start:after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: white;
+    border-radius: 27px;
+    opacity: .15;
+    //transform: translate(-100%, 0);
+    transition: width .55s;
+}
+
+.btn-start:hover {
+    color: white;
+}
+
+.btn-start:hover:after {
+    width: 90%;
+    //transform: translate(0, 0);
+}
+
+/* intro section */
+section[data-name=intro] {
+    color: white;
+    height: 435px;
+    text-align: center;
+    box-sizing: border-box;
+    padding-top: 50px;
+    background: url(../img/intro_bg.png) no-repeat center bottom #8B21ED;
+    position: relative;
+}
+
+section[data-name=intro] .slogan {
+    font-size: 24px;
+    margin: 35px 0;
+}
+
+section[data-name=intro] .btn-start {
+    margin-bottom: 35px;
+}
+
+#particles-js {
+    position: absolute;
+    width: 100%;
+    top: -100px;
+    left: 0;
+    bottom: 0;
+}
+
+/* feature section */
+section[data-name=feature] {
+    height: 700px;
+}
+
+.feature-list {
+    overflow: hidden;
+}
+
+.feature-list li {
+    width: 538px;
+    text-align: center;
+    display: inline-block;
+    margin-top: 60px;
+}
+
+.feature-list li img {
+}
+
+.feature-list li h3 {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 16px 0;
+}
+
+.feature-list li p {
+    color: #333333;
+    display: inline-block;
+    width: 360px;
+}
+
+/* present section */
+section[data-name=present] {
+    background: #f9f9f9;
+    padding: 75px 0;
+}
+
+section[data-name=present]  h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 25px 0;
+}
+
+section[data-name=present]  .code {
+    overflow: hidden;
+}
+
+section[data-name=present]  .preview {
+    float: right;
+    width: 300px;
+}
+
+section[data-name=present]  p {
+    margin: 25px 0;
+}
+
+section[data-name=present]  .btn-start {
+    display: block;
+    margin: auto;
+    margin-top: 85px;
+}
