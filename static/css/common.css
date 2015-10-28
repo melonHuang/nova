@@ -17,7 +17,7 @@ a {
 }
 
 a:hover {
-    color: #8B21ED;
+    color: #773ded;
 }
 
 .cont-wrap {
@@ -33,7 +33,7 @@ a:hover {
 
 /* header */
 header {
-    background: #8B21ED;
+    background: #773ded;
     height: 100px;
     line-height: 100px;
 }
@@ -79,13 +79,17 @@ footer .heart {
 .btn {
     box-sizing: border-box;
     font-size: 14px;
-    color: white;
+    color: #CFAADA;
     text-decoration: none;
     text-align: center;
     line-height: 32px;
     display: inline-block;
     outline: none;
-    border: 1px solid white;
+    border: 1px solid #CFAADA;
     border-radius: 17px;
     padding: 0 20px;
+}
+.btn:hover {
+    color: white;
+    border-color: white;
 }

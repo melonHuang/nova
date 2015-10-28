@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Nova.js，小巧易用的Web Component框架，让组件化开发更简单</title>
-    <link rel="stylesheet" href="../static/css/common.css" />
-    <link rel="stylesheet" href="../static/css/doc.css" />
+    <link rel="stylesheet" href="static/css/common.css" />
+    <link rel="stylesheet" href="static/css/doc.css" />
+    <link rel="stylesheet" href="static/css/github-markdown.css" />
+    <link rel="stylesheet" href="static/css/tomorrow.css" />
 </head>
 <body>
 </body>
     <header>
         <div class="cont-wrap">
-            <img src="../static/img/logo_with_text.png" alt="Nova.js" class="logo" />
+            <a href="index.html">
+                <img src="static/img/logo_with_text.png" alt="Nova.js" class="logo" />
+            </a>
             <nav>
                 <a href="doc.html" class="btn">快速开始</a>
                 <a href="doc.html" class="btn">API文档</a>
@@ -26,13 +30,10 @@
                     <h3>快速入门</h3>
                     <ul class="directory-list" data-level="2">
                         <li>
-                            <a href="#">新建项目</a>
+                            <a data-doc="get_started" href="#">使用Nova.js</a>
                         </li>
                         <li>
-                            <a href="#">新建项目</a>
-                        </li>
-                        <li>
-                            <a href="#">新建项目</a>
+                            <a href="#">创建自定义元素</a>
                         </li>
                     </ul>
                 </li>
@@ -82,7 +83,7 @@
         </aside>
 
         <main>
-            <nova-markdown>
+            <nova-markdown class="markdown-body">
             </nova-markdown>
         </main>
     </div>
@@ -95,7 +96,10 @@
     <script src="http://s0.qhimg.com/static/c194ef77618ac141/nova_polyfills.js "></script>
     <script src="http://s4.qhimg.com/static/a2435fb6e1b4b1c3/nova.js"></script>
     <script src="http://s7.qhimg.com/!9cf3a0f2/nova_dev.js"></script>
-    <script src="http://s1.qhimg.com/static/759cd944d92bab8b/nova_markdown.js"></script>
+<!--
+    <script src="http://s2.qhimg.com/static/ff03488eaefd013b/nova_markdown.js"></script>
+-->
 
-    <script src="../static/js/doc.js"></script>
+    <script src="/nova/components/nova-markdown/main.js"></script>
+    <script src="static/js/doc.js"></script>
 </html>

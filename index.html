@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Nova.js，小巧易用的Web Component框架，让组件化开发更简单</title>
-    <link rel="stylesheet" href="../static/css/common.css" />
-    <link rel="stylesheet" href="../static/css/index.css" />
+    <link rel="stylesheet" href="static/css/common.css" />
+    <link rel="stylesheet" href="static/css/index.css" />
+    <link rel="stylesheet" href="static/css/github-markdown.css" />
+    <link rel="stylesheet" href="static/css/tomorrow.css" />
 </head>
 <body>
 </body>
     <header>
         <div class="cont-wrap">
-            <img src="../static/img/logo.png" alt="Nova.js" class="logo" />
+            <a href="index.html">
+                <img src="static/img/logo.png" alt="Nova.js" class="logo" />
+            </a>
             <nav>
                 <a href="doc.html" class="btn">快速开始</a>
                 <a href="doc.html" class="btn">API文档</a>
@@ -20,7 +24,7 @@
     </header>
     <section data-name="intro">
         <div class="cont-wrap">
-            <img src="../static/img/logo_text.png" alt="Nova.js" class="logo-text" />
+            <img src="static/img/logo_text.png" alt="Nova.js" class="logo-text" />
             <h1 class="logi-text"></h1>
             <p class="slogan">小巧易用的Web Component框架</p>
             <a href="###" class="btn btn-start">快速开始</a>
@@ -35,7 +39,7 @@
     <section data-name="feature" class="cont-wrap">
         <ul class="feature-list">
             <li>
-                <img src="../static/img/custom_element.png" alt="" />
+                <img src="static/img/custom_element.png" alt="" />
                 <h3>自定义元素</h3>
                 <p>
                     拖拽元素就能搭建作品，支持多款插件数十款动画，
@@ -44,7 +48,7 @@
                 </p>
             </li>
             <li>
-                <img src="../static/img/scoped_css.png" alt="" />
+                <img src="static/img/scoped_css.png" alt="" />
                 <h3>Scoped CSS</h3>
                 <p>
                     拖拽元素就能搭建作品，支持多款插件数十款动画，
@@ -53,7 +57,7 @@
                 </p>
             </li>
             <li>
-                <img src="../static/img/data_binding.png" alt="" />
+                <img src="static/img/data_binding.png" alt="" />
                 <h3>双向绑定</h3>
                 <p>
                     拖拽元素就能搭建作品，支持多款插件数十款动画，
@@ -62,7 +66,7 @@
                 </p>
             </li>
             <li>
-                <img src="../static/img/more.png" alt="" />
+                <img src="static/img/more.png" alt="" />
                 <h3>更多功能</h3>
                 <p>
                     拖拽元素就能搭建作品，支持多款插件数十款动画，
@@ -76,13 +80,48 @@
         <div class="cont-wrap">
             <h2>Nova.js</h2>
             <div>
-                <div class="preview"></div>
+                <div class="preview">
+                    <markdown-editor class="markdown-body"></markdown-editor>
+                </div>
                 <div class="code">
-                    <p>
-                        拖拽元素就能搭建作品，支持多款插件数十款动画，
-                        可以完成各种效果需求支持多款插件数十款动画，
-                        可以完成各种效果需求
-                    </p>
+                    <nova-markdown>
+```html
+<!-- 注册自定义元素<markdown-editor> -->
+<template is="dom-module">
+    <style>
+        :host {display:block;padding:15px 20px;border:1px solid rgba(16,16,16,0.1);background:white;}
+        textarea { width:100%; height:100px; resize:none;padding:5px;}
+    </style>
+    <template>
+        <h3>Markdown Editor</h3>
+        <textarea value="{{content::input}}"></textarea>
+        <p></p>
+    </template>
+    <script require-src="components/nova-markdown/marked"></script>
+    <script>
+        Nova({
+            is: 'markdown-editor',
+            props: {
+                content: {
+                    type: String,
+                    value: '# Hello\nType some markdown here.'
+                }
+            },
+            createdHandler: function() {
+                this.on('_contentChanged', this.contentObserver);
+                this.render();
+            },
+            contentObserver: function(ev, oldVal, newVal) {
+                this.render();
+            },
+            render: function() {
+                this.querySelector('p').innerHTML = marked(this.content);
+            }
+        });
+    </script>
+</template>
+```
+                    </nova-markdown>
                 </div>
             </div>
             <a href="###" class="btn btn-start">快速开始</a>
@@ -91,12 +130,17 @@
     <footer>
     Handcrafted with <span class="heart">♥</span> by <a href="http://melonh.com/">Melon.H</a>@<a href="http://www.75team.com/">奇舞团</a>
     </footer>
+    <script src="http://s2.qhimg.com/static/a9e451ace7e1fd1d/zepto.114.js"></script>
+    <script src="http://s0.qhimg.com/static/c194ef77618ac141/nova_polyfills.js "></script>
+    <script src="http://s4.qhimg.com/static/a2435fb6e1b4b1c3/nova.js"></script>
+    <script src="static/js/nova_demo.js"></script>
+    <script src="http://s1.qhimg.com/static/060e16362737d3ce/nova_markdown.js"></script>
     <!--
     <script src="http://s3.qhimg.com/static/bf77878501cfb5dd/particles.min.js"></script>
 
     <script type="text/javascript">
         /* particlesJS.load(@dom-id, @path-json, @callback (optional)); */
-        particlesJS.load('particles-js', '../static/assets/particles.json', function() {
+        particlesJS.load('particles-js', 'static/assets/particles.json', function() {
             console.log('callback - particles.js config loaded');
         });
     </script>
