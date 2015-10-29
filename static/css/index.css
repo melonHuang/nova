@@ -22,7 +22,6 @@
     background: white;
     border-radius: 27px;
     opacity: .15;
-    //transform: translate(-100%, 0);
     transition: width .55s;
 }
 
@@ -31,8 +30,7 @@
 }
 
 .btn-start:hover:after {
-    width: 90%;
-    //transform: translate(0, 0);
+    width: 100%;
 }
 
 /* intro section */
@@ -43,6 +41,7 @@ section[data-name=intro] {
     box-sizing: border-box;
     padding-top: 50px;
     background: url(../img/intro_bg.png) no-repeat center bottom #773ded;
+    //background: #773ded;
     position: relative;
 }
 
@@ -130,7 +129,13 @@ section[data-name=present]  .btn-start {
     padding-right: 40px;
 }
 
-.code pre:before {
+.code nova-markdown pre {
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 3px 3px;
+}
+
+.code nova-markdown:before {
     content: '';
     display: block;
     background: url(../img/btns.png) no-repeat 10px center #eee;
@@ -140,8 +145,6 @@ section[data-name=present]  .btn-start {
 }
 .code code {
     font-size: 14px;
-    border: 1px solid #ddd;
-    border-radius: 0 0 3px 3px;
     padding: 8px 10px;
 }
 

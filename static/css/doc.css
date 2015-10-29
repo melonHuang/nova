@@ -49,3 +49,22 @@ main {
     padding: 0 40px;
     border-left: 1px solid #dde5ec;
 }
+
+.markdown-body ul li {
+    list-style: disc;
+}
+
+.markdown-body ol li {
+    list-style: decimal;
+}
+
+.markdown-body .btn-primary {
+    border: none;
+    background: #773ded;
+    color: white;
+}
+
+.markdown-body .btn-primary:hover {
+    text-decoration: none;
+    background: #5E32BD;
+}

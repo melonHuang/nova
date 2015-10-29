@@ -16,9 +16,11 @@
                 <img src="static/img/logo.png" alt="Nova.js" class="logo" />
             </a>
             <nav>
-                <a href="doc.html" class="btn">快速开始</a>
-                <a href="doc.html" class="btn">API文档</a>
+                <a href="doc.html#doc=get_started" class="btn">快速开始</a>
+                <a href="doc.html#doc=api" class="btn">API文档</a>
+                <!--
                 <a href="doc.html" class="btn">组件库</a>
+                -->
             </nav>
         </div>
     </header>
@@ -27,7 +29,7 @@
             <img src="static/img/logo_text.png" alt="Nova.js" class="logo-text" />
             <h1 class="logi-text"></h1>
             <p class="slogan">小巧易用的Web Component框架</p>
-            <a href="###" class="btn btn-start">快速开始</a>
+            <a href="doc.html#doc=get_started" class="btn btn-start">快速开始</a>
             <!--
             <p>
             总共12K,支持所有移动端主流浏览器<br />及IE8+和其他PC端主流浏览器
@@ -42,36 +44,28 @@
                 <img src="static/img/custom_element.png" alt="" />
                 <h3>自定义元素</h3>
                 <p>
-                    拖拽元素就能搭建作品，支持多款插件数十款动画，
-                    可以完成各种效果需求支持多款插件数十款动画，
-                    可以完成各种效果需求
+                    通过自定义元素的方式实现组件。可方便快速地定义元素的样式、模板、属性、方法、生命周期各阶段的行为。
                 </p>
             </li>
             <li>
                 <img src="static/img/scoped_css.png" alt="" />
                 <h3>Scoped CSS</h3>
                 <p>
-                    拖拽元素就能搭建作品，支持多款插件数十款动画，
-                    可以完成各种效果需求支持多款插件数十款动画，
-                    可以完成各种效果需求
+                    编写自定义元素的CSS时无需担心影响外部元素，样式只会作用于元素及其内部，将你从命名的牢笼中解救出来。
                 </p>
             </li>
             <li>
                 <img src="static/img/data_binding.png" alt="" />
                 <h3>双向绑定</h3>
                 <p>
-                    拖拽元素就能搭建作品，支持多款插件数十款动画，
-                    可以完成各种效果需求支持多款插件数十款动画，
-                    可以完成各种效果需求
+                    通过MVVM模型，方便开发者快速关联元素的模板与属性，快速绑定事件, 无需过多手动地读写DOM节点来同步属性。
                 </p>
             </li>
             <li>
                 <img src="static/img/more.png" alt="" />
                 <h3>更多功能</h3>
                 <p>
-                    拖拽元素就能搭建作品，支持多款插件数十款动画，
-                    可以完成各种效果需求支持多款插件数十款动画，
-                    可以完成各种效果需求
+                    Nova.js使用gzip压缩后仅12K，支持所有移动端浏览器和IE8+等主流PC浏览器。它还包含属性监听、方法切片、Behavior复用机制等功能。
                 </p>
             </li>
         </ul>
@@ -84,7 +78,8 @@
                     <markdown-editor class="markdown-body"></markdown-editor>
                 </div>
                 <div class="code">
-                    <nova-markdown>
+                    <div class="markdown-body">
+                        <nova-markdown>
 ```html
 <!-- 注册自定义元素<markdown-editor> -->
 <template is="dom-module">
@@ -104,7 +99,7 @@
             props: {
                 content: {
                     type: String,
-                    value: '# Hello\nType some markdown here.'
+                    value: 'Hello Nova! '
                 }
             },
             createdHandler: function() {
@@ -121,10 +116,17 @@
     </script>
 </template>
 ```
-                    </nova-markdown>
+                        </nova-markdown>
+
+                        <nova-markdown>
+                            <script type="text/tmpl">
+    <markdown-editor content="# Hello \n Type some markdown here."></markdown-editor>
+                            </script>
+                        </nova-markdown>
+                    </div>
                 </div>
             </div>
-            <a href="###" class="btn btn-start">快速开始</a>
+            <a href="doc.html#doc=get_started" class="btn btn-start">快速开始</a>
         </div>
     </section>
     <footer>
@@ -135,14 +137,13 @@
     <script src="http://s4.qhimg.com/static/a2435fb6e1b4b1c3/nova.js"></script>
     <script src="static/js/nova_demo.js"></script>
     <script src="http://s1.qhimg.com/static/060e16362737d3ce/nova_markdown.js"></script>
-    <!--
     <script src="http://s3.qhimg.com/static/bf77878501cfb5dd/particles.min.js"></script>
 
     <script type="text/javascript">
-        /* particlesJS.load(@dom-id, @path-json, @callback (optional)); */
+        /*
         particlesJS.load('particles-js', 'static/assets/particles.json', function() {
             console.log('callback - particles.js config loaded');
         });
+*/
     </script>
-    -->
 </html>
