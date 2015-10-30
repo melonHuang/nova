@@ -11,6 +11,12 @@
         e.preventDefault();
         var $li = $(this).closest('li');
         var doc = $li.attr('data-doc');
+        location.href = 'doc.html#doc=' + doc;
+    });
+
+    // 监听hash
+    window.addEventListener('hashchange', function() {
+        var doc = $.queryHash('doc');
         renderDoc(doc);
     });
 

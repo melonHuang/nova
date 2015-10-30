@@ -2,6 +2,13 @@ body {
     background: #f9f9f9;
 }
 
+.main {
+    overflow: hidden;
+    min-height: calc(100% - 180px);
+    padding: 34px 0;
+    box-sizing: border-box;
+}
+
 /* aside */
 aside {
     width: 260px;
@@ -45,7 +52,6 @@ aside h3 {
 /* main */
 main {
     overflow: hidden;
-    margin: 34px 0;
     padding: 0 40px;
     border-left: 1px solid #dde5ec;
 }

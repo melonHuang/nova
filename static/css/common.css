@@ -4,11 +4,13 @@ html {
     font: 16px/1.6 "Hiragino Sans GB", "JHeiti", "Microsoft Yahei",Simhei,arial,sans-serif;
     color: #333;
     -webkit-font-smoothing: antialiased;
+    height: 100%;
 }
 
 body {
     min-width: 1082px;
     background: white;
+    height: 100%;
 }
 
 a {
