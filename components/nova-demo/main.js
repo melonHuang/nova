@@ -238,13 +238,17 @@
       if (typeof exports == "object") module.exports = t(require("components/nova-markdown/marked"));else if (typeof define == "function" && define.amd) define("components/nova-demo/main", ["components/nova-markdown/marked"], t);else {
         var n = "Nova.Components.NovaDemo",
             r = n.split("."),
-            i = e;for (var s = 0; s < r.length - 1; s++) i[r[s]] === undefined && (i[r[s]] = {}), i = i[r[s]];i[r[r.length - 1]] = t(e._7);
+            i = e;for (var s = 0; s < r.length - 1; s++) i[r[s]] === undefined && (i[r[s]] = {}), i = i[r[s]];i[r[r.length - 1]] = t(e._1);
       }
     })(this, function (e) {
       function t(t) {
         return ({ "components/nova-markdown/marked": e })[t];
       }var n = undefined;return (NovaExports.__fixedUglify = "script>", NovaExports.exports = { stylesheet: ":host{display:block;padding:15px 20px;border:1px solid rgba(16,16,16,.1);background:#fff}textarea{width:100%;height:100px;resize:none;padding:5px}", template: "\n        <h3>Markdown Editor</h3>\n        <textarea value=\"{{content::input}}\"></textarea>\n        <p></p>\n    " }, NovaExports({ is: "markdown-editor", props: { content: { type: String, value: "# Hello\nType some markdown here." } }, createdHandler: function createdHandler() {
           this.on("_contentChanged", this.contentObserver), this.render();
+        }, attachedHandler: function attachedHandler() {
+          alert("attached");
+        }, detachedHandler: function detachedHandler() {
+          alert("detached");
         }, contentObserver: function contentObserver(e, t, n) {
           this.render();
         }, render: function render() {

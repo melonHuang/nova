@@ -500,7 +500,7 @@
       if (typeof exports == "object") module.exports = n(require("components/nova-markdown/marked"), e);else if (typeof define == "function" && define.amd) define("components/nova-markdown/main", ["components/nova-markdown/marked", "components/nova-markdown/highlight.pack"], n);else {
         var r = "Nova.Components.NovaMarkdown",
             i = r.split("."),
-            s = t;for (var o = 0; o < i.length - 1; o++) s[i[o]] === undefined && (s[i[o]] = {}), s = s[i[o]];s[i[i.length - 1]] = n(t._4, t._5);
+            s = t;for (var o = 0; o < i.length - 1; o++) s[i[o]] === undefined && (s[i[o]] = {}), s = s[i[o]];s[i[i.length - 1]] = n(t._3, t._4);
       }
     })(this, function (e, t) {
       function n(n) {
