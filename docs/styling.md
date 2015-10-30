@@ -12,7 +12,7 @@
     <template>
         <h1>Hello Nova</h1>
     </template>
-    <script exports="Nova.Components.MyElement">
+    <script>
         Nova({
             is: 'my-element'
         });
@@ -104,4 +104,20 @@ my-element ::host h1 {}
     <a href="api.html">API文档</a>
     <a href="comp.html">组件库</a>
 </my-element>
+```
+
+## 动态插入节点
+
+某些场景下，需要给自定义元素动态插入子节点。如果希望应用`<style>`中定义的样式，需要使用`compileNodeis`接口编译要动态插入节点。
+#### 例子
+```js
+Nova({
+    is: 'my-element',
+    createdHandler: function() {
+        var ul = this.querySelector('ul');
+        var li = document.createElement('li');
+
+        ul.appendChild(this.compileNodes(li));
+    }
+});
 ```

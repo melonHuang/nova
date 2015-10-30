@@ -33,7 +33,7 @@ yo nova
     <template>
         <h1>Hello Nova!</h1>
     </template>
-    <script exports="Nova.Component.MyElement">
+    <script>
         var MyEle = Nova({
             // 标签名
             is: 'my-element',
