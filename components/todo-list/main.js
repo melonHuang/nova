@@ -24,8 +24,8 @@
       var _bundleExports = undefined;
       NovaExports.__fixedUglify = 'script>';
       NovaExports.exports = {
-        'stylesheet': '.todo-done{text-decoration:line-through}',
-        'template': '\n        <h2>Todo</h2>\n        <div>\n            <p>\n                {{remaining}} of {{todos.length}} remaining\n            </p>\n            <ul>\n                <template class="template-repeat" on-item-changed="{{changeTodoStatus}}" is="template-repeat" items="{{todos}}">\n                <li>\n                    <input type="checkbox" checked="{{item.done::change}}">\n                    <p class_="todo-{{item.done ? &apos;done&apos; : &apos;undone&apos;}}">\n                        {{item.text}}\n                    </p>\n                </li>\n                </template>\n            </ul>\n\n            <form on-submit="{{addTodo}}">\n                <input type="text" value="{{todoText::change}}">\n                <button>Submit</button>\n            </form>\n        </div>\n    '
+        'stylesheet': ':host{display:block;padding:15px 20px;border:1px solid rgba(16,16,16,.1);background:#fff}h3{font-size:24px;line-height:40px;margin:0}p{margin:10px 0}ul{margin:20px 0;list-style-type:square;padding-left:0}ul li{margin-left:20px;height:20px}ul li p{display:inline-block;vertical-align:middle;margin:0}.todo-done{text-decoration:line-through}',
+        'template': '\n        <h3>TODO</h3>\n        <div>\n            <form on-submit="{{addTodo}}">\n                <input type="text" value="{{todoText::change}}">\n                <button>Submit</button>\n            </form>\n            <ul>\n                <template class="template-repeat" on-item-changed="{{changeTodoStatus}}" is="template-repeat" items="{{todos}}">\n                <li>\n                    <p class_="todo-{{item.done ? &apos;done&apos; : &apos;undone&apos;}}">{{item.text}}</p>\n                    <input type="checkbox" checked="{{item.done::change}}">\n                </li>\n                </template>\n            </ul>\n            <p>{{remaining}} of {{todos.length}} items left.</p>\n        </div>\n    '
       };
       'use strict';
       var TodoList = NovaExports({
@@ -46,13 +46,10 @@
             value: ''
           }
         },
-        createdHandler: function createdHandler() {
-          this.repeat = this.querySelector('.template-repeat');
-        },
+        createdHandler: function createdHandler() {},
         addTodo: function addTodo(e) {
           e.preventDefault();
-          this.todos.push({ text: this.todoText });
-          this.todos = this.todos.slice();
+          this.todos = this.todos.concat({ text: this.todoText });
           this.todoText = '';
         },
         changeTodoStatus: function changeTodoStatus() {

@@ -1,17 +1,30 @@
 <template is="dom-module">
     <script require-src="components/nova-markdown/marked"></script>
+    <script require-src="components/nova-markdown/highlight.pack"></script>
     <script exports="Nova.Components.NovaMarkdown">
         var NovaMarkdown = Nova({
             is: 'nova-markdown',
             props: {
-                content: String
+                content: String,
+                hljs: Object
             },
             createdHandler: function() {
                 this.on('_contentChanged', this.contentChanged);
-                this.content = this.innerHTML;
+                var script = this.querySelector('script');
+                this.content = script ? script.innerHTML : this.innerHTML;
             },
             contentChanged: function() {
+                // parse markdown
                 this.innerHTML = marked(this.content);
+
+                // highlight html
+                if(this.hljs) {
+                    hljs.configure(hljs);
+                }
+                var codes = Array.prototype.slice.call(this.querySelectorAll('pre code'));
+                codes.forEach(function(block, i) {
+                    hljs.highlightBlock(block);
+                });
             }
         });
         return NovaMarkdown;

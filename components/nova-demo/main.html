@@ -1,0 +1,39 @@
+<template is="dom-module">
+    <style>
+        :host {display:block;padding:15px 20px;border:1px solid rgba(16,16,16,0.1);background:white;}
+        textarea { width:100%; height:100px; resize:none;padding:5px;}
+    </style>
+    <template>
+        <h3>Markdown Editor</h3>
+        <textarea value="{{content::input}}"></textarea>
+        <p></p>
+    </template>
+    <script require-src="components/nova-markdown/marked"></script>
+    <script>
+        Nova({
+            is: 'markdown-editor',
+            props: {
+                content: {
+                    type: String,
+                    value: '# Hello\nType some markdown here.'
+                }
+            },
+            createdHandler: function() {
+                this.on('_contentChanged', this.contentObserver);
+                this.render();
+            },
+            attachedHandler: function() {
+                alert('attached');
+            },
+            detachedHandler: function() {
+                alert('detached');
+            },
+            contentObserver: function(ev, oldVal, newVal) {
+                this.render();
+            },
+            render: function() {
+                this.querySelector('p').innerHTML = marked(this.content);
+            }
+        });
+    </script>
+</template>

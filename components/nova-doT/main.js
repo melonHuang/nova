@@ -54,7 +54,7 @@
       if (typeof exports == "object") module.exports = t(require("components/nova-doT/doT"));else if (typeof define == "function" && define.amd) define("components/nova-doT/main", ["components/nova-doT/doT"], t);else {
         var n = "Nova.Components.NovaDot",
             r = n.split("."),
-            i = e;for (var s = 0; s < r.length - 1; s++) i[r[s]] === undefined && (i[r[s]] = {}), i = i[r[s]];i[r[r.length - 1]] = t(e._1);
+            i = e;for (var s = 0; s < r.length - 1; s++) i[r[s]] === undefined && (i[r[s]] = {}), i = i[r[s]];i[r[r.length - 1]] = t(e._2);
       }
     })(this, function (e) {
       function t(t) {
