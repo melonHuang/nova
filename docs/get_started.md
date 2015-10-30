@@ -40,6 +40,10 @@ bower install --save Nova.js
 ```html
 <script src="http://s0.qhimg.com/static/c194ef77618ac141/nova_polyfills.js"></script>
 <script src="http://s4.qhimg.com/static/a2435fb6e1b4b1c3/nova.js"></script>
+
+<!-- https -->
+<script src="https://s.ssl.qhimg.com/static/c194ef77618ac141/nova_polyfills.js"></script>
+<script src="https://s.ssl.qhimg.com/static/a2435fb6e1b4b1c3/nova.js"></script>
 ```
 
 <!--

@@ -81,8 +81,11 @@ yo nova
 
 ```html
 <!-- 开发模式需要引入nova_dev.js -->
-<script src="http://s7.qhimg.com/!9cf3a0f2/nova_dev.js"></script>
 <link rel="import" href="/my-element/main.html">
+<script src="http://s7.qhimg.com/!9cf3a0f2/nova_dev.js"></script>
+<!-- https
+<script src="https://s.ssl.qhimg.com/!9cf3a0f2/nova_dev.js"></script>
+-->
 
 <!-- 使用自定义元素 -->
 <my-element></my-element>
