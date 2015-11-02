@@ -106,6 +106,20 @@ my-element ::host h1 {}
 </my-element>
 ```
 
+## unresolved
+
+在自定义元素的脚本被解析后，main.html中定义的样式才会被解析。因此渲染可能会存在抖动现象。使用者在使用自定义元素时，可给其添加`unresolved`属性，并事先定义元素`unresolved`状态时的样式。Nova.js在初始化自定义元素时，会自动移除它的`unresolved`属性。
+
+#### 例子
+```
+<style>
+    my-element[unresolved] {
+        opacity: 0;
+    }
+</style>
+<my-element unresolved></my-element>
+```
+
 ## 动态插入节点
 
 某些场景下，需要给自定义元素动态插入子节点。如果希望应用`<style>`中定义的样式，需要使用`compileNodeis`接口编译要动态插入节点。
