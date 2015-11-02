@@ -33,7 +33,7 @@ bower install --save Nova.js
 
 #### 直接下载
 
-<a href="###" class="btn btn-primary">Download ZIP</a>
+<a href="https://github.com/melonHuang/nova/archive/master.zip" class="btn btn-primary">Download ZIP</a>
 
 
 #### 使用CDN资源

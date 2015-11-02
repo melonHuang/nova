@@ -15,10 +15,8 @@
 
 ```bash
 npm install -g yeoman
-npm install -g generator-nova
-mkdir my-element
-cd my-element
-yo nova
+npm install -g generator-novajs
+yo novajs
 ```
 
 ## 定义元素
@@ -26,7 +24,7 @@ yo nova
 在以上创建的main.html中，对元素进行定义:
 ```html
 <!-- main.html -->
-<template is="dom=module">
+<template is="dom-module">
     <style>
         h1 { color: #f44; }
     </style>
@@ -110,4 +108,4 @@ yo nova
 ## 例子
 以下文件是一个在线编辑markdown的例子
 
-<a href="###" class="btn btn-primary">Download ZIP</a>
+<a href="https://github.com/melonHuang/nova-demo/archive/master.zip" class="btn btn-primary">Download ZIP</a>
