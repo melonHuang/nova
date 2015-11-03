@@ -42,12 +42,16 @@ npm install -save gulp-nova
 
 ```js
 var gulpNova = require('gulp-nova');
+var gulpRename = require('gulp-rename');
 gulp.src('my-element/main.html')
     .pipe(gulpNova({
         combo: {
             baseUrl: '.'
         }
     }))
-    .pipe(gulp.dest('my-element/main.js'));
+    .pipe(gulpRename(function(path) {
+        path.extname = '.js';
+    }))
+    .pipe(gulp.dest('.'));
 ```
 
