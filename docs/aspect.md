@@ -19,6 +19,6 @@ myElement.after('checkin', function(ev, name, age) {
     // do sth
 });
 
-myElement.check('Tom', '18');
+myElement.checkin('Tom', '18');
 ```
 

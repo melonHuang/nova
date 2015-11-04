@@ -20,7 +20,7 @@ npm install -save nova-compile
 var novaCompile = require('nova-compile');
 
 var option = { };
-novaCompile(file, option).then(function(script) {
+novaCompile.compile(file, option).then(function(script) {
     // ...
 });
 ```

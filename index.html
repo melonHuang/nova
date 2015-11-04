@@ -73,7 +73,7 @@
     </section>
     <section data-name="present">
         <div class="cont-wrap">
-            <h2>Nova.js</h2>
+            <h2>&lt;markdown-editor&gt;</h2>
             <div>
                 <div class="preview">
                     <markdown-editor class="markdown-body"></markdown-editor>
@@ -128,6 +128,10 @@
                 </div>
             </div>
             <a href="doc.html#doc=get_started" class="btn btn-start">快速开始</a>
+
+            <!-- 多说评论框 start -->
+            <div style="margin-top:40px;" class="ds-thread" data-thread-key="请将此处替换成文章在你的站点中的ID" data-title="请替换成文章的标题" data-url="请替换成文章的网址"></div>
+            <!-- 多说评论框 end -->
         </div>
     </section>
     <footer>
@@ -146,5 +150,18 @@
             console.log('callback - particles.js config loaded');
         });
 */
+
+        var wid = 'home';
+        $('.ds-thread').data('thread-key', wid).data('title', 'Nova.js Web Component框架').data('url', location.href);
+        var duoshuoQuery = {short_name:"novajs"};
+        (function() {
+            var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+            ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            ds.charset = 'UTF-8';
+            (document.getElementsByTagName('head')[0] 
+             || document.getElementsByTagName('body')[0]).appendChild(ds);
+        })();
+    <!-- 多说公共JS代码 end -->
     </script>
 </html>
