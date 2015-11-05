@@ -246,7 +246,7 @@
                 result = new Date(value);
                 break;
             case Boolean:
-                return (this.hasAttribute(attrName));
+                return (this.hasAttribute(attrName) && this.getAttribute(attrName) != 'false');
                 break;
         }
         return result;

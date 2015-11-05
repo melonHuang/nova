@@ -88,8 +88,8 @@
                 var style = ele.querySelector('style');
                 var template = ele.querySelector('template');
                 var exports = {
-                    stylesheet: style ? style.innerHTML : '',
-                    template: template ? template.innerHTML : ''
+                    stylesheet: style ? style.innerHTML : undefined,
+                    template: template ? template.innerHTML : undefined
                 };
                 var script = ele.querySelector('script:not([require-src])');
 

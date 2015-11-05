@@ -33,10 +33,12 @@
     NovaExports.exports = {};
     /******************** Helpers **********************/
     function getConstructor(realConstructor) {
-        return function (initData) {
+        var constructor = function constructor(initData) {
             initData && Nova.Initial.set(initData);
             return new realConstructor();
         };
+        constructor.realConstructor = realConstructor;
+        return constructor;
     }
     window.Nova = Nova;
     window.NovaExports = NovaExports;
@@ -771,7 +773,7 @@ Nova.CssParse = function () {
             result = new Date(value);
             break;
         case Boolean:
-            return this.hasAttribute(attrName);
+            return this.hasAttribute(attrName) && this.getAttribute(attrName) != 'false';
             break;
         }
         return result;
@@ -1479,6 +1481,25 @@ console.log('nova');
             _initBehaviors: function _initBehaviors() {
                 var self = this;
                 var behaviors = self._behaviors.concat(self.behaviors);
+                /* 将behaviors均转为标准格式(behaviors支持标准格式或构造函数格式) */
+                behaviors.forEach(function (behavior, index) {
+                    // 构造函数格式
+                    if (typeof behavior == 'function') {
+                        var srcPrototype = behavior.realConstructor.prototype;
+                        var destBehavior = {};
+                        behaviors[index] = destBehavior;
+                        // 将prototype所有非原型链继承的属性都提取到destBehavior
+                        for (var prop in srcPrototype) {
+                            if (srcPrototype.hasOwnProperty(prop)) {
+                                destBehavior[prop] = srcPrototype[prop];
+                            }
+                        }
+                        // 将srcPrototype中的behaviors合并到此元素的behaviors中
+                        (srcPrototype.behaviors || []).forEach(function (b, j) {
+                            behaviors.splice(index + 1 + j, 0, b);
+                        });
+                    }
+                });
                 /* 将behaviors的行为和属性合并到元素上 */
                 behaviors.forEach(function (behavior) {
                     var toMix = Utils.mix({}, behavior);
@@ -1606,10 +1627,7 @@ Nova.Components.TemplateRepeat = NovaExports({
 });
 undefined;
 NovaExports.__fixedUglify = 'script>';
-NovaExports.exports = {
-    'stylesheet': '',
-    'template': ''
-};
+NovaExports.exports = {};
 Nova.Components.TemplateIf = NovaExports({
     is: 'template-if',
     props: { 'if': { type: Boolean } },
@@ -1623,7 +1641,7 @@ Nova.Components.TemplateIf = NovaExports({
             self.parentElement && self.parentElement.removeChild(self);
         }, 0);
         this.on('_ifChanged', this._ifObserver);
-        this.trigger('_ifChanged', [this["if"], this["if"]]);
+        this.trigger('_ifChanged', [this['if'], this['if']]);
     },
     _ifObserver: function _ifObserver(ev, oldVal, newVal) {
         var self = this;
@@ -1650,10 +1668,7 @@ Nova.Components.TemplateIf = NovaExports({
 });
 undefined;
 NovaExports.__fixedUglify = 'script>';
-NovaExports.exports = {
-    'stylesheet': '',
-    'template': '\n        <content></content>\n    '
-};
+NovaExports.exports = { 'template': '\n        <content></content>\n    ' };
 Nova.Components.TemplateRepeatItem = NovaExports({
     is: 'template-repeat-item',
     props: {},

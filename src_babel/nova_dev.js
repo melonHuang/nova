@@ -89,8 +89,8 @@
                 let style = ele.querySelector('style');
                 let template = ele.querySelector('template');
                 let exports = {
-                    stylesheet: style ? style.innerHTML : '',
-                    template: template ? template.innerHTML : ''
+                    stylesheet: style ? style.innerHTML : undefined,
+                    template: template ? template.innerHTML : undefined
                 }
                 let script = ele.querySelector('script:not([require-src])');
 

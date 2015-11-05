@@ -42,10 +42,12 @@
 
     /******************** Helpers **********************/
     function getConstructor(realConstructor) {
-        return function(initData) {
+        var constructor = function(initData) {
             initData && Nova.Initial.set(initData);
             return new realConstructor();
         }
+        constructor.realConstructor = realConstructor;
+        return constructor;
     }
 
     window.Nova = Nova;

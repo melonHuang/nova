@@ -118,6 +118,28 @@ console.log('nova');
             let self = this;
             let behaviors = self._behaviors.concat(self.behaviors);
 
+            /* 将behaviors均转为标准格式(behaviors支持标准格式或构造函数格式) */
+            behaviors.forEach(function(behavior, index) {
+                // 构造函数格式
+                if(typeof behavior == 'function') {
+                    var srcPrototype = behavior.realConstructor.prototype;
+                    var destBehavior = {};
+                    behaviors[index] = destBehavior;
+
+                    // 将prototype所有非原型链继承的属性都提取到destBehavior
+                    for(var prop in srcPrototype) {
+                        if(srcPrototype.hasOwnProperty(prop)) {
+                            destBehavior[prop] = srcPrototype[prop];
+                        }
+                    }
+
+                    // 将srcPrototype中的behaviors合并到此元素的behaviors中
+                    (srcPrototype.behaviors || []).forEach(function(b, j) {
+                        behaviors.splice(index + 1 + j, 0, b);
+                    });
+                }
+            });
+
             /* 将behaviors的行为和属性合并到元素上 */
             behaviors.forEach(function(behavior) {
                 var toMix = Utils.mix({}, behavior);
