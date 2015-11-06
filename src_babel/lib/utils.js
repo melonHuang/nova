@@ -66,6 +66,29 @@
             });
 
             return toString ? str : r;
+        },
+
+        setPropByPath: function(obj, path, value) {
+            let paths = path.split('.');
+            let curObj = obj;
+            for(let i = 0, len = paths.length; i < len - 1; i++) {
+                if(!curObj) { return; }
+                curObj = curObj[paths[i]];
+            }
+            curObj && (curObj[paths[paths.length - 1]] = value);
+        },
+
+        getPropByPath: function(obj, path) {
+            let paths = path.split('.');
+            let curObj = obj;
+            for(let i = 0, len = paths.length; i < len; i++) {
+                try {
+                    curObj = curObj[paths[i]];
+                } catch(e) {
+                    return;
+                }
+            }
+            return curObj;
         }
     }
 
