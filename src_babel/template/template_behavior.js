@@ -81,8 +81,6 @@
             let self = this;
             let bindData = Nova.ExpressionParser.parse(node, this);
 
-            //if(this.is == 'template-repeat-item' && bindData.size > 0) debugger;
-
             // 遍历有绑定关系的节点
             bindData.forEach(function(bindings, node) {
                 // 遍历节点与host绑定的不同attr/prop/textContent
