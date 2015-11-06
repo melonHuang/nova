@@ -19,10 +19,10 @@
             Nova.Utils.chainObject(Base, HTMLElement.prototype);
         }
 
-        var registered = document.registerElement(prototype.is, opts);
-
         // 初始化stylesheet
         Nova.Style.init(prototype);
+
+        var registered = document.registerElement(prototype.is, opts);
 
         return getConstructor(registered);
     };

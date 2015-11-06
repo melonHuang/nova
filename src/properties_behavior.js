@@ -28,9 +28,10 @@
         },
 
         attributeChangedHandler: function attributeChangedHandler(attrName, oldVal, newVal) {
-            var propName = Nova.CaseMap.dashToCamelCase(attrName);
-            var prop = this.props[propName];
-            if (prop) {
+            var propPath = Nova.CaseMap.dashToCamelCase(attrName);
+            var propName = propPath.split('.')[0];
+
+            if (this.hasProperty(propName)) {
                 setPropFromAttr.call(this, attrName, newVal);
             }
         },
@@ -38,36 +39,20 @@
         set: function set(path, value, opt) {
             var paths = path.split('.');
             var oldVal = this[paths[0]];
+            var oldSubVal = this.get(path);
 
-            this._setProp(path, value);
+            Nova.Utils.setPropByPath(this, path, value);
 
             // 若不会触发setter，则需手动触发_propChange事件
             if (!(paths.length == 1 && this.get(path) != value)) {
-                if (oldVal != value) {
+                if (oldSubVal != value) {
                     triggerPropChange.call(this, this._getPropChangeEventName(paths[0]), [oldVal, this[paths[0]], path]);
                 }
             }
         },
 
-        _setProp: function _setProp(path, value) {
-            var paths = path.split('.');
-            var curObj = this;
-            for (var i = 0, len = paths.length; i < len - 1; i++) {
-                if (!curObj[paths[i]]) {
-                    return;
-                }
-                curObj = curObj[paths[i]];
-            }
-            curObj[paths[paths.length - 1]] = value;
-        },
-
         get: function get(path) {
-            var paths = path.split('.');
-            var curObj = this;
-            for (var i = 0, len = paths.length; i < len; i++) {
-                curObj = curObj[paths[i]];
-            }
-            return curObj;
+            return Nova.Utils.getPropByPath(this, path);
         },
 
         addProperty: function addProperty(prop, config) {
@@ -106,6 +91,7 @@
         var oldProto = this.__proto__;
         this.__proto__ = proto;
         proto.__proto__ = oldProto;
+
         // 定义properties
         for (var prop in this.props) {
             if (this.props.hasOwnProperty(prop)) {
@@ -113,6 +99,10 @@
                 defineProperty.call(this, prop, this.props[prop]);
             }
         }
+
+        // 获取attrs初始化props的列表
+        this._nova.attrsToPropsMap = getAttrsToPropsMap.call(this);
+
         // 设置properties初始值
         for (var prop in this.props) {
             if (this.props.hasOwnProperty(prop)) {
@@ -122,13 +112,89 @@
     }
 
     /*
-    * 通过Attribute，设置property
+     * 获得attrsToProps数据，格式：
+     * {
+     *      propName: {
+     *          path,
+     *          value,
+     *          subProps: [{
+     *              path,
+     *              value
+     *          }]
+     *      }
+     * }
+     * */
+    function getAttrsToPropsMap() {
+        var self = this;
+        var data = {};
+        Array.prototype.slice.call(this.attributes || []).forEach(function (attr) {
+            if (attr.constructor == Attr) {
+                var attrName = attr.name;
+                var attrVal = attr.value;
+                var propPath = Nova.CaseMap.dashToCamelCase(attrName);
+                var isSubProp = propPath.indexOf('.') >= 0;
+                var propName = propPath.split('.')[0];
+                var propConfig = self.props[propName];
+
+                if (self.hasProperty(propName)) {
+                    var mapData = data[propName] || {};
+                    data[propName] = mapData;
+
+                    if (isSubProp) {
+                        mapData.subProps = mapData.subProps || [];
+                        mapData.subProps.push({
+                            path: propPath,
+                            value: attrVal
+                        });
+                    } else {
+                        Nova.Utils.mix(mapData, {
+                            path: propPath,
+                            value: fromAttrToProp.call(self, attrName, attrVal, propConfig)
+                        });
+                    }
+                }
+            }
+        });
+        return data;
+    }
+
+    function setPropFromAttr(attrName, attrVal) {
+        var propPath = Nova.CaseMap.dashToCamelCase(attrName);
+        var propName = propPath.split('.')[0];
+        var isSubProp = propPath.indexOf('.') >= 0;
+        var propConfig = this.props[propName];
+
+        if (isSubProp) {
+            this.set(propPath, attrVal);
+        } else {
+            this[propName] = fromAttrToProp.call(this, attrName, attrVal, propConfig);
+        }
+    }
+
+    /*
+    * 通过Attribute，初始化property
     * */
-    function setPropFromAttr(attrName) {
-        var propName = Nova.CaseMap.dashToCamelCase(attrName);
-        var prop = this.props[propName];
-        var val = this.getAttribute(attrName);
-        this[propName] = fromAttrToProp.call(this, attrName, val, prop);
+    function initPropFromAttr(propName) {
+        var _this = this;
+
+        var attrName = Nova.CaseMap.camelToDashCase(propName);
+        var mapData = this._nova.attrsToPropsMap[propName];
+
+        /* 通过attr初始化一级属性，如info="{}" */
+        if (mapData.value) {
+            this[propName] = mapData.value;
+        }
+        /* 通过attr初始化子属性，如info.age="1" */
+        else {
+            (function () {
+                var configVal = getPropConfigValue(_this.props[propName]);
+                mapData.subProps.forEach(function (subProp) {
+                    var path = subProp.path.replace(/^(.+)\./, '');
+                    Nova.Utils.setPropByPath(configVal, path, subProp.value);
+                });
+                _this[propName] = configVal;
+            })();
+        }
     }
 
     /*
@@ -191,22 +257,31 @@
 
         var attrName = Nova.CaseMap.camelToDashCase(name);
 
-        // 优先读取attribute
-        if (this.hasAttribute(attrName)) {
-            setPropFromAttr.call(this, attrName);
+        // 优先通过attribute初始化属性
+        //if(this.hasAttribute(attrName)) {
+        if (this._nova.attrsToPropsMap[name]) {
+            initPropFromAttr.call(this, name);
         }
         // 若已有绑定的值，则使用原来的值
         else if (hasOldVal) {
             this[name] = oldVal;
         }
         // 否则使用默认值
-        else if (config.hasOwnProperty('value')) {
+        else {
+            this[name] = getPropConfigValue(config);
+        }
+    }
+
+    function getPropConfigValue(config) {
+        var value;
+        if (config.hasOwnProperty('value')) {
             if (typeof config.value == 'function') {
-                this[name] = config.value.apply(this);
+                value = config.value.apply(this);
             } else {
-                this[name] = config.value;
+                value = config.value;
             }
         }
+        return value;
     }
 
     function fromAttrToProp(attrName, value, config) {
@@ -233,7 +308,7 @@
                 result = new Date(value);
                 break;
             case Boolean:
-                return this.hasAttribute(attrName) && this.getAttribute(attrName) != 'false';
+                return this.hasAttribute(attrName) && value != 'false';
                 break;
         }
         return result;

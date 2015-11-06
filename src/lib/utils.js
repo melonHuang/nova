@@ -65,6 +65,31 @@
             });
 
             return toString ? str : r;
+        },
+
+        setPropByPath: function setPropByPath(obj, path, value) {
+            var paths = path.split('.');
+            var curObj = obj;
+            for (var i = 0, len = paths.length; i < len - 1; i++) {
+                if (!curObj) {
+                    return;
+                }
+                curObj = curObj[paths[i]];
+            }
+            curObj && (curObj[paths[paths.length - 1]] = value);
+        },
+
+        getPropByPath: function getPropByPath(obj, path) {
+            var paths = path.split('.');
+            var curObj = obj;
+            for (var i = 0, len = paths.length; i < len; i++) {
+                try {
+                    curObj = curObj[paths[i]];
+                } catch (e) {
+                    return;
+                }
+            }
+            return curObj;
         }
     };
 

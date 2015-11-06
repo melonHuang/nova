@@ -27,6 +27,13 @@
                     },
                     'isLace': {
                         type: Boolean
+                    },
+                    info: {
+                        type: Object,
+                        value: {
+                            career: 'doctor',
+                            salary: 100000
+                        }
                     }
                 },
                 _nameChangedHandler: function() {
@@ -39,7 +46,7 @@
         });
         it('attributes transfer', function() {
             var wrap = document.createElement('div');
-            wrap.innerHTML = '<test-ele-properties name="gua" age="10" birthday="Tue Jul 07 2015 17:11:55 GMT+0800 (CST)" hobbies=\'["basketball"]\' families=\'{"father":"Mike"}\' is-gay></test-ele-properties>';
+            wrap.innerHTML = '<test-ele-properties name="gua" age="10" birthday="Tue Jul 07 2015 17:11:55 GMT+0800 (CST)" hobbies=\'["basketball"]\' families=\'{"father":"Mike"}\' is-gay info.career="dancer"></test-ele-properties>';
             var ins = wrap.querySelector('test-ele-properties');
             expect(ins.name).to.equal('gua');
             expect(ins.age).to.equal(10);
@@ -48,6 +55,14 @@
             expect(ins.hobbies[0]).to.equal('basketball');
             expect(!!ins.isGay).to.equal(true);
             expect(!!ins.isLace).to.equal(false);
+            expect(ins.info.career).to.equal('dancer');
+            expect(ins.info.salary).to.equal(100000);
+
+            ins.setAttribute('info.career', 'homeless');
+            expect(ins.info.career).to.equal('homeless');
+
+            ins.setAttribute('age', '4');
+            expect(ins.age).to.equal(4);
         });
         it('prop changed event fired', function() {
             var ins = document.createElement('test-ele-properties');
