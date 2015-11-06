@@ -49,14 +49,14 @@
 
 使用格式：
 ```css
-my-element ::host h1 {}
+:host ::shadow h1 {}
 ```
 
 ```html
 <!-- 自定义元素<wrap-element>  -->
 <template is="dom-module">
     <style>
-        my-element ::shadow h1 { font-size:32px; }
+        :host ::shadow h1 { font-size:32px; }
     </style>
     <template>
         <my-element></my-element>
