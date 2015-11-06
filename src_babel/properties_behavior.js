@@ -191,7 +191,7 @@
         let mapData = this._nova.attrsToPropsMap[propName];
 
         /* 通过attr初始化一级属性，如info="{}" */
-        if(mapData.value) {
+        if(mapData.hasOwnProperty('value')) {
             this[propName] = mapData.value;
         }
         /* 通过attr初始化子属性，如info.age="1" */
