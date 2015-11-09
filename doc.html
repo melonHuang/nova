@@ -83,9 +83,8 @@
             <nova-markdown class="markdown-body">
             </nova-markdown>
 
-        <!-- 多说评论框 start -->
-        <div style="margin-top:40px;" class="ds-thread" data-thread-key="请将此处替换成文章在你的站点中的ID" data-title="请替换成文章的标题" data-url="请替换成文章的网址"></div>
-        <!-- 多说评论框 end -->
+            <div id="comment" style="margin-top: 40px;">
+            </div>
         </main>
     </div>
 
@@ -104,19 +103,30 @@
 
     <script src="http://s1.qhimg.com/static/b5f322e2c4a34909/main.js"></script>
     <script src="static/js/doc.js"></script>
+
+    <script> var duoshuoQuery = {short_name:"novajs"}; </script>
+    <script src="http://s3.qhimg.com/static/320304eff8687b25.js"></script>
     <script type="text/javascript">
 
         var wid = $.queryHash('doc');
-        $('.ds-thread').data('thread-key', wid).data('title', 'Nova.js Web Component框架').data('url', location.href);
-        var duoshuoQuery = {short_name:"novajs"};
-        (function() {
-            var ds = document.createElement('script');
-            ds.type = 'text/javascript';ds.async = true;
-            ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-            ds.charset = 'UTF-8';
-            (document.getElementsByTagName('head')[0] 
-             || document.getElementsByTagName('body')[0]).appendChild(ds);
-        })();
+        loadDuoShuo(wid);
+        window.addEventListener('hashchange', function() {
+            var wid = $.queryHash('doc');
+            loadDuoShuo(wid);
+        });
+
+        function loadDuoShuo(threadKey) {
+            var commentEl = document.getElementById('comment');
+            commentEl.innerHTML = '';
+            var el = document.createElement('div');
+            commentEl.appendChild(el);
+            el.setAttribute('data-thread-key', threadKey);
+            el.setAttribute('data-url', location.href);
+            DUOSHUO.EmbedThread('#comment>div');
+        }
+
     <!-- 多说公共JS代码 end -->
+
+
     </script>
 </html>
