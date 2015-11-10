@@ -38,12 +38,12 @@ bower install --save Nova.js
 
 #### 使用CDN资源
 ```html
-<script src="http://s0.qhimg.com/static/c194ef77618ac141/nova_polyfills.js"></script>
-<script src="http://s4.qhimg.com/static/a2435fb6e1b4b1c3/nova.js"></script>
+<script src="http://s0.qhimg.com/static/c194ef77618ac141/nova_polyfills.1.0.1.js"></script>
+<script src="http://s1.qhimg.com/static/c70d46df1c829566/nova.1.0.1.js"></script>
 
 <!-- https -->
-<script src="https://s.ssl.qhimg.com/static/c194ef77618ac141/nova_polyfills.js"></script>
-<script src="https://s.ssl.qhimg.com/static/a2435fb6e1b4b1c3/nova.js"></script>
+<script src="https://s.ssl.qhimg.com/static/c194ef77618ac141/nova_polyfills.1.0.1.js"></script>
+<script src="https://s.ssl.qhimg.com/static/c70d46df1c829566/nova.1.0.1.js"></script>
 ```
 
 <!--

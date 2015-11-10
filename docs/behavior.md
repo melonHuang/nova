@@ -35,3 +35,19 @@ Nova({
     behaviors: [PluginBehavior, AnimBehavior]
 });
 ```
+
+## 继承
+
+Nova.js通过Behavior机制实现自定义元素的继承。可在behaviors属性中，传入自定义元素的构造函数，以声明拥有该自定义元素的行为。
+
+#### 例子
+```javascript
+var MyPet = Nova({
+    // ...
+});
+
+var MyDog = Nova({
+    behaviors: [MyPet]
+});
+```
+
