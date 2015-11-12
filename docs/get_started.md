@@ -11,7 +11,7 @@ Nova.js使用gzip压缩后的总大小为12K。
 #### 浏览器支持度
 
 * 移动端主流浏览器(Android2.3+, iOS4.0+)
-* PC端主流浏览器(Chrome, Safari, Firefox, IE8+)
+* PC端主流浏览器(Chrome, Safari, Firefox, IE9+)
 
 #### 功能列表
 * 自定义元素
