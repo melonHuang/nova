@@ -80,9 +80,9 @@ yo novajs
 ```html
 <!-- 开发模式需要引入nova_dev.js -->
 <link rel="import" href="/my-element/main.html">
-<script src="http://s7.qhimg.com/!9cf3a0f2/nova_dev.1.0.1.js"></script>
+<script src="http://s7.qhimg.com/!9cf3a0f2/nova_dev.js"></script>
 <!-- https
-<script src="https://s.ssl.qhimg.com/!9cf3a0f2/nova_dev.1.0.1.js"></script>
+<script src="https://s.ssl.qhimg.com/!9cf3a0f2/nova_dev.js"></script>
 -->
 
 <!-- 使用自定义元素 -->
