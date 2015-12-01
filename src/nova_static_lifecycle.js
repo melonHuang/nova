@@ -9,7 +9,10 @@
             var count = eles.length;
             var readyCount = 0;
             eles.forEach(function (ele) {
-                if (ele._nova && ele._nova.isReady) {
+                // 原生元素
+                if (ele.tagName.indexOf('-') < 0 && !ele.getAttribute('is')) {
+                    readyCount++;
+                } else if (ele._nova && ele._nova.isReady) {
                     readyCount++;
                 } else {
                     ele.addEventListener('nova.ready', function () {

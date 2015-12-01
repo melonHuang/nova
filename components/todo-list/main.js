@@ -1,12 +1,15 @@
 'use strict';
 
 ;(function () {
+  var components_todo_list_main;
   (function () {
     (function (root, factory) {
       if (typeof exports === 'object') {
         module.exports = factory();
-      } else if (typeof define === 'function' && define.amd) {
-        define('components/todo-list/main', [], factory);
+      } else if (true) {
+        components_todo_list_main = (function () {
+          return typeof factory === 'function' ? factory() : factory;
+        })();
       } else {
         var globalAlias = 'Nova.Components.TodoList';
         var namespace = globalAlias.split('.');

@@ -1,7 +1,7 @@
 "use strict";
 
 (function () {
-  (function () {
+  var components_nova_doT_doT, components_nova_doT_main;(function () {
     function o() {
       var e = { "&": "&#38;", "<": "&#60;", ">": "&#62;", "\"": "&#34;", "'": "&#39;", "/": "&#47;" },
           t = /&(?!#?\w+;)|<|>|"|'|\//g;return function () {
@@ -22,11 +22,9 @@
     }function m(e) {
       return e.replace(/\\('|\\)/g, "$1").replace(/[\r\t\n]/g, " ");
     }var j = { version: "1.0.1", templateSettings: { evaluate: /\{\{([\s\S]+?(\}?)+)\}\}/g, interpolate: /\{\{=([\s\S]+?)\}\}/g, encode: /\{\{!([\s\S]+?)\}\}/g, use: /\{\{#([\s\S]+?)\}\}/g, useParams: /(^|[^\w$])def(?:\.|\[[\'\"])([\w$\.]+)(?:[\'\"]\])?\s*\:\s*([\w$\.]+|\"[^\"]+\"|\'[^\']+\'|\{[^\}]+\})/g, define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g, defineParams: /^\s*([\w$]+):([\s\S]+)/, conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g, iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g, varname: "it", strip: !0, append: !0, selfcontained: !1 }, template: undefined, compile: undefined },
-        q;typeof module != "undefined" && module.exports ? module.exports = j : typeof define == "function" && define.amd ? define("components/nova-doT/doT", [], function () {
+        q;typeof module != "undefined" && module.exports ? module.exports = j : components_nova_doT_doT = (function () {
       return j;
-    }) : (q = (function () {
-      return this || (0, eval)("this");
-    })(), q.doT = j), String.prototype.encodeHTML = o();var r = { append: { start: "'+(", end: ")+'", endencode: "||'').toString().encodeHTML()+'" }, split: { start: "';out+=(", end: ");out+='", endencode: "||'').toString().encodeHTML();out+='" } },
+    })(), String.prototype.encodeHTML = o();var r = { append: { start: "'+(", end: ")+'", endencode: "||'').toString().encodeHTML()+'" }, split: { start: "';out+=(", end: ");out+='", endencode: "||'').toString().encodeHTML();out+='" } },
         i = /$^/;j.template = function (e, t, n) {
       t = t || j.templateSettings;var s = t.append ? r.append : r.split,
           u,
@@ -51,11 +49,9 @@
     };
   })(), (function () {
     (function (e, t) {
-      if (typeof exports == "object") module.exports = t(require("components/nova-doT/doT"));else if (typeof define == "function" && define.amd) define("components/nova-doT/main", ["components/nova-doT/doT"], t);else {
-        var n = "Nova.Components.NovaDot",
-            r = n.split("."),
-            i = e;for (var s = 0; s < r.length - 1; s++) i[r[s]] === undefined && (i[r[s]] = {}), i = i[r[s]];i[r[r.length - 1]] = t(e._2);
-      }
+      typeof exports == "object" ? module.exports = t(components_nova_doT_doT) : components_nova_doT_main = (function (e) {
+        return typeof t == "function" ? t(e) : t;
+      })(components_nova_doT_doT);
     })(this, function (e) {
       function t(t) {
         return ({ "components/nova-doT/doT": e })[t];

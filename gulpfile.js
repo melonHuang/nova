@@ -10,7 +10,8 @@ gulp.task('build-component', function() {
         .pipe(plugins.nova({
             combo: {
                 baseUrl: '.'
-            }
+            },
+            umd: null
         }))
         .pipe(plugins.rename(function(path) {
             console.log('building component', path);

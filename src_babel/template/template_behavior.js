@@ -350,15 +350,20 @@
     function addClass(node) {
         let self = this;
 
+        // quit if node is not an element
+        if(!node.getAttribute) return;
+
         // 添加tagName class, 支持css scope
         let scope = this;
         while(scope) {
             if(Nova.ExpressionParser.SCOPED_ELEMENTS.indexOf(scope.tagName) < 0) {
-                if(!node.className || node.className.indexOf(scope.is) < 0) {
-                    node.className += ' ' + scope.is;
+                let className = node.getAttribute('class') || '';
+                if(className.indexOf(scope.is) < 0) {
+                    className += ' ' + scope.is;
+                    node.setAttribute('class', className);
                 }
                 // XXX
-                if(node.hasAttribute && node.hasAttribute('class_')) {
+                if(node.hasAttribute('class_')) {
                     node.setAttribute('class_', node.getAttribute('class_') + ' ' + scope.is);
                 }
             }
@@ -366,7 +371,7 @@
         }
 
         // traverse childNodes
-        node.childNodes && Array.prototype.slice.call(node.childNodes).forEach(function(child) {
+        node.children && Array.prototype.slice.call(node.children).forEach(function(child) {
             addClass.call(self, child);
         });
     }

@@ -1,13 +1,11 @@
 "use strict";
 
 (function () {
-  (function () {
-    (function (e, t) {
-      if (typeof exports == "object") module.exports = t();else if (typeof define == "function" && define.amd) define("components/my-test/test-template", [], t);else {
-        var n = "Nova.Components.MyTest",
-            r = n.split("."),
-            i = e;for (var s = 0; s < r.length - 1; s++) i[r[s]] === undefined && (i[r[s]] = {}), i = i[r[s]];i[r[r.length - 1]] = t();
-      }
+  var e;(function () {
+    (function (t, n) {
+      typeof exports == "object" ? module.exports = n() : e = (function () {
+        return typeof n == "function" ? n() : n;
+      })();
     })(this, function () {
       function e(e) {
         return ({})[e];
