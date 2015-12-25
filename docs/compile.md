@@ -28,10 +28,19 @@ novaCompile.compile(file, option).then(function(script) {
 options:
 ```js
 {
-    umd: true,          // 是否包装为umd模块，默认为true
-    combo: {            // 是否将依赖合并成一个文件，默认null
-        baseUrl: '.'    // 合并的baseUrl
-    }
+    umd: true,                          // 是否包装为umd模块，默认为true
+    combo: {                            // 是否将依赖合并成一个文件，默认null
+        baseUrl: '.'                    // 合并的baseUrl
+    },
+    precss: function(sourceCss) {       // 预处理CSS，可直接返回css字符串，或promise对象
+        return sass.renderSync({
+            data: sourceCss
+        }).css;
+    },
+    postcss: [                          // postcss插件数组
+        require('autoprefixer'),
+        require('cssnano')
+    ]
 }
 ```
 
