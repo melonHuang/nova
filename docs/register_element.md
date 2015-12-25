@@ -55,7 +55,9 @@ yo novajs
 <my-element></my-element>
 <script>
     var myElement = document.querySelector('my-element');
-    myElement.sayHi();
+    Nova.ready([myElement], function(){ 
+        myElement.sayHi();
+    })
 </script>
 ```
 
