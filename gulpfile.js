@@ -1,15 +1,22 @@
 var gulp = require('gulp'),
+    sass = require('node-sass');
     gulpLoadPlugins = require('gulp-load-plugins'),
     plugins = gulpLoadPlugins();
 
 
 gulp.task('build-component', function() {
   // place code for your default task here
-    gulp.src('components/**/*.html')
+    gulp.src('components/todo-list/*.html')
         .pipe(plugins.watch('components/**/*.html'))
         .pipe(plugins.nova({
             combo: {
                 baseUrl: '.'
+            },
+            precss: function(sourceCss) {
+                var result = sass.renderSync({
+                    data: sourceCss
+                });
+                return result.css;
             },
             umd: null
         }))
@@ -26,7 +33,8 @@ gulp.task('build-nova-components', function() {
     gulp.src('src_babel/components/**/*.html')
         .pipe(plugins.watch('src_babel/components/**/*.html'))
         .pipe(plugins.nova({
-            umd: null
+            umd: null,
+            postcss: [require('autoprefixer')]
         }))
         .pipe(plugins.rename(function(path) {
             console.log('building component', path);
