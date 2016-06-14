@@ -6,7 +6,7 @@
 Nova({
     is: 'my-element',
     createdHandler: function() { },
-    attachededHandler: function() { },
+    attachedHandler: function() { },
     detachedHandler: function() { },
     attributeChangedHandler: function(attrName, oldVal, newVal) { },
 });
