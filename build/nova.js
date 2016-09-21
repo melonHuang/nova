@@ -172,7 +172,7 @@ Nova.CssParse = function () {
     var AT_START = '@';
     // helper regexp's
     var rx = {
-            comments: /\/\*[^*]*\*+([^/*][^*]*\*+)*\//gim,
+            comments: /\/\*[^*]*\*+([^\/*][^*]*\*+)*\//gim,
             port: /@import[^;]*;/gim,
             customProp: /(?:^|[\s;])--[^;{]*?:[^{};]*?;/gim,
             mixinProp: /(?:^|[\s;])--[^;{]*?:[^{;]*?{[^}]*?};?/gim,
@@ -552,7 +552,7 @@ Nova.CssParse = function () {
         * @param {String} methodName 被插队的方法名
         * @param {Function} callback 插入的方法
         * */
-            before: function before(methodName, callback) {
+            callBefore: function callBefore(methodName, callback) {
                 weaver.call(this, 'before', methodName, callback);
                 return this;
             },
@@ -561,7 +561,7 @@ Nova.CssParse = function () {
         * @param {String} methodName 被插队的方法名
         * @param {Function} callback 插入的方法
         * */
-            after: function after(methodName, callback) {
+            callAfter: function callAfter(methodName, callback) {
                 weaver.call(this, 'after', methodName, callback);
                 return this;
             }
@@ -1235,7 +1235,7 @@ Nova.CssParse = function () {
                         bindObj.relatedProps.forEach(function (prop) {
                             var exist = undefined;
                             for (var i = 0, len = props.length; i < len; i++) {
-                                if (prop.path.indexOf(props[i]) == 0 && (!prop.path[props[i]] || prop.prop[props[i]] == '.')) {
+                                if (prop.path.indexOf(props[i]) == 0 && (!prop.path[i + 1] || prop.path[i + 1] == '.')) {
                                     exist = true;
                                 }
                             }
@@ -1719,7 +1719,7 @@ Nova.Components.TemplateRepeat = NovaExports({
 });
 undefined;
 NovaExports.__fixedUglify = 'script>';
-NovaExports.exports = {};
+NovaExports.exports = { 'stylesheet': ':host{display:none}' };
 Nova.Components.TemplateIf = NovaExports({
     is: 'template-if',
     props: { 'if': { type: Boolean } },
@@ -1733,7 +1733,7 @@ Nova.Components.TemplateIf = NovaExports({
             self.parentElement && self.parentElement.removeChild(self);
         }, 0);
         this.on('_ifChanged', this._ifObserver);
-        this.trigger('_ifChanged', [this['if'], this['if']]);
+        this.trigger('_ifChanged', [this["if"], this["if"]]);
     },
     _ifObserver: function _ifObserver(ev, oldVal, newVal) {
         var self = this;

@@ -130,7 +130,7 @@
                     bindObj.relatedProps.forEach(function (prop) {
                         var exist = undefined;
                         for (var i = 0, len = props.length; i < len; i++) {
-                            if (prop.path.indexOf(props[i]) == 0 && (!prop.path[props[i]] || prop.prop[props[i]] == '.')) {
+                            if (prop.path.indexOf(props[i]) == 0 && (!prop.path[i + 1] || prop.path[i + 1] == '.')) {
                                 exist = true;
                             }
                         }

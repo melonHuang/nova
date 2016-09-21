@@ -6,7 +6,7 @@
         * @param {String} methodName 被插队的方法名
         * @param {Function} callback 插入的方法
         * */
-        before: function(methodName, callback) {
+        callBefore: function(methodName, callback) {
             weaver.call(this, 'before', methodName, callback);
             return this;
         },
@@ -16,7 +16,7 @@
         * @param {String} methodName 被插队的方法名
         * @param {Function} callback 插入的方法
         * */
-        after: function(methodName, callback) {
+        callAfter: function(methodName, callback) {
             weaver.call(this, 'after', methodName, callback);
             return this;
         },

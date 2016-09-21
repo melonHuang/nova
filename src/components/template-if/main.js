@@ -1,11 +1,11 @@
-'use strict';
+"use strict";
 
-undefined;NovaExports.__fixedUglify = 'script>';NovaExports.exports = {};
-'use strict';
+undefined;NovaExports.__fixedUglify = "script>";NovaExports.exports = { "stylesheet": ":host{display:none}" };
+"use strict";
 Nova.Components.TemplateIf = NovaExports({
-    is: 'template-if',
+    is: "template-if",
     props: {
-        'if': {
+        "if": {
             type: Boolean
         }
     },
@@ -20,8 +20,8 @@ Nova.Components.TemplateIf = NovaExports({
             self.parentElement && self.parentElement.removeChild(self);
         }, 0);
 
-        this.on('_ifChanged', this._ifObserver);
-        this.trigger('_ifChanged', [this['if'], this['if']]);
+        this.on("_ifChanged", this._ifObserver);
+        this.trigger("_ifChanged", [this["if"], this["if"]]);
     },
     _ifObserver: function _ifObserver(ev, oldVal, newVal) {
         var self = this;

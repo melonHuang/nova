@@ -1,4 +1,4 @@
-undefined;NovaExports.__fixedUglify="script>";NovaExports.exports={};
+undefined;NovaExports.__fixedUglify="script>";NovaExports.exports={"stylesheet":":host{display:none}"};
         'use strict';
         Nova.Components.TemplateIf = NovaExports({
             is: 'template-if',
