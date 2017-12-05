@@ -2,7 +2,7 @@
 
 小巧易用的 Web Component 框架
 
-主页：http://novajs.com/
+主页：http://melonhuang.github.io/nova/
 
 ## 支持度
 所有主流移动端浏览器
